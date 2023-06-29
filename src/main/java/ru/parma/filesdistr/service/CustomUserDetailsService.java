@@ -1,5 +1,6 @@
 package ru.parma.filesdistr.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,13 +12,10 @@ import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.UserRepo;
 
 @Service
+@RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
+
     private final UserRepo userRepo;
-
-
-    public CustomUserDetailsService(UserRepo userRepo) {
-        this.userRepo = userRepo;
-    }
 
     @Override
     public UserDetails loadUserByUsername(String name) {
@@ -25,9 +23,6 @@ public class CustomUserDetailsService implements UserDetailsService {
         if (user == null) {
             throw new UsernameNotFoundException(name);
         }
-
-
-
         return user;
     }
 }

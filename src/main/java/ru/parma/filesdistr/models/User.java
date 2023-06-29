@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 @Entity
-@Table(name = "username")
+@Table(name = "users")
 @Data
 public class User implements UserDetails {
     @Id
@@ -26,32 +26,29 @@ public class User implements UserDetails {
     @Column(name = "blocked")
     private boolean blocked;
 
-    @Column(name = "is_admin_manager")
+    @Column(name = "isAdminManager")
     private boolean isAdminManager;
 
-    @Column(name = "is_admin_scope_manager")
+    @Column(name = "isAdminScopeManager")
     private boolean isAdminScopeManager;
 
-    @Column(name = "can_create_and_delete_scope")
+    @Column(name = "canCreateAndDeleteScope")
     private boolean canCreateAndDeleteScope;
 
-    @Column(name = "max_number_scope")
+    @Column(name = "maxNumberScope")
     private Long maxNumberScope;
 
-    @Column(name = "max_storage_space")
+    @Column(name = "maxStorageSpace")
     private Long maxStorageSpace;
 
-    @Column(name = "max_number_folder")
+    @Column(name = "maxNumberFolder")
     private Long maxNumberFolder;
 
-    @Column(name = "role")
-    private String role;
-
-    @ElementCollection(targetClass = Role.class, fetch = FetchType.EAGER)    //не создаём отдельную таблицу для Enum-а
+    @ElementCollection(targetClass = Roles.class, fetch = FetchType.EAGER)    //не создаём отдельную таблицу для Enum-а
     @Column(name = "role_name")
     @CollectionTable(name = "role", joinColumns = @JoinColumn(name = "user_id"))    //join с user по полю user_id
     @Enumerated(EnumType.STRING)// хранится в виде строки
-    private Set<Role> roles = new HashSet<>();
+    private Set<Roles> roles = new HashSet<>();
 
 
     // security
@@ -83,6 +80,6 @@ public class User implements UserDetails {
     }
     @Override
     public boolean isEnabled() {
-        return true;
+        return !blocked;
     }
 }

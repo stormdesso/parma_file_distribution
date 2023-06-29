@@ -1,15 +1,11 @@
 package ru.parma.filesdistr.controllers;
 
-import org.apache.catalina.core.ApplicationContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.ScopeDto;
-import ru.parma.filesdistr.models.Role;
 import ru.parma.filesdistr.service.ScopeService;
 
-import javax.annotation.security.RolesAllowed;
 import java.util.List;
 
 @Controller
