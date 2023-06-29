@@ -20,7 +20,6 @@ import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
-//@EnableGlobalMethodSecurity(prePostEnabled = true)
 @RequiredArgsConstructor
 public class WebSecurityConfig  {
 
@@ -41,30 +40,33 @@ public class WebSecurityConfig  {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors().disable().csrf().disable()
-                .formLogin()
-                .loginProcessingUrl("/perform_login")
-                .defaultSuccessUrl("/hello", true)
-                .failureUrl("/login?error=true")
+                    .formLogin()
+                    .loginProcessingUrl("/perform_login")
+                    .defaultSuccessUrl("/hello", true)
+                    .failureUrl("/login?error=true")
                 .and()
-                .authorizeRequests()
-                .expressionHandler(defaultWebSecurityExpressionHandler()) // !
-                .antMatchers("/login","/encrypt").permitAll()
-                .antMatchers("/hello", "/jpa").permitAll()
-                    .antMatchers("/user").hasAnyRole(Roles.USER.getAuthority(),  Roles.ADMIN.getAuthority())
-                    .antMatchers("/admin").hasAuthority( Roles.ADMIN.getAuthority())
-                .anyRequest().authenticated()
-                .and().logout().permitAll()
+                    .authorizeRequests()
+                    .expressionHandler(defaultWebSecurityExpressionHandler()) // !
+                    .antMatchers("/login","/encrypt").permitAll()
+                    .antMatchers("/hello", "/jpa").permitAll()
+                        .antMatchers("/user").hasAnyRole(Roles.USER.getAuthority(),  Roles.ADMIN.getAuthority())
+                        .antMatchers("/admin").hasAuthority( Roles.ADMIN.getAuthority())
+                    .anyRequest().authenticated()
+                .and().
+                    logout().permitAll()
                 .and()
-                .userDetailsService(customUserDetailsService)
-                .addFilterAfter(new CustomFilterSec(), BasicAuthenticationFilter.class) // !
+                    .userDetailsService(customUserDetailsService)
+                    .addFilterAfter(new CustomFilterSec(), BasicAuthenticationFilter.class)
                 .httpBasic(withDefaults());
+
         return http.build();
     }
 
     @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(8);
+    public PasswordEncoder encoder() {
+        return new BCryptPasswordEncoder(8); //NoOpPasswordEncoder.getInstance();
     }
+
 
 
 }

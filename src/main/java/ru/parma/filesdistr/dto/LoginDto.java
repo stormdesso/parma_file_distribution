@@ -8,7 +8,7 @@ import java.util.List;
 
 @Data
 @NoArgsConstructor
-public class LoginDTO {
+public class LoginDto {
     private Long userId;
     private List<Roles> roles;
 }

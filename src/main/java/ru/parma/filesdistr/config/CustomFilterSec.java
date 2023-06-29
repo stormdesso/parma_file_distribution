@@ -32,7 +32,6 @@ public class CustomFilterSec extends GenericFilterBean {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
             WebAuthenticationDetails authenticationDetails = (WebAuthenticationDetails) authentication.getDetails();
         }
-
         chain.doFilter(request, response);
     }
 }

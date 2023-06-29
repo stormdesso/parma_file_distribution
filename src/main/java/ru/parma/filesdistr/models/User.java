@@ -26,22 +26,22 @@ public class User implements UserDetails {
     @Column(name = "blocked")
     private boolean blocked;
 
-    @Column(name = "isAdminManager")
+    @Column(name = "is_admin_manager")
     private boolean isAdminManager;
 
-    @Column(name = "isAdminScopeManager")
+    @Column(name = "is_admin_scope_manager")
     private boolean isAdminScopeManager;
 
-    @Column(name = "canCreateAndDeleteScope")
+    @Column(name = "can_create_and_delete_scope")
     private boolean canCreateAndDeleteScope;
 
-    @Column(name = "maxNumberScope")
+    @Column(name = "max_number_scope")
     private Long maxNumberScope;
 
-    @Column(name = "maxStorageSpace")
+    @Column(name = "max_storage_space")
     private Long maxStorageSpace;
 
-    @Column(name = "maxNumberFolder")
+    @Column(name = "max_number_folder")
     private Long maxNumberFolder;
 
     @ElementCollection(targetClass = Roles.class, fetch = FetchType.EAGER)    //не создаём отдельную таблицу для Enum-а
