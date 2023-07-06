@@ -1,0 +1,26 @@
+version: '3.1'
+services:
+  pg_db:
+    container_name: postgresql-db
+    image: postgres:15
+    restart: always
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: postgres
+    ports:
+      - "5438:5432"
+
+  flyway:
+    image: flyway/flyway:9-alpine
+    command: -configFiles=/flyway/conf/flyway.config -locations=filesystem:/flyway/sql -connectRetries=60 migrate
+    volumes:
+      - ./database/sql:/flyway/sql
+      - ./database/conf/flyway.conf:/flyway/conf/flyway.config
+    depends_on:
+      - pg_db
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres:5438/postgres
+      FLYWAY_USER: admin
+      FLYWAY_PASSWORD: admin
+      FLYWAY_BASELINE_ON_MIGRATE: "false"
