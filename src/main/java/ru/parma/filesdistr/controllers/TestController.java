@@ -2,15 +2,13 @@ package ru.parma.filesdistr.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.UserRepo;
 
 
 @RestController
+@RequestMapping("test")
 @RequiredArgsConstructor
 public class TestController {
 

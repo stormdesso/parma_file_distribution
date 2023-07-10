@@ -42,18 +42,24 @@ public class WebSecurityConfig  {
         http.cors().disable().csrf().disable()
                     .formLogin()
                     .loginProcessingUrl("/perform_login")
-                    .defaultSuccessUrl("/hello", true)
+                    .defaultSuccessUrl("/test/hello", true)
                     .failureUrl("/login?error=true")
                 .and()
+                    .logout().permitAll()
+
+                .and()
                     .authorizeRequests()
-                    .expressionHandler(defaultWebSecurityExpressionHandler()) // !
-                    .antMatchers("/login","/encrypt").permitAll()
-                    .antMatchers("/hello", "/jpa").permitAll()
-                        .antMatchers("/user").hasAnyRole(Roles.USER.getAuthority(),  Roles.ADMIN.getAuthority())
-                        .antMatchers("/admin").hasAuthority( Roles.ADMIN.getAuthority())
+                    .expressionHandler(defaultWebSecurityExpressionHandler())
+                    .antMatchers("/scope/all").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
+                    .antMatchers("/scope/{scope_id}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
+
+                    //test api
+                    .antMatchers("/test/login","/test/encrypt").permitAll()
+                    .antMatchers("/test/hello", "/test/jpa").permitAll()
+                    .antMatchers("/test/user").hasAnyRole(Roles.USER.getAuthority(),  Roles.ADMIN.getAuthority())
+                    .antMatchers("/test/admin").hasAuthority( Roles.ADMIN.getAuthority())
+                    //test api
                     .anyRequest().authenticated()
-                .and().
-                    logout().permitAll()
                 .and()
                     .userDetailsService(customUserDetailsService)
                     .addFilterAfter(new CustomFilterSec(), BasicAuthenticationFilter.class)
