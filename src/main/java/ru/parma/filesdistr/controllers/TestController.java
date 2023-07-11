@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.models.User;
-import ru.parma.filesdistr.repos.UserRepo;
+import ru.parma.filesdistr.repos.UserRepository;
 
 
 @RestController
@@ -12,7 +12,7 @@ import ru.parma.filesdistr.repos.UserRepo;
 @RequiredArgsConstructor
 public class TestController {
 
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @GetMapping("/encrypt")
@@ -48,7 +48,7 @@ public class TestController {
     @GetMapping("/jpa")
     @ResponseBody
     public String jpa() {
-        User user = userRepo.findByName("test");
+        User user = userRepository.findByName("test");
         return "jpa";
     }
 

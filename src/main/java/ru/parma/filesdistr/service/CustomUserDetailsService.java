@@ -6,17 +6,17 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.models.User;
-import ru.parma.filesdistr.repos.UserRepo;
+import ru.parma.filesdistr.repos.UserRepository;
 
 @Service
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    private final UserRepo userRepo;
+    private final UserRepository userRepository;
 
     @Override
     public UserDetails loadUserByUsername(String name) {
-        User user = userRepo.findByName(name);
+        User user = userRepository.findByName(name);
         if (user == null) {
             throw new UsernameNotFoundException(name);
         }
