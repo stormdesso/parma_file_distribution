@@ -9,8 +9,7 @@ create table scope
     show_illustrations boolean     not null
 );
 
-alter table scope
-    owner to postgres;
+
 
 create table folder
 (
@@ -26,8 +25,7 @@ create table folder
     identifier     varchar(30) not null
 );
 
-alter table folder
-    owner to postgres;
+
 
 create table "manifest_for_IOS"
 (
@@ -41,8 +39,7 @@ create table "manifest_for_IOS"
     content   bytea        not null
 );
 
-alter table "manifest_for_IOS"
-    owner to postgres;
+
 
 create table version
 (
@@ -60,8 +57,7 @@ create table version
         unique (folder_id, version_number)
 );
 
-alter table version
-    owner to postgres;
+
 
 create table tag
 (
@@ -72,8 +68,7 @@ create table tag
     letter_color varchar      not null
 );
 
-alter table tag
-    owner to postgres;
+
 
 create table users
 (
@@ -91,8 +86,7 @@ create table users
     max_number_folder           integer default 0
 );
 
-alter table users
-    owner to postgres;
+
 
 create table user_scope
 (
@@ -102,8 +96,7 @@ create table user_scope
         references scope
 );
 
-alter table user_scope
-    owner to postgres;
+
 
 create table file
 (
@@ -117,8 +110,7 @@ create table file
     location      varchar          not null
 );
 
-alter table file
-    owner to postgres;
+
 
 create table license_agreement_file_for_scope
 (
@@ -139,8 +131,7 @@ create table license_agreement_file_for_scope
         references file
 );
 
-alter table license_agreement_file_for_scope
-    owner to postgres;
+
 
 create table illustration_for_scope
 (
@@ -154,8 +145,7 @@ create table illustration_for_scope
         references file
 );
 
-alter table illustration_for_scope
-    owner to postgres;
+
 
 create table file_for_version
 (
@@ -169,8 +159,7 @@ create table file_for_version
         references file
 );
 
-alter table file_for_version
-    owner to postgres;
+
 
 create table tag_file_for_version
 (
@@ -182,8 +171,6 @@ create table tag_file_for_version
         unique (tag_id, file_for_version_id)
 );
 
-alter table tag_file_for_version
-    owner to postgres;
 
 create table illustration_for_version
 (
@@ -197,19 +184,20 @@ create table illustration_for_version
         references file
 );
 
-alter table illustration_for_version
-    owner to postgres;
 
+
+DROP TYPE IF EXISTS "roles";
+CREATE TYPE "roles" AS ENUM ('ADMIN','USER');
 create table role
 (
     id        integer generated always as identity
         primary key,
+
     user_id   integer not null
         references users,
     role_name roles   not null
 );
 
-alter table role
-    owner to postgres;
+
 
 
