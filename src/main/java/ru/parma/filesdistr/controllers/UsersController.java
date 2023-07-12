@@ -17,8 +17,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("users")
 public class UsersController {
-    @Autowired
     private UserService userService;
+    @Autowired
+    public UsersController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping("/admin/all")
     @ResponseBody

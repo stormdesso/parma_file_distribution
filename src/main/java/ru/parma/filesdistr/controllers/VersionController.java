@@ -16,8 +16,11 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("version")
 public class VersionController {
-    @Autowired
     private VersionService versionService;
+    @Autowired
+    public VersionController(VersionService versionService) {
+        this.versionService = versionService;
+    }
 
     @GetMapping("/all/{scope_id}/{folder_id}")
     @ResponseBody

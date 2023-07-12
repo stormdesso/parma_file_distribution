@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.FolderDto;
-import ru.parma.filesdistr.dto.ScopeDto;
 import ru.parma.filesdistr.service.FolderService;
-import ru.parma.filesdistr.service.ScopeService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -16,8 +14,12 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("folder")
 public class FolderController {
-    @Autowired
     private FolderService folderService;
+
+    @Autowired
+    public FolderController(FolderService folderService) {
+        this.folderService = folderService;
+    }
 
     @GetMapping("/all/{scope_id}")
     @ResponseBody

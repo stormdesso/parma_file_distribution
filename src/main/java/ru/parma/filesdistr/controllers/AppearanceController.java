@@ -5,9 +5,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.TagDto;
-import ru.parma.filesdistr.dto.VersionDto;
 import ru.parma.filesdistr.service.AppearanceService;
-import ru.parma.filesdistr.service.VersionService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,8 +15,12 @@ import java.util.List;
 @RequestMapping("settings/appearance")
 public class AppearanceController {
 
-    @Autowired
     private AppearanceService appearanceService;
+
+    @Autowired
+    public AppearanceController(AppearanceService appearanceService) {
+        this.appearanceService = appearanceService;
+    }
 
     @GetMapping("/all")
     @ResponseBody

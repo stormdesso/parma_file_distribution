@@ -1,3 +1,7 @@
+create type roles as enum ('USER', 'ADMIN_SCOPES', 'ADMIN');
+
+alter type roles owner to postgres;
+
 create table tag
 (
     id           integer      not null
@@ -136,11 +140,7 @@ create table license_agreement_file_for_scope
         constraint scope_id
             unique
         constraint scope_fkey
-            references scope,
-    file_id  integer          not null
-        constraint license_agreement_file_for_scope_file_id_file_id1_key
-            unique
-        references file
+            references scope
 );
 
 alter table license_agreement_file_for_scope

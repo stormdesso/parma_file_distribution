@@ -1,10 +1,7 @@
 package ru.parma.filesdistr.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import ru.parma.filesdistr.models.User;
-import ru.parma.filesdistr.repos.UserRepository;
 
 
 @RestController

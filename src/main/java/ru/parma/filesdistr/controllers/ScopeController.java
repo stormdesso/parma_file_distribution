@@ -2,23 +2,22 @@ package ru.parma.filesdistr.controllers;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Role;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.ScopeDto;
-import ru.parma.filesdistr.models.Roles;
 import ru.parma.filesdistr.service.ScopeService;
 
-import javax.annotation.security.RolesAllowed;
 import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("scope")
 public class ScopeController {
-    @Autowired
     private ScopeService scopeService;
+    @Autowired
+    public ScopeController(ScopeService scopeService) {
+        this.scopeService = scopeService;
+    }
 
     @GetMapping("/all")
     @ResponseBody
