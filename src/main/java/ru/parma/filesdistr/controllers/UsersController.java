@@ -45,13 +45,13 @@ public class UsersController {
         return new AdminScopeDto();
     }
 
-    @PutMapping("/update/admin")
+    @PutMapping("/admin/update")
     public void update(@RequestBody AdminDto adminDto)
     {
         //System.out.println("Изменения сохранены");
     }
 
-    @PostMapping("/add/admin")
+    @PostMapping("/admin/add")
     public void add (@RequestBody AdminDto adminDto)
     {
         //System.out.println("Пространство добавлено");
@@ -64,13 +64,13 @@ public class UsersController {
         //System.out.println("Пространство удалено");
     }
 
-    @PutMapping("/update/admin_scope")
+    @PutMapping("/admin_scope/update")
     public void update(@RequestBody AdminScopeDto adminScopeDto)
     {
         //System.out.println("Изменения сохранены");
     }
 
-    @PostMapping("/add/admin_scope")
+    @PostMapping("/admin_scope/add")
     public void add (@RequestBody AdminScopeDto adminScopeDto)
     {
         //System.out.println("Пространство добавлено");
