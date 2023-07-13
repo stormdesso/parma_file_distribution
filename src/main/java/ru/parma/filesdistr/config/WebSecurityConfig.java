@@ -50,19 +50,19 @@ public class WebSecurityConfig  {
                 .and()
                     .authorizeRequests()
                     .expressionHandler(defaultWebSecurityExpressionHandler())
-                    .antMatchers("/scope/{scope_id}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
+                    .antMatchers("/scope/{scope_id:\\d+}").permitAll()
                     .antMatchers("/scope/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
                 //папки
                 .and()
                     .authorizeRequests()
                     .expressionHandler(defaultWebSecurityExpressionHandler())
-                .antMatchers("/folder/{folder_id}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
+                .antMatchers("/folder/{folder_id:\\d+}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
                 .antMatchers("/folder/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
                 //версии
                 .and()
                     .authorizeRequests()
                     .expressionHandler(defaultWebSecurityExpressionHandler())
-                    .antMatchers("/version/{version_id}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
+                    .antMatchers("/version/{version_id:\\d+}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
                     .antMatchers("/version/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
                 //пользователи
                 .and()
