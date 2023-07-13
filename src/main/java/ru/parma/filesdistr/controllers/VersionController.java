@@ -4,9 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import ru.parma.filesdistr.dto.FolderDto;
 import ru.parma.filesdistr.dto.VersionDto;
-import ru.parma.filesdistr.service.FolderService;
 import ru.parma.filesdistr.service.VersionService;
 
 import java.util.ArrayList;
@@ -22,17 +20,15 @@ public class VersionController {
         this.versionService = versionService;
     }
 
-    @GetMapping("/all/{scope_id}/{folder_id}")
+    @GetMapping("/all/{folder_id}")
     @ResponseBody
-    public List<VersionDto> getAll(@PathVariable Long scope_id, @PathVariable Long folder_id) {
-        return new ArrayList<VersionDto>();
+    public List<VersionDto> getAll(@PathVariable Long folder_id) {
+        return new ArrayList<>();
     }
 
-    @GetMapping("/{scope_id}/{folder_id}/{version_id}")
+    @GetMapping("/{version_id}")
     @ResponseBody
-    public VersionDto get(@PathVariable Long scope_id,
-                          @PathVariable Long folder_id,
-                          @PathVariable Long version_id) {
+    public VersionDto get(@PathVariable Long version_id) {
         return new VersionDto();
     }
 
@@ -49,10 +45,8 @@ public class VersionController {
 
     }
 
-    @DeleteMapping("/delete/{scope_id}/{folder_id}/{version_id}")
-    public void delete(@PathVariable Long scope_id,
-                       @PathVariable Long folder_id,
-                       @PathVariable Long version_id)
+    @DeleteMapping("/delete/{version_id}")
+    public void delete(@PathVariable Long version_id)
     {
         //System.out.println("Пространство удалено");
     }

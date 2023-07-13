@@ -14,12 +14,6 @@ public class LoginController {
         return "login";
     }
 
-    @PostMapping("/perform_login")
-    public void performLogin(@RequestParam String username,
-                             @RequestParam String password ) {
-
-    }
-
     @GetMapping("/logout")
     public String logout() {
         return "logout";

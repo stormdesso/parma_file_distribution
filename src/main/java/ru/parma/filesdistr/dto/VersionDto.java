@@ -1,7 +1,6 @@
 package ru.parma.filesdistr.dto;
 
 import lombok.Data;
-import ru.parma.filesdistr.models.File;
 
 import java.sql.Date;
 import java.util.ArrayList;

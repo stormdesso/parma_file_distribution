@@ -6,8 +6,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.AdminDto;
 import ru.parma.filesdistr.dto.AdminScopeDto;
-import ru.parma.filesdistr.dto.FolderDto;
-import ru.parma.filesdistr.service.FolderService;
 import ru.parma.filesdistr.service.UserService;
 
 import java.util.ArrayList;
@@ -26,7 +24,7 @@ public class UsersController {
     @GetMapping("/admin/all")
     @ResponseBody
     public List<AdminDto> getAllAdmins() {
-        return new ArrayList<AdminDto>();
+        return new ArrayList<>();
     }
 
     @GetMapping("/admin_scope/all")
@@ -37,7 +35,7 @@ public class UsersController {
 
     @GetMapping("/admin/{admin_id}")
     @ResponseBody
-    public AdminDto get() {
+    public AdminDto get(@PathVariable String admin_id) {
         return new AdminDto();
     }
 
@@ -60,7 +58,7 @@ public class UsersController {
 
     }
 
-    @DeleteMapping("/delete/admin/{admin_id}")
+    @DeleteMapping("/admin/delete/{admin_id}")
     public void deleteAdmin( @PathVariable Long admin_id)
     {
         //System.out.println("Пространство удалено");
@@ -79,7 +77,7 @@ public class UsersController {
 
     }
 
-    @DeleteMapping("/delete/admin_scope/{admin_scope_id}")
+    @DeleteMapping("/admin_scope/delete/{admin_scope_id}")
     public void deleteAdminScope( @PathVariable Long admin_scope_id)
     {
         //System.out.println("Пространство удалено");

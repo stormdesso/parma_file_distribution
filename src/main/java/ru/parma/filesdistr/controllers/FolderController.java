@@ -25,12 +25,12 @@ public class FolderController {
     @ResponseBody
     public List<FolderDto> getAll(@PathVariable Long scope_id) {
 
-        return new ArrayList<FolderDto>();
+        return new ArrayList<>();
     }
 
-    @GetMapping("/{scope_id}/{folder_id}}")
+    @GetMapping("/{folder_id}")
     @ResponseBody
-    public FolderDto get(@PathVariable Long scope_id, @PathVariable Long folder_id) {
+    public FolderDto get(@PathVariable Long folder_id) {
         return new FolderDto();
     }
 
@@ -47,8 +47,8 @@ public class FolderController {
 
     }
 
-    @DeleteMapping("/delete/{scope_id}/{folder_id}")
-    public void delete( @PathVariable Long scope_id, @PathVariable Long folder_id)
+    @DeleteMapping("/delete/{folder_id}")
+    public void delete(@PathVariable Long folder_id)
     {
         //System.out.println("Пространство удалено");
     }

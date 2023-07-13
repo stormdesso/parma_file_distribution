@@ -1,10 +1,10 @@
 package ru.parma.filesdistr.models;
 
 import lombok.Data;
-import org.hibernate.annotations.LazyToOne;
 
 import javax.persistence.*;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "scope")

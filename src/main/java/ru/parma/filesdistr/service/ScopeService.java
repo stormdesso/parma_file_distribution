@@ -1,9 +1,7 @@
 package ru.parma.filesdistr.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Service;
-import ru.parma.filesdistr.dto.FileDto;
 import ru.parma.filesdistr.dto.ScopeDto;
 import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.repos.LicenseAgreementFileForScopeRepository;
@@ -28,7 +26,7 @@ public class ScopeService {
                 .collect(Collectors.toList());
     }
     public ScopeDto getScopeById(Long scopeId) {
-        return convertEntityToDto(scopeRepository.getScopeById(scopeId));
+        return convertEntityToDto(scopeRepository.getReferenceById(scopeId));
     }
 
     private ScopeDto convertEntityToDto(Scope scope){
@@ -39,9 +37,11 @@ public class ScopeService {
         scopeDto.setCopyright(scope.getCopyright());
         scopeDto.setShowIllustration(scope.isShowIllustration());
         scopeDto.setIcon(scope.getIcon());
-        scopeDto.setImages(new ArrayList<FileDto>());//!!!не забыть заменить!!!
+        //TODO !!!не забыть заменить!!!
+        scopeDto.setImages(new ArrayList<>());
         scopeDto.setLicenseAgreement(licenseAgreementFileForScopeRepository.findByScopeId(Math.toIntExact(scope.getId())).getContent());
-        scopeDto.setFolders(new ArrayList<>());//!!!не забыть заменить!!!
+        //TODO !!!не забыть заменить!!!
+        scopeDto.setFolders(new ArrayList<>());
 
         return scopeDto;
     }

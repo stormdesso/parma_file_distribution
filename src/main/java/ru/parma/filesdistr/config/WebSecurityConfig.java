@@ -1,7 +1,6 @@
 package ru.parma.filesdistr.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,7 +23,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class WebSecurityConfig  {
 
     private final CustomUserDetailsService customUserDetailsService;
-    private final ApplicationContext applicationContext;
+
 
     @Bean
     public GrantedAuthorityDefaults grantedAuthorityDefaults()  {
@@ -57,13 +56,13 @@ public class WebSecurityConfig  {
                 .and()
                     .authorizeRequests()
                     .expressionHandler(defaultWebSecurityExpressionHandler())
-                .antMatchers("/folder/{scope_id}/{folder_id}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
+                .antMatchers("/folder/{folder_id}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
                 .antMatchers("/folder/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
                 //версии
                 .and()
                     .authorizeRequests()
                     .expressionHandler(defaultWebSecurityExpressionHandler())
-                    .antMatchers("/version/{scope_id}/{folder_id}/{version_id}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
+                    .antMatchers("/version/{version_id}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
                     .antMatchers("/version/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
                 //пользователи
                 .and()

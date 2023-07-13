@@ -25,7 +25,7 @@ public class AppearanceController {
     @GetMapping("/all")
     @ResponseBody
     public List<TagDto> getAll() {
-        return new ArrayList<TagDto>();
+        return new ArrayList<>();
     }
 
 
@@ -35,8 +35,9 @@ public class AppearanceController {
         //System.out.println("Пространство добавлено");
     }
 
+    //TODO: вылетает 405
     @DeleteMapping("/delete/{tag_id}")
-    public void delete(@PathVariable Long tag_id)
+    public void delete(@PathVariable Integer tag_id)
     {
         //System.out.println("Пространство удалено");
     }

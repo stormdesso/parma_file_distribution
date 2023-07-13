@@ -1,7 +1,6 @@
 package ru.parma.filesdistr.models;
 
 import lombok.Data;
-import lombok.Getter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
