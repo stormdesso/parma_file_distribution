@@ -1,7 +1,6 @@
 package ru.parma.filesdistr.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.AdminDto;
@@ -13,14 +12,9 @@ import java.util.List;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("users")
+@RequestMapping("/")
 public class UsersController {
-    private UserService userService;
-    @Autowired
-    public UsersController(UserService userService) {
-        this.userService = userService;
-    }
-
+    private final UserService userService;
     @GetMapping("/admin/all")
     @ResponseBody
     public List<AdminDto> getAllAdmins() {

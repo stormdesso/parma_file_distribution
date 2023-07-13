@@ -1,7 +1,6 @@
 package ru.parma.filesdistr.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.VersionDto;
@@ -14,12 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("version")
 public class VersionController {
-    private VersionService versionService;
-    @Autowired
-    public VersionController(VersionService versionService) {
-        this.versionService = versionService;
-    }
-
+    private final VersionService versionService;
     @GetMapping("/all/{folder_id}")
     @ResponseBody
     public List<VersionDto> getAll(@PathVariable Long folder_id) {

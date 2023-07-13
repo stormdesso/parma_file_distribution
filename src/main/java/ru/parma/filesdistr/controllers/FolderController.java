@@ -1,7 +1,6 @@
 package ru.parma.filesdistr.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.FolderDto;
@@ -14,12 +13,7 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("folder")
 public class FolderController {
-    private FolderService folderService;
-
-    @Autowired
-    public FolderController(FolderService folderService) {
-        this.folderService = folderService;
-    }
+    private final FolderService folderService;
 
     @GetMapping("/all/{scope_id}")
     @ResponseBody

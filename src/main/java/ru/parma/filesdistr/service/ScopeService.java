@@ -1,6 +1,6 @@
 package ru.parma.filesdistr.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.dto.ScopeDto;
 import ru.parma.filesdistr.models.Scope;
@@ -12,12 +12,11 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ScopeService {
 
-    @Autowired
-    ScopeRepository scopeRepository;
-    @Autowired
-    LicenseAgreementFileForScopeRepository licenseAgreementFileForScopeRepository;
+    private final ScopeRepository scopeRepository;
+    private final LicenseAgreementFileForScopeRepository licenseAgreementFileForScopeRepository;
 
     public List<ScopeDto> getAll() {
         return scopeRepository.findAll()

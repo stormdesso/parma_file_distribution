@@ -1,7 +1,6 @@
 package ru.parma.filesdistr.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.TagDto;
@@ -15,12 +14,7 @@ import java.util.List;
 @RequestMapping("settings/appearance")
 public class AppearanceController {
 
-    private AppearanceService appearanceService;
-
-    @Autowired
-    public AppearanceController(AppearanceService appearanceService) {
-        this.appearanceService = appearanceService;
-    }
+    private final AppearanceService appearanceService;
 
     @GetMapping("/all")
     @ResponseBody

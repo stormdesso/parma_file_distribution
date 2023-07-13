@@ -1,7 +1,6 @@
 package ru.parma.filesdistr.controllers;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.ScopeDto;
@@ -13,12 +12,8 @@ import java.util.List;
 @RequiredArgsConstructor
 @RequestMapping("scope")
 public class ScopeController {
-    private ScopeService scopeService;
-    @Autowired
-    public ScopeController(ScopeService scopeService) {
-        this.scopeService = scopeService;
-    }
 
+    private final ScopeService scopeService;
     @GetMapping("/all")
     @ResponseBody
     public List<ScopeDto> getAll() {
