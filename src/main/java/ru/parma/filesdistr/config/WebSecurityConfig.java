@@ -82,7 +82,6 @@ public class WebSecurityConfig  {
                     .antMatchers("/test/admin").hasAuthority( Roles.ADMIN.getAuthority())
                 //test api
 
-                    .anyRequest().authenticated()
                 .and()
                     .userDetailsService(customUserDetailsService)
                     .addFilterAfter(new CustomFilterSec(), BasicAuthenticationFilter.class)
