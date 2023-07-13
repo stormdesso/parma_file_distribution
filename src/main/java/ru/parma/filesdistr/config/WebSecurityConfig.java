@@ -1,7 +1,6 @@
 package ru.parma.filesdistr.config;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -24,7 +23,7 @@ import static org.springframework.security.config.Customizer.withDefaults;
 public class WebSecurityConfig  {
 
     private final CustomUserDetailsService customUserDetailsService;
-    private final ApplicationContext applicationContext;
+
 
     @Bean
     public GrantedAuthorityDefaults grantedAuthorityDefaults()  {
@@ -40,20 +39,49 @@ public class WebSecurityConfig  {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.cors().disable().csrf().disable()
+                //авторизация
                     .formLogin()
                     .loginProcessingUrl("/perform_login")
-                    .defaultSuccessUrl("/hello", true)
+                    .defaultSuccessUrl("/test/hello", true)
                     .failureUrl("/login?error=true")
                 .and()
+                    .logout().permitAll()
+                //пространства
+                .and()
                     .authorizeRequests()
-                    .expressionHandler(defaultWebSecurityExpressionHandler()) // !
-                    .antMatchers("/login","/encrypt").permitAll()
-                    .antMatchers("/hello", "/jpa").permitAll()
-                        .antMatchers("/user").hasAnyRole(Roles.USER.getAuthority(),  Roles.ADMIN.getAuthority())
-                        .antMatchers("/admin").hasAuthority( Roles.ADMIN.getAuthority())
-                    .anyRequest().authenticated()
-                .and().
-                    logout().permitAll()
+                    .expressionHandler(defaultWebSecurityExpressionHandler())
+                    .antMatchers("/scope/{scope_id:\\d+}").permitAll()
+                    .antMatchers("/scope/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
+                //папки
+                .and()
+                    .authorizeRequests()
+                    .expressionHandler(defaultWebSecurityExpressionHandler())
+                .antMatchers("/folder/{folder_id:\\d+}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
+                .antMatchers("/folder/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
+                //версии
+                .and()
+                    .authorizeRequests()
+                    .expressionHandler(defaultWebSecurityExpressionHandler())
+                    .antMatchers("/version/{version_id:\\d+}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
+                    .antMatchers("/version/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
+                //пользователи
+                .and()
+                    .authorizeRequests()
+                    .expressionHandler(defaultWebSecurityExpressionHandler())
+                    .antMatchers("/users/**").hasAnyRole(Roles.ADMIN.getAuthority())
+                //настройки:внешний вид тэга
+                .and()
+                    .authorizeRequests()
+                    .expressionHandler(defaultWebSecurityExpressionHandler())
+                    .antMatchers("/settings/appearance/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
+
+                //test api
+                    .antMatchers("/test/login","/test/encrypt").permitAll()
+                    .antMatchers("/test/hello", "/test/jpa").permitAll()
+                    .antMatchers("/test/user").hasAnyRole(Roles.USER.getAuthority(),  Roles.ADMIN.getAuthority())
+                    .antMatchers("/test/admin").hasAuthority( Roles.ADMIN.getAuthority())
+                //test api
+
                 .and()
                     .userDetailsService(customUserDetailsService)
                     .addFilterAfter(new CustomFilterSec(), BasicAuthenticationFilter.class)

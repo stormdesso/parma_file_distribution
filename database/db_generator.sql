@@ -1,3 +1,52 @@
+create type roles as enum ('USER', 'ADMIN_SCOPES', 'ADMIN');
+
+alter type roles owner to postgres;
+
+create table tag
+(
+    id           integer      not null
+        primary key,
+    letter       varchar(250) not null,
+    bkg_color    varchar      not null,
+    letter_color varchar      not null
+);
+
+alter table tag
+    owner to postgres;
+
+create table users
+(
+    id                          integer               not null
+        constraint user_pkey
+            primary key,
+    name                        varchar(40)           not null,
+    password                    varchar(255)          not null,
+    blocked                     boolean default false not null,
+    is_admin_manager            boolean default false not null,
+    is_admin_scope_manager      boolean default false not null,
+    can_create_and_delete_scope boolean default false,
+    max_number_scope            integer default 0,
+    max_storage_space           integer default 0,
+    max_number_folder           integer default 0
+);
+
+alter table users
+    owner to postgres;
+
+create table file
+(
+    id           integer generated always as identity
+        primary key,
+    name         varchar(255)     not null,
+    size         double precision not null,
+    type         varchar          not null,
+    date_created date             not null,
+    location     varchar          not null
+);
+
+alter table file
+    owner to postgres;
+
 create table scope
 (
     id                 integer generated always as identity
@@ -6,11 +55,16 @@ create table scope
         unique,
     description        varchar(1000),
     copyright          varchar(40),
-    show_illustrations boolean     not null
+    show_illustrations boolean     not null,
+    icon_id            integer
+        references file
 );
 
 alter table scope
     owner to postgres;
+
+create index icon_id_fk
+    on scope (icon_id);
 
 create table folder
 (
@@ -63,37 +117,6 @@ create table version
 alter table version
     owner to postgres;
 
-create table tag
-(
-    id           integer      not null
-        primary key,
-    letter       varchar(250) not null,
-    bkg_color    varchar      not null,
-    letter_color varchar      not null
-);
-
-alter table tag
-    owner to postgres;
-
-create table users
-(
-    id                          integer               not null
-        constraint user_pkey
-            primary key,
-    name                        varchar(40)           not null,
-    password                    varchar(255)          not null,
-    blocked                     boolean default false not null,
-    is_admin_manager            boolean default false not null,
-    is_admin_scope_manager      boolean default false not null,
-    can_create_and_delete_scope boolean default false,
-    max_number_scope            integer default 0,
-    max_storage_space           integer default 0,
-    max_number_folder           integer default 0
-);
-
-alter table users
-    owner to postgres;
-
 create table user_scope
 (
     user_id  integer not null
@@ -103,21 +126,6 @@ create table user_scope
 );
 
 alter table user_scope
-    owner to postgres;
-
-create table file
-(
-    id            integer generated always as identity
-        primary key
-        references version,
-    name          varchar(255)     not null,
-    size          double precision not null,
-    type          varchar          not null,
-    "dateCreated" date             not null,
-    location      varchar          not null
-);
-
-alter table file
     owner to postgres;
 
 create table license_agreement_file_for_scope
@@ -132,11 +140,7 @@ create table license_agreement_file_for_scope
         constraint scope_id
             unique
         constraint scope_fkey
-            references scope,
-    file_id  integer          not null
-        constraint license_agreement_file_for_scope_file_id_file_id1_key
-            unique
-        references file
+            references scope
 );
 
 alter table license_agreement_file_for_scope
@@ -211,5 +215,4 @@ create table role
 
 alter table role
     owner to postgres;
-
 

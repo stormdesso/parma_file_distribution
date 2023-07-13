@@ -5,6 +5,6 @@ import org.springframework.stereotype.Repository;
 import ru.parma.filesdistr.models.User;
 
 @Repository
-public interface UserRepo extends JpaRepository<User, Long> {
+public interface UserRepository extends JpaRepository<User, Long> {
     User findByName(String name);
 }
