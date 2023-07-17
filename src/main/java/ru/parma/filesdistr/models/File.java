@@ -2,6 +2,7 @@ package ru.parma.filesdistr.models;
 
 
 import lombok.Data;
+import lombok.RequiredArgsConstructor;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -10,9 +11,12 @@ import java.util.List;
 @Entity
 @Table(name = "file")
 @Data
+@RequiredArgsConstructor
 public class File {
 
+
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     Integer id;
 
@@ -30,10 +34,6 @@ public class File {
 
     @Column(name = "location")
     String location;
-
-
-
-    //byte[] data;
 
     //@Nullable
     //List<Tag> tags;
