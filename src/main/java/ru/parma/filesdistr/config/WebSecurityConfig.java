@@ -82,6 +82,14 @@ public class WebSecurityConfig  {
                     .antMatchers("/test/admin").hasAuthority( Roles.ADMIN.getAuthority())
                 //test api
 
+                //ViewScope
+                .and()
+                    .authorizeRequests()
+                    .expressionHandler(defaultWebSecurityExpressionHandler())
+                    .antMatchers("/view/s/{scope_id:\\d+}/v/{version_id:\\d+}").permitAll()
+                    .antMatchers("/view/**").hasAnyRole(Roles.USER.getAuthority())
+                //ViewScope
+
                 .and()
                     .userDetailsService(customUserDetailsService)
                     .addFilterAfter(new CustomFilterSec(), BasicAuthenticationFilter.class)
