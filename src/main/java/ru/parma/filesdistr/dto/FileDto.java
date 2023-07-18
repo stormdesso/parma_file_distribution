@@ -13,7 +13,6 @@ public class FileDto {
     Date dateCreated;
     String location;
     byte[] data;
-
     //@Nullable
     //List<Tag> tags;
 }

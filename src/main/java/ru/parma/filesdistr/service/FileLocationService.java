@@ -1,38 +1,51 @@
 package ru.parma.filesdistr.service;
 
+
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import ru.parma.filesdistr.dto.FileDto;
 import ru.parma.filesdistr.models.File;
 import ru.parma.filesdistr.repos.FileRepository;
 import ru.parma.filesdistr.repos.FileSystemRepository;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
+import ru.parma.filesdistr.utils.Utils;
 
 @Service
 @RequiredArgsConstructor
 public class FileLocationService {
-    final int ONE_MB_SIZE_IN_BYTES = 1048576;
     final FileSystemRepository fileSystemRepository;
     final FileRepository fileDbRepository;
 
-    public void save(byte[] bytes, String fileName, String filetype) throws Exception {
+    public FileDto save(byte[] bytes, String fileName, String filetype) throws Exception {
         String location = fileSystemRepository.save(bytes, fileName);// сохраняет на сервер
 
-        ru.parma.filesdistr.models.File f = new File();//parma.File
-        f.setName(fileName);
-        f.setSize(convertByteToMb(bytes));
-        f.setType(filetype);
-        f.setDateCreated(getDateWithoutTime());
-        f.setLocation(location);
+        File file = File
+                .builder()
+                    .name(fileName)
+                    .size(Utils.convertByteToMb(bytes))
+                    .type(filetype)
+                    .dateCreated(Utils.getDateWithoutTime())
+                    .location(location)
+                .build();
 
-        fileDbRepository.save(f);// сохраняет в БД
+        fileDbRepository.save(file);// сохраняет в БД
+        //TODO: добавить маппер (JMapper, MapStruct не сработали)
+        return entityToDto(file);
     }
+    private FileDto entityToDto(@NotNull File file){
+        return new FileDto(){{
+            setId(file.getId());
+            setName(file.getName());
+            setSize(file.getSize());
+            setType(file.getType());
+            setDateCreated(file.getDateCreated());
+            setLocation(file.getLocation());
+        }};
+    }
+
     public void delete(Long fileId) {
         File fileDb = fileDbRepository.findById(Math.toIntExact(fileId))// parma.File
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
@@ -41,14 +54,6 @@ public class FileLocationService {
         fileSystemRepository.delete(location);//удаляет с сервера
     }
 
-    Date getDateWithoutTime() throws ParseException {
-        SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
-        return formatter.parse(formatter.format(new Date()));
-    }
-
-    Double convertByteToMb(byte @NotNull [] bytes){
-        return ((double)bytes.length/(double) ONE_MB_SIZE_IN_BYTES);
-    }
 
     public FileSystemResource get(Long fileId) {
         File file = fileDbRepository.findById(Math.toIntExact(fileId))// parma.File

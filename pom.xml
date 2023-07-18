@@ -65,6 +65,14 @@
             <version>2.6</version>
         </dependency>
 
+        <!--Mapping-->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.5.3.Final</version>
+        </dependency>
+        <!--Mapping-->
+
     </dependencies>
 
     <build>
@@ -74,8 +82,13 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <version>${project.parent.version}</version>
             </plugin>
+
+
+
         </plugins>
     </build>
+
+
 
 
 </project>
