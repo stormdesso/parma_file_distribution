@@ -1,7 +1,9 @@
 package ru.parma.filesdistr.repos;
 
 import org.springframework.core.io.FileSystemResource;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -23,12 +25,22 @@ class FileSystemRepository {
         Files.write(newFile, content);
         return newFile.toAbsolutePath().toString();
     }
+    public void delete(String location) {
+        try {
+            java.io.File file = new java.io.File(location);
+            if (!file.delete()) {//удаляет с сервера
+                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            }
+        } catch (NullPointerException | SecurityException exception) {
+            exception.getStackTrace();
+        }
+    }
 
-    public FileSystemResource findInFileSystem(String location) {
+
+        public FileSystemResource findInFileSystem(String location) {
         try {
             return new FileSystemResource(Paths.get(location));
         } catch (Exception e) {
-            // Handle access or file not found problems.
             throw new RuntimeException();
         }
     }

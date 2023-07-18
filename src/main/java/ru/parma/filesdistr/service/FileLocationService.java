@@ -36,6 +36,16 @@ public class FileLocationService {
 
         fileDbRepository.save(f);// сохраняет в БД
     }
+    public void delete(Long fileId) {
+        File fileDb = fileDbRepository.findById(Math.toIntExact(fileId))// parma.File
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        String location = fileDb.getLocation();
+        fileDbRepository.delete(fileDb);//удаляет в бд
+        fileSystemRepository.delete(location);//удаляет с сервера
+    }
+
+
+
     Date getDateWithoutTime() throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
         return formatter.parse(formatter.format(new Date()));

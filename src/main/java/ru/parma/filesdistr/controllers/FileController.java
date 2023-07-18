@@ -12,12 +12,13 @@ import ru.parma.filesdistr.service.FileLocationService;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("myFiles")
+@RequestMapping("file")
 public class FileController {
     private final FileLocationService fileLocationService;
 
-    //TODO: async подгрузка и загрузка
-    //TODO: связка с version
+    //TODO: async подгрузка и загрузка, связка с версией
+
+
 
     @PostMapping("/upload")
     @ResponseBody
@@ -29,6 +30,12 @@ public class FileController {
     @ResponseBody
     FileSystemResource download(@PathVariable Long fileId){
         return fileLocationService.get(fileId);
+    }
+
+    @DeleteMapping(value = "/delete/{fileId}")
+    @ResponseBody
+    void delete(@PathVariable Long fileId) {
+        fileLocationService.delete(fileId);
     }
 }
 
