@@ -10,9 +10,6 @@ import ru.parma.filesdistr.models.File;
 import ru.parma.filesdistr.repos.FileRepository;
 import ru.parma.filesdistr.repos.FileSystemRepository;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.net.URLConnection;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -24,13 +21,13 @@ public class FileLocationService {
     final FileSystemRepository fileSystemRepository;
     final FileRepository fileDbRepository;
 
-    public void save(byte[] bytes, String fileName) throws Exception {
+    public void save(byte[] bytes, String fileName, String filetype) throws Exception {
         String location = fileSystemRepository.save(bytes, fileName);// сохраняет на сервер
 
         ru.parma.filesdistr.models.File f = new File();//parma.File
         f.setName(fileName);
         f.setSize(convertByteToMb(bytes));
-        f.setType(getFileType(bytes));
+        f.setType(filetype);
         f.setDateCreated(getDateWithoutTime());
         f.setLocation(location);
 
@@ -43,8 +40,6 @@ public class FileLocationService {
         fileDbRepository.delete(fileDb);//удаляет в бд
         fileSystemRepository.delete(location);//удаляет с сервера
     }
-
-
 
     Date getDateWithoutTime() throws ParseException {
         SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
@@ -59,10 +54,6 @@ public class FileLocationService {
         File file = fileDbRepository.findById(Math.toIntExact(fileId))// parma.File
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return fileSystemRepository.findInFileSystem(file.getLocation());
-    }
-    String getFileType(byte[] bytes) throws Exception{
-        InputStream is = new ByteArrayInputStream(bytes);
-        return  URLConnection.guessContentTypeFromStream(is);
     }
 
 }

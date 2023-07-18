@@ -7,6 +7,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import ru.parma.filesdistr.service.FileLocationService;
+import org.apache.commons.io.FilenameUtils;
+
 
 //если не работает, запись файлов -> включить админские права для IDEA
 
@@ -18,12 +20,11 @@ public class FileController {
 
     //TODO: async подгрузка и загрузка, связка с версией
 
-
-
     @PostMapping("/upload")
     @ResponseBody
     void upload(@RequestParam MultipartFile file) throws Exception {
-        fileLocationService.save(file.getBytes(), file.getOriginalFilename());
+        String fileType = FilenameUtils.getExtension(file.getOriginalFilename());
+        fileLocationService.save(file.getBytes(), file.getOriginalFilename(), fileType);
     }
 
     @GetMapping(value = "/download/{fileId}", produces = MediaType.ALL_VALUE)
