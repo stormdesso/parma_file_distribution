@@ -1,10 +1,7 @@
 package ru.parma.filesdistr.models;
 
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
@@ -17,11 +14,8 @@ import java.util.List;
 @Setter
 @Builder
 @AllArgsConstructor
+@NoArgsConstructor
 public class File {
-
-    public File() {
-
-    }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,15 +40,13 @@ public class File {
     //@Nullable
     //List<Tag> tags;
 
-    @ManyToMany(mappedBy = "images")
-    List<Scope> scopes;
-
-
-
+//    @ManyToMany(mappedBy = "images")
+//    List<Scope> scopes;
 
 //    @ManyToMany(mappedBy = "illustrations")
 //    List<Version> IllustrationsForVersion;
 //
 //    @ManyToMany(mappedBy = "files")
 //    List<Version> filesForVersion;
+
 }

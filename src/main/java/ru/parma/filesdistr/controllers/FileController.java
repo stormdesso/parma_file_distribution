@@ -6,7 +6,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.parma.filesdistr.dto.FileDto;
+import ru.parma.filesdistr.dto.SavedFileDto;
 import ru.parma.filesdistr.service.FileLocationService;
 import org.apache.commons.io.FilenameUtils;
 
@@ -22,7 +22,7 @@ public class FileController {
 
     @PostMapping("/upload")
     @ResponseBody
-    FileDto upload(@RequestParam MultipartFile file) throws Exception {
+    SavedFileDto upload(@RequestParam MultipartFile file) throws Exception {
         String fileType = FilenameUtils.getExtension(file.getOriginalFilename());
         return fileLocationService.save(file.getBytes(), file.getOriginalFilename(), fileType);
     }

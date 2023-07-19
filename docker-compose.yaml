@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   pg_db:
-    container_name: postgresql-db
+    container_name: parma-file-distr-db
     image: postgres:15rc1-alpine
     restart: always
     environment:

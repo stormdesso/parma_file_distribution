@@ -6,21 +6,21 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Date;
 
 
 @Repository
-public
-class FileSystemRepository {
-    @Value("${files.baseDir}")
-    private String resources_dir;
+public class FileSystemRepository {
 
-    public String save (byte[] content, String fileName) throws Exception {
-        Files.createDirectories(Paths.get(resources_dir));
-        Path newFile = Paths.get(resources_dir + new Date().getTime() + "-" + fileName);
+    @Value("${files.baseDir}")
+    private String resourcesDir;
+
+    public String save (byte[] content, String fileName) throws IOException {
+        Files.createDirectories(Paths.get(resourcesDir));
+        Path newFile = Paths.get(resourcesDir +  fileName);
         Files.write(newFile, content);
         return newFile.toAbsolutePath().toString();
     }
@@ -28,9 +28,10 @@ class FileSystemRepository {
     public void delete (String location) {
         try {
             java.io.File file = new java.io.File(location);
-            if (!file.delete()) {//удаляет с сервера
-                throw new ResponseStatusException(HttpStatus.NOT_FOUND);
+            if(!file.exists()){
+                // TODO logs - no file
             }
+            file.deleteOnExit();
         } catch (NullPointerException | SecurityException exception) {
             exception.getStackTrace();
         }
