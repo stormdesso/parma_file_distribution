@@ -6,20 +6,20 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import ru.parma.filesdistr.dto.ViewScopeDto;
-import ru.parma.filesdistr.service.ViewScopeService;
+import ru.parma.filesdistr.dto.GuestPageDto;
+import ru.parma.filesdistr.service.GuestPageService;
 
 @Controller
 @RequiredArgsConstructor
 @RequestMapping("view")
 public class ViewController {
 
-    private final ViewScopeService viewScopeService;
+    private final GuestPageService guestPageService;
 
     @GetMapping("/s/{scope_id}/v/{version_id}")
     @ResponseBody
-    public ViewScopeDto get(@PathVariable Long scope_id, @PathVariable Long version_id) {
-        return viewScopeService.getViewScopeByScopeIdAndVersionId(scope_id, version_id);
+    public GuestPageDto get(@PathVariable Long scope_id, @PathVariable Long version_id) {
+        return guestPageService.getGuestPageByScopeIdAndVersionId(scope_id, version_id);
     }
 
 }
