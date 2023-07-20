@@ -1,4 +1,4 @@
-package ru.parma.filesdistr.mapper;
+package ru.parma.filesdistr.mappers;
 
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;

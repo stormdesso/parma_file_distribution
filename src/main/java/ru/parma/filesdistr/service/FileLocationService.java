@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 import ru.parma.filesdistr.dto.SavedFileDto;
-import ru.parma.filesdistr.mapper.FileMapper;
+import ru.parma.filesdistr.mappers.FileMapper;
 import ru.parma.filesdistr.models.File;
 import ru.parma.filesdistr.repos.FileRepository;
 import ru.parma.filesdistr.repos.FileSystemRepository;
