@@ -1,18 +1,24 @@
 package ru.parma.filesdistr.models;
 
 
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
 import java.util.List;
 
+
 @Entity
 @Table(name = "file")
-@Data
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class File {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     Integer id;
 
@@ -31,19 +37,16 @@ public class File {
     @Column(name = "location")
     String location;
 
-
-
-    //byte[] data;
-
     //@Nullable
     //List<Tag> tags;
 
-    @ManyToMany(mappedBy = "images")
-    List<Scope> scopes;
+//    @ManyToMany(mappedBy = "images")
+//    List<Scope> scopes;
 
 //    @ManyToMany(mappedBy = "illustrations")
 //    List<Version> IllustrationsForVersion;
 //
 //    @ManyToMany(mappedBy = "files")
 //    List<Version> filesForVersion;
+
 }

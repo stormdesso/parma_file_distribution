@@ -50,19 +50,19 @@ public class WebSecurityConfig  {
                 .and()
                     .authorizeRequests()
                     .expressionHandler(defaultWebSecurityExpressionHandler())
-                    .antMatchers("/scope/{scope_id:\\d+}").permitAll()
+                    .antMatchers("/scope/{scope_id:\\d+}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
                     .antMatchers("/scope/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
                 //папки
                 .and()
                     .authorizeRequests()
                     .expressionHandler(defaultWebSecurityExpressionHandler())
-                .antMatchers("/folder/{folder_id:\\d+}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
+                .antMatchers("/folder/{folder_id:\\d+}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
                 .antMatchers("/folder/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
                 //версии
                 .and()
                     .authorizeRequests()
                     .expressionHandler(defaultWebSecurityExpressionHandler())
-                    .antMatchers("/version/{version_id:\\d+}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority(),Roles.USER.getAuthority())
+                    .antMatchers("/version/{version_id:\\d+}").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
                     .antMatchers("/version/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
                 //пользователи
                 .and()
@@ -74,13 +74,18 @@ public class WebSecurityConfig  {
                     .authorizeRequests()
                     .expressionHandler(defaultWebSecurityExpressionHandler())
                     .antMatchers("/settings/appearance/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
+                //файлы
+                .and()
+                    .authorizeRequests()
+                    .expressionHandler(defaultWebSecurityExpressionHandler())
+                    .antMatchers("/myFiles/**").permitAll()
 
                 //test api
                     .antMatchers("/test/login","/test/encrypt").permitAll()
                     .antMatchers("/test/hello", "/test/jpa").permitAll()
                     .antMatchers("/test/user").hasAnyRole(Roles.USER.getAuthority(),  Roles.ADMIN.getAuthority())
                     .antMatchers("/test/admin").hasAuthority( Roles.ADMIN.getAuthority())
-                //test api
+
 
                 .and()
                     .userDetailsService(customUserDetailsService)

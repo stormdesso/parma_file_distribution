@@ -16,7 +16,7 @@ public class ScopeDto {
     String copyright;
     boolean showIllustration;
     File icon;
-    List<FileDto> images = new ArrayList<>();
+    List<SavedFileDto> images = new ArrayList<>();
     byte[] licenseAgreement;
     List<FolderDto> folders = new ArrayList<>();
 }

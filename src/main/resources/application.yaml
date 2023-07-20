@@ -25,5 +25,7 @@ logging:
     org:
       springframework:
         web=INFO:
+files:
+  baseDir: "resources_dir//"
 
 

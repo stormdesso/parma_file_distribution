@@ -19,6 +19,7 @@ public class ScopeService {
     private final LicenseAgreementFileForScopeRepository licenseAgreementFileForScopeRepository;
 
     public List<ScopeDto> getAll() {
+
         return scopeRepository.findAll()
                 .stream()
                 .map(this::convertEntityToDto)
@@ -28,6 +29,7 @@ public class ScopeService {
         return convertEntityToDto(scopeRepository.getReferenceById(scopeId));
     }
 
+    //TODO:заменить на маппер
     private ScopeDto convertEntityToDto(Scope scope){
         ScopeDto scopeDto = new ScopeDto();
         scopeDto.setId(scope.getId());
