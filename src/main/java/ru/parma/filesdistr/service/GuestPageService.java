@@ -6,6 +6,7 @@ import ru.parma.filesdistr.dto.FileDto;
 import ru.parma.filesdistr.dto.FolderDto;
 import ru.parma.filesdistr.dto.GuestPageDto;
 import ru.parma.filesdistr.dto.VersionDto;
+import ru.parma.filesdistr.models.File;
 import ru.parma.filesdistr.models.Folder;
 import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.models.Version;
@@ -54,7 +55,7 @@ public class GuestPageService {
         folderDto.setId(folder.getId());
         folderDto.setName(folder.getName());
 
-
+        //Первичная версия задания файлов
         List<VersionDto> versionDtoList = new ArrayList<>();
         List<Version> versions = folder.getVersions();
         if (versions.contains(requiredVersion)) {
@@ -67,7 +68,25 @@ public class GuestPageService {
     private VersionDto convertVersionToDto(Version version) {
         VersionDto versionDto = new VersionDto();
 
+        versionDto.setVersionNumber(version.getVersionNumber());
+
+        List<File> files = version.getFiles();
+        List<FileDto> fileDtoList = new ArrayList<>();
+        for (File file : files) {
+            fileDtoList.add(convertFileToDto(file));
+        }
+        versionDto.setFiles(fileDtoList);
+
         //TODO !!!не забыть доработать!!!
         return versionDto;
+    }
+
+    private FileDto convertFileToDto(File file) {
+        FileDto fileDto = new FileDto();
+        fileDto.setId(file.getId());
+        fileDto.setName(file.getName());
+        fileDto.setType(file.getType());
+        fileDto.setSize(file.getSize());
+        return fileDto;
     }
 }
