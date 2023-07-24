@@ -2,7 +2,7 @@ package ru.parma.filesdistr.dto;
 
 
 import lombok.*;
-import ru.parma.filesdistr.models.Roles;
+import ru.parma.filesdistr.enums.Roles;
 
 import java.util.List;
 

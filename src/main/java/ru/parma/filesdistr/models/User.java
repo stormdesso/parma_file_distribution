@@ -3,6 +3,7 @@ package ru.parma.filesdistr.models;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import ru.parma.filesdistr.enums.Roles;
 
 import javax.persistence.*;
 import java.util.Collection;

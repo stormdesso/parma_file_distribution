@@ -11,7 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-import ru.parma.filesdistr.models.Roles;
+import ru.parma.filesdistr.enums.Roles;
 import ru.parma.filesdistr.service.CustomUserDetailsService;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -78,7 +78,8 @@ public class WebSecurityConfig  {
                 .and()
                     .authorizeRequests()
                     .expressionHandler(defaultWebSecurityExpressionHandler())
-                    .antMatchers("/myFiles/**").permitAll()
+                .antMatchers("/file/download/{file_id:\\d+}").permitAll()
+                .antMatchers("/file/**").hasAnyRole(Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
 
                 //test api
                     .antMatchers("/test/login","/test/encrypt").permitAll()
