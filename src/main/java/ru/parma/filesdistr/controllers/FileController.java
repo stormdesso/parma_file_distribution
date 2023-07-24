@@ -22,7 +22,7 @@ public class FileController {
     private final FileLocationService fileLocationService;
 
     //TODO: async подгрузка и загрузка, связка с версией
-    //TODO: проверка доступа к scope во всех методах по таблице user_scope
+    //TODO: проверка доступа к scope во всех методах по таблице user_scope, userId доставать из cookie
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
@@ -34,7 +34,8 @@ public class FileController {
             throws Exception {
         String fileType = FilenameUtils.getExtension(file.getOriginalFilename());
 
-        return fileLocationService.save(file.getBytes(), file.getOriginalFilename(), fileType);
+        return fileLocationService.save(file.getBytes(), file.getOriginalFilename(), fileType,
+                generalId, typeInScopePage, mediaTypeInScopePage);
     }
 
     @GetMapping(value = "/download/{fileId}", produces = MediaType.ALL_VALUE)

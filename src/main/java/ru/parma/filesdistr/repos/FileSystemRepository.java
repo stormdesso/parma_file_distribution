@@ -2,9 +2,7 @@ package ru.parma.filesdistr.repos;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Repository;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -18,6 +16,7 @@ public class FileSystemRepository {
     @Value("${files.baseDir}")
     private String resourcesDir;
 
+    //TODO: файлы перезаписывается, если такое имя уже занято
     public String save (byte[] content, String fileName) throws IOException {
         Files.createDirectories(Paths.get(resourcesDir));
         Path newFile = Paths.get(resourcesDir +  fileName);
