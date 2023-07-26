@@ -12,12 +12,8 @@ import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.FileMapper;
 import ru.parma.filesdistr.models.File;
-import ru.parma.filesdistr.models.intermediate.FileVersion;
-import ru.parma.filesdistr.models.intermediate.IllustrationVersion;
 import ru.parma.filesdistr.repos.FileRepository;
 import ru.parma.filesdistr.repos.FileSystemRepository;
-import ru.parma.filesdistr.repos.intermediate.FileVersionRepository;
-import ru.parma.filesdistr.repos.intermediate.IllustrationVersionRepository;
 import ru.parma.filesdistr.utils.Utils;
 
 import java.util.Date;
@@ -28,8 +24,14 @@ import java.util.Date;
 public class FileLocationService {
     final FileSystemRepository fileSystemRepository;
     final FileRepository fileDbRepository;
-    final FileVersionRepository fileVersionRepository;
-    final IllustrationVersionRepository illustrationVersionRepository;
+//    final FileVersionRepository fileVersionRepository;
+//    final IllustrationVersionRepository illustrationVersionRepository;
+//    final IllustrationScopeRepository illustrationScopeRepository;
+//    final ManifestIOSFolderRepository manifestIOSFolderRepository;
+//    final ScopeRepository scopeRepository;
+//    final LicenseAgreementFileForScopeRepository licenseAgreementFileForScopeRepository;
+
+    //TODO: папки сделать, убрать scopeId
 
     @Transactional
     public SavedFileDto save ( byte[] bytes, String fileName, String filetype,
@@ -39,8 +41,16 @@ public class FileLocationService {
         Date currDate = Utils.getDateWithoutTime();
         String location = null;
         try {
-
-            location = fileSystemRepository.save(bytes, fileName);// сохраняет на сервер
+            if( typeInScopePage == TypeInScopePage.SCOPE ){
+                //TODO: в дальнейшем будем получать name, поднимаясь вверх по иерархии
+                location = fileSystemRepository.save(bytes, fileName, mediaTypeInScopePage, "testScope3");
+            }
+            else if( typeInScopePage == TypeInScopePage.FOLDER ){
+                location = fileSystemRepository.save(bytes, fileName, mediaTypeInScopePage, "testScope2","testFolder");
+            }
+            else if( typeInScopePage == TypeInScopePage.VERSION ){
+                location = fileSystemRepository.save(bytes, fileName, mediaTypeInScopePage, "testScope3","testFolder2","testVersion2");
+            }
 
             File file = File
                     .builder()
@@ -51,12 +61,14 @@ public class FileLocationService {
                     .location(location)
                     .build();
             File savedFile = fileDbRepository.save(file);// сохраняет в БД
-            saveIntermediateEntity(typeInScopePage, mediaTypeInScopePage, generalId, savedFile);// сохраняет в БД
 
-            SavedFileDto savedFileDto = FileMapper.INSTANCE.toSaveFileDto(savedFile);
-            return savedFileDto;
+//            if(!trySaveIntermediateEntity(typeInScopePage, mediaTypeInScopePage, generalId, savedFile)) {
+//                throw new Exception();
+//            }// сохраняет в БД
 
-        } catch (Exception e){
+            return FileMapper.INSTANCE.toSaveFileDto(savedFile);
+
+        } catch (Exception e) {
             // убираем за собой
             if(location != null && !location.isEmpty()) {
                 fileSystemRepository.delete(location);
@@ -65,30 +77,92 @@ public class FileLocationService {
         }
     }
 
+//    @Transactional
+//    boolean trySaveIntermediateEntity ( TypeInScopePage typeInScopePage, MediaTypeInScopePage mediaTypeInScopePage,
+//                                        int generalId, File savedFile )
+//            throws EntityNotFoundException {
+//
+//        if(typeInScopePage == TypeInScopePage.VERSION) {
+//            if(mediaTypeInScopePage == MediaTypeInScopePage.FILE) {
+//                FileVersion fileVersion = FileVersion
+//                        .builder()
+//                        .versionId(generalId)
+//                        .fileId(savedFile.getId())
+//                        .build();
+//                fileVersionRepository.save(fileVersion);
+//                return true;
+//            }
+//
+//            if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
+//                IllustrationVersion illustrationVersion = IllustrationVersion
+//                        .builder()
+//                        .versionId(generalId)
+//                        .fileId(savedFile.getId())
+//                        .build();
+//                illustrationVersionRepository.save(illustrationVersion);
+//                return true;
+//            }
+//        }else if(typeInScopePage == TypeInScopePage.FOLDER) {
+//            if(mediaTypeInScopePage == MediaTypeInScopePage.MANIFEST) {
+//
+//                ManifestIOSFolder oldEntity = manifestIOSFolderRepository.findByFolderId(generalId);
+//                if(oldEntity != null) {
+//                    manifestIOSFolderRepository.delete(oldEntity);
+//                }
+//
+//                ManifestIOSFolder manifestIOSFolder = ManifestIOSFolder
+//                        .builder()
+//                        .folderId(generalId)
+//                        .fileId(savedFile.getId())
+//                        .build();
+//                manifestIOSFolderRepository.save(manifestIOSFolder);
+//                return true;
+//            }
+//        }else if(typeInScopePage == TypeInScopePage.SCOPE) {
+//            if(mediaTypeInScopePage == MediaTypeInScopePage.ICON) {
+//                Scope scope = scopeRepository.getReferenceById((long) generalId);
+//                if(scope.getIconId() != null) {
+//                    delete(scope.getIconId());// delete old icon from table "file"
+//                }
+//                scope.setIconId(Long.valueOf(savedFile.getId()));
+//                scopeRepository.save(scope);
+//                return true;
+//            }
+//            if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
+//                IllustrationScope illustrationScope = IllustrationScope
+//                        .builder()
+//                        .scopeId(generalId)
+//                        .fileId(savedFile.getId())
+//                        .build();
+//                illustrationScopeRepository.save(illustrationScope);
+//                return true;
+//            }
+//            if(mediaTypeInScopePage == MediaTypeInScopePage.DISTRIBUTION_AGREEMENT) {
+//
+//                LicenseAgreementFileForScope oldEntity = licenseAgreementFileForScopeRepository.findByScopeId(generalId);
+//                if(oldEntity != null) {
+//                    long oldFileId = oldEntity.getFileId();
+//                    oldEntity.setFileId(savedFile.getId());
+//                    delete(oldFileId);
+//                }
+//                else{
+//                    LicenseAgreementFileForScope licenseAgreementFileForScope = LicenseAgreementFileForScope
+//                            .builder()
+//                            .scopeId(generalId)
+//                            .fileId(savedFile.getId())
+//                            .build();
+//                    licenseAgreementFileForScopeRepository.save(licenseAgreementFileForScope);
+//                }
+//                return true;
+//            }
+//        }
+//
+//
+//        return false;
+//    }
+//
 
-    private void saveIntermediateEntity( TypeInScopePage typeInScopePage, MediaTypeInScopePage mediaTypeInScopePage, int generalId, File savedFile ){
-        //TODO:сделать кучу if для проверки в какую промежуточную таблицу всё надо сохранить
 
-        if(typeInScopePage == TypeInScopePage.VERSION) {
-            if(mediaTypeInScopePage == MediaTypeInScopePage.FILE) {
-                FileVersion fileVersion = FileVersion
-                        .builder()
-                        .versionId(generalId)
-                        .fileId(savedFile.getId())
-                        .build();
-                fileVersionRepository.save(fileVersion);
-            }
-
-            if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
-                IllustrationVersion illustrationVersion = IllustrationVersion
-                        .builder()
-                        .versionId(generalId)
-                        .fileId(savedFile.getId())
-                        .build();
-                illustrationVersionRepository.save(illustrationVersion);
-            }
-        }
-    }
     @Transactional
     public void delete ( Long fileId ) {
         File fileDb = fileDbRepository.findById(Math.toIntExact(fileId))// parma.File

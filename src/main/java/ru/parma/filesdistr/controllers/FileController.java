@@ -22,15 +22,14 @@ public class FileController {
     private final FileLocationService fileLocationService;
 
     //TODO: async подгрузка и загрузка, связка с версией
-    //TODO: проверка доступа к scope во всех методах по таблице user_scope, userId доставать из cookie
-
+    //для определения доступа к scope(для admin_scope, user) будем подниматься по иерархии вверх до scope(от версии или папки)
+    //userId доставать из cookie
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     SavedFileDto upload ( @RequestParam @NotNull MultipartFile file,
                           @RequestParam Integer generalId,   //указывает id пространства, папки, версии
                           @RequestParam TypeInScopePage typeInScopePage,
-                          @RequestParam MediaTypeInScopePage mediaTypeInScopePage,
-                          @RequestParam  Integer scopeId ) //поможет определить есть ли доступ к scope
+                          @RequestParam MediaTypeInScopePage mediaTypeInScopePage)
             throws Exception {
         String fileType = FilenameUtils.getExtension(file.getOriginalFilename());
 
@@ -43,8 +42,7 @@ public class FileController {
     FileSystemResource download ( @PathVariable Long fileId,
                                   @RequestParam Integer generalId,   //указывает id пространства, папки, версии
                                   @RequestParam TypeInScopePage typeInScopePage,
-                                  @RequestParam MediaTypeInScopePage mediaTypeInScopePage,
-                                  @RequestParam  Integer scopeId ){ //поможет определить есть ли доступ к scope
+                                  @RequestParam MediaTypeInScopePage mediaTypeInScopePage){
         return fileLocationService.get(fileId);
     }
 
@@ -53,8 +51,7 @@ public class FileController {
     void delete ( @PathVariable Long fileId,
                   @RequestParam Integer generalId,   //указывает id пространства, папки, версии
                   @RequestParam TypeInScopePage typeInScopePage,
-                  @RequestParam MediaTypeInScopePage mediaTypeInScopePage,
-                  @RequestParam  Integer scopeId ){ //поможет определить есть ли доступ к scope
+                  @RequestParam MediaTypeInScopePage mediaTypeInScopePage ){
         fileLocationService.delete(fileId);
     }
 }

@@ -2,13 +2,15 @@ package ru.parma.filesdistr.models;
 
 import lombok.Data;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 import java.sql.Date;
-import java.util.ArrayList;
-import java.util.List;
 
 @Entity
 @Table(name = "version")
+
 @Data
 public class Version {
 
@@ -34,20 +36,22 @@ public class Version {
     @Column(name = "folder_id")
     Integer parentId;
 
-    @Column(name = "title")
-    @CollectionTable(name = "folder",
-            joinColumns = @JoinColumn(name = "id"))
-    String parentName;
+    //TODO: починить
 
-    @ManyToMany
-    @JoinTable(name = "illustration_for_version",
-            joinColumns = @JoinColumn(name = "version_id"),
-            inverseJoinColumns = @JoinColumn(name = "file_id"))
-    List<File> illustrations = new ArrayList<>();
+//    @Column(name = "title")
+//    @CollectionTable(name = "folder",
+//            joinColumns = @JoinColumn(name = "id"))
+//    String parentName;
 
-    @ManyToMany
-    @JoinTable(name = "file_for_version",
-            joinColumns = @JoinColumn(name = "version_id"),
-            inverseJoinColumns = @JoinColumn(name = "file_id"))
-    List<File> files = new ArrayList<>();
+//    @ManyToMany
+//    @JoinTable(name = "illustration_for_version",
+//            joinColumns = @JoinColumn(name = "version_id"),
+//            inverseJoinColumns = @JoinColumn(name = "file_id"))
+//    List<File> illustrations = new ArrayList<>();
+//
+//    @ManyToMany
+//    @JoinTable(name = "file_for_version",
+//            joinColumns = @JoinColumn(name = "version_id"),
+//            inverseJoinColumns = @JoinColumn(name = "file_id"))
+//    List<File> files = new ArrayList<>();
 }

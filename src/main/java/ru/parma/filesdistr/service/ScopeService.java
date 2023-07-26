@@ -16,7 +16,6 @@ import java.util.stream.Collectors;
 public class ScopeService {
 
     private final ScopeRepository scopeRepository;
-    private final LicenseAgreementFileForScopeRepository licenseAgreementFileForScopeRepository;
 
     public List<ScopeDto> getAll() {
 
@@ -37,10 +36,10 @@ public class ScopeService {
         scopeDto.setDescription(scope.getDescription());
         scopeDto.setCopyright(scope.getCopyright());
         scopeDto.setShowIllustration(scope.isShowIllustration());
-        scopeDto.setIcon(scope.getIcon());
+        //scopeDto.setIcon(scope.getIcon());
         //TODO !!!не забыть заменить!!!
         scopeDto.setImages(new ArrayList<>());
-        scopeDto.setLicenseAgreement(licenseAgreementFileForScopeRepository.findByScopeId(Math.toIntExact(scope.getId())).getContent());
+        //scopeDto.setLicenseAgreement(licenseAgreementFileForScopeRepository.findByScopeId(Math.toIntExact(scope.getId())).getContent());
         //TODO !!!не забыть заменить!!!
         scopeDto.setFolders(new ArrayList<>());
 

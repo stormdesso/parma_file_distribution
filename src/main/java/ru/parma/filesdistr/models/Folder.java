@@ -2,9 +2,10 @@ package ru.parma.filesdistr.models;
 
 import lombok.Data;
 
-import javax.persistence.*;
-import java.util.ArrayList;
-import java.util.List;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "folder")
@@ -15,7 +16,7 @@ public class Folder {
     Integer id;
 
     @Column(name = "scope_id")
-    Integer parentId;
+    Integer scopeId;
 
     @Column(name = "title")
     String name;
@@ -29,13 +30,10 @@ public class Folder {
     @Column(name = "identifier")
     String identifier;
 
-    @Column(name = "content")
-    @CollectionTable(name = "manifest_for_IOS",
-            joinColumns = @JoinColumn(name = "folder_id"))
-    byte[] manifestIOS;
+//TODO: починить
 
-    @OneToMany(fetch = FetchType.LAZY)
-        @JoinTable(name = "version",
-                joinColumns = @JoinColumn(name = "folder_id"))
-    List<Version> versions = new ArrayList<>();
+//    @OneToMany(fetch = FetchType.LAZY)
+//        @JoinTable(name = "version",
+//                joinColumns = @JoinColumn(name = "folder_id"))
+//    List<Version> versions = new ArrayList<>();
 }
