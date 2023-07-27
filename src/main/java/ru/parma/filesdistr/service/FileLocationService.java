@@ -12,6 +12,9 @@ import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.FileMapper;
 import ru.parma.filesdistr.models.File;
+import ru.parma.filesdistr.models.Folder;
+import ru.parma.filesdistr.models.Scope;
+import ru.parma.filesdistr.models.Version;
 import ru.parma.filesdistr.repos.FileRepository;
 import ru.parma.filesdistr.repos.FileSystemRepository;
 import ru.parma.filesdistr.utils.Utils;
@@ -40,16 +43,31 @@ public class FileLocationService {
     ) throws Exception {
         Date currDate = Utils.getDateWithoutTime();
         String location = null;
+
+        //test
+        Scope scope = Scope.builder()
+                .name("test")
+                .build();
+        Folder folder = Folder.builder()
+                .name("test")
+                .build();
+        Version version = Version.builder()
+                .versionNumber("1.1.1")
+                .build();
+
         try {
             if( typeInScopePage == TypeInScopePage.SCOPE ){
-                //TODO: в дальнейшем будем получать name, поднимаясь вверх по иерархии
-                location = fileSystemRepository.save(bytes, fileName, mediaTypeInScopePage, "testScope3");
+                //location = fileSystemRepository.save(bytes, fileName, mediaTypeInScopePage, "testScope3");
+                location = fileSystemRepository.saveInScope(bytes, fileName, mediaTypeInScopePage, scope.getPath());//заглушка
             }
             else if( typeInScopePage == TypeInScopePage.FOLDER ){
-                location = fileSystemRepository.save(bytes, fileName, mediaTypeInScopePage, "testScope2","testFolder");
+                //location = fileSystemRepository.save(bytes, fileName, mediaTypeInScopePage, "testScope2","testFolder");
+                location = fileSystemRepository.saveInFolder(bytes, fileName, mediaTypeInScopePage, folder.getRootPath(scope));//заглушка
             }
             else if( typeInScopePage == TypeInScopePage.VERSION ){
-                location = fileSystemRepository.save(bytes, fileName, mediaTypeInScopePage, "testScope3","testFolder2","testVersion2");
+                //location = fileSystemRepository.save(bytes, fileName, mediaTypeInScopePage, "testScope3","testFolder2","testVersion2");
+                location = fileSystemRepository.saveInVersion(bytes, fileName, mediaTypeInScopePage,version.getRootPath(folder,scope) );
+
             }
 
             File file = File

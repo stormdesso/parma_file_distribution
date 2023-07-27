@@ -84,7 +84,7 @@ public class FileSystemRepository{
     public String save ( byte[] content, String fileName, MediaTypeInScopePage mediaTypeInScopePage,
                          String scopeName, String folderName) throws IOException {
         Files.createDirectories(Paths.get(resourcesDir));
-        String path = resourcesDir + scopeName + "//";
+        String path = resourcesDir + scopeName + folderName + "//";
 
         if(mediaTypeInScopePage == MediaTypeInScopePage.MANIFEST) {
             path += MediaTypeInScopePage.MANIFEST.toString().toLowerCase();
@@ -92,6 +92,52 @@ public class FileSystemRepository{
 
         return createFileLocation(path, fileName, content);
     }
+
+    public String saveInScope ( byte[] content, String fileName, MediaTypeInScopePage mediaTypeInScopePage,
+                                String fullPath) throws IOException {
+        Files.createDirectories(Paths.get(resourcesDir));
+        String path = resourcesDir + fullPath + "//";
+
+        if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
+            path += MediaTypeInScopePage.ILLUSTRATION.toString().toLowerCase();
+        }
+        if(mediaTypeInScopePage == MediaTypeInScopePage.ICON) {
+            path += MediaTypeInScopePage.ICON.toString().toLowerCase();
+        }
+        if( mediaTypeInScopePage == MediaTypeInScopePage.DISTRIBUTION_AGREEMENT){
+            path += MediaTypeInScopePage.DISTRIBUTION_AGREEMENT.toString().toLowerCase();
+        }
+
+        return createFileLocation(path, fileName, content);
+    }
+
+    public String saveInFolder( byte[] content, String fileName, MediaTypeInScopePage mediaTypeInScopePage,
+                                String fullPath) throws IOException {
+        Files.createDirectories(Paths.get(resourcesDir));
+        String path = resourcesDir + fullPath + "//";
+
+        if(mediaTypeInScopePage == MediaTypeInScopePage.MANIFEST) {
+            path += MediaTypeInScopePage.MANIFEST.toString().toLowerCase();
+        }
+
+        return createFileLocation(path, fileName, content);
+    }
+
+    public String saveInVersion( byte[] content, String fileName, MediaTypeInScopePage mediaTypeInScopePage,
+                                String fullPath) throws IOException {
+        Files.createDirectories(Paths.get(resourcesDir));
+        String path = resourcesDir + fullPath + "//";
+
+        if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
+            path += MediaTypeInScopePage.ILLUSTRATION.toString().toLowerCase();
+        }
+        if(mediaTypeInScopePage == MediaTypeInScopePage.FILE) {
+            path += MediaTypeInScopePage.FILE.toString().toLowerCase();
+        }
+
+        return createFileLocation(path, fileName, content);
+    }
+
 
     public String save ( byte[] content, String fileName, MediaTypeInScopePage mediaTypeInScopePage,
                          String scopeName, String folderName, String versionNumber) throws IOException {

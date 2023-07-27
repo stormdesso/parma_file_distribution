@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.parma.filesdistr.utils.IPathName;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -16,7 +17,7 @@ import javax.persistence.Table;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class Scope {
+public class Scope implements IPathName{
 
     @Id
     @Column(name = "id")
@@ -36,6 +37,11 @@ public class Scope {
 
     @Column(name = "icon_id")
     Long iconId;
+
+    @Override
+    public String getPath () {
+        return getName() + "//";
+    }
 
 //    @OneToOne
 //    @JoinColumn(name = "icon_id", //icon_id - fk,

@@ -1,16 +1,25 @@
 package ru.parma.filesdistr.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import ru.parma.filesdistr.utils.IPathName;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Entity
+
 @Table(name = "folder")
+@Entity
 @Data
-public class Folder {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Folder implements IPathName{
     @Id
     @Column(name = "id")
     Integer id;
@@ -29,6 +38,15 @@ public class Folder {
 
     @Column(name = "identifier")
     String identifier;
+
+    @Override
+    public String getPath () {
+        return getName() + "//";
+    }
+
+    public String getRootPath ( @NotNull Scope scope ) {
+        return  scope.getPath() + getPath();
+    }
 
 //TODO: починить
 

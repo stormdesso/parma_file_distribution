@@ -1,6 +1,11 @@
 package ru.parma.filesdistr.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.jetbrains.annotations.NotNull;
+import ru.parma.filesdistr.utils.IPathName;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -10,9 +15,12 @@ import java.sql.Date;
 
 @Entity
 @Table(name = "version")
-
 @Data
-public class Version {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+
+public class Version implements IPathName{
 
     @Id
     @Column(name = "id")
@@ -35,6 +43,16 @@ public class Version {
 
     @Column(name = "folder_id")
     Integer parentId;
+
+
+    @Override
+    public String getPath () {
+        return getVersionNumber() + "//";
+    }
+
+    public String getRootPath ( @NotNull Folder folder, Scope scope ) {
+        return folder.getRootPath(scope) + getPath();
+    }
 
     //TODO: починить
 
