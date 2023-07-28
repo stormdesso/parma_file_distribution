@@ -16,6 +16,6 @@ public class VersionDto {
     boolean publish;
     Integer parentId;
     String parentName;
-    List<FileDto> illustrations = new ArrayList<>();
-    List<FileDto> files = new ArrayList<>();
+    List<SavedFileDto> illustrations = new ArrayList<>();
+    List<SavedFileDto> files = new ArrayList<>();
 }
