@@ -1,17 +1,17 @@
 package ru.parma.filesdistr.dto;
 
 import lombok.Data;
+import ru.parma.filesdistr.models.File;
 
-import java.util.ArrayList;
 import java.util.List;
 @Data
 public class FolderDto {
-    Integer id;
-    Integer parentId;
-    String name;
-    boolean publish;
-    boolean manifestForIOS;
-    String identifier;
-    byte[] manifestIOS;
-    List<VersionDto> versions = new ArrayList<>();
+    private Integer id;
+    private Integer scopeId;
+    private String name;
+    private boolean publish;
+    private boolean manifestForIOS;
+    private String identifier;
+    private File manifestForIOSFile;
+    private List<VersionDto> versions;
 }

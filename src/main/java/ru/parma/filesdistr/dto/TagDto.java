@@ -1,6 +1,7 @@
 package ru.parma.filesdistr.dto;
-
-
-//TODO: сделать Tag
 public class TagDto {
+    private Integer id;
+    private String letter;
+    private String backgroundColor;
+    private String letterColor;
 }

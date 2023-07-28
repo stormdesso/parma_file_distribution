@@ -7,10 +7,8 @@ import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import ru.parma.filesdistr.utils.IPathName;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
+import java.util.List;
 
 
 @Table(name = "folder")
@@ -22,10 +20,10 @@ import javax.persistence.Table;
 public class Folder implements IPathName{
     @Id
     @Column(name = "id")
-    Integer id;
+    private Integer id;
 
     @Column(name = "scope_id")
-    Integer scopeId;
+    private Integer scopeId;
 
     @Column(name = "title")
     String name;
@@ -33,11 +31,19 @@ public class Folder implements IPathName{
     @Column(name = "publish")
     boolean publish;
 
-    @Column(name = "manifest_IOS")
+    @Column(name = "manifest_ios")
     boolean manifestForIOS;
 
     @Column(name = "identifier")
     String identifier;
+
+    @OneToOne
+    @JoinColumn(name = "manifest_ios_id")//manifest_ios_id(fk) folder -> id(pk) file
+    private File manifestForIOSFile;
+
+    @OneToMany( targetEntity = Version.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "folder_id", referencedColumnName = "id")
+    private List<Version> versions;
 
     @Override
     public String getPath () {
@@ -48,10 +54,5 @@ public class Folder implements IPathName{
         return  scope.getPath() + getPath();
     }
 
-//TODO: починить
 
-//    @OneToMany(fetch = FetchType.LAZY)
-//        @JoinTable(name = "version",
-//                joinColumns = @JoinColumn(name = "folder_id"))
-//    List<Version> versions = new ArrayList<>();
 }

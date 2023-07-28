@@ -40,6 +40,50 @@ alter table license_agreement_file_for_scope
 alter table license_agreement_file_for_scope
     drop constraint license_agreement_file_for_scope_file_id_file_id1_key;
 
+alter table folder
+    rename column "manifest_IOS" to manifest_ios;
+
+drop table license_agreement_file_for_scope;
+
+alter table scope
+    add distribution_agreement_id int;
+
+alter table scope
+    add constraint scope_distr_agreement_fk
+        foreign key (distribution_agreement_id) references file;
+
+drop table "manifest_IOS_ for_folder";
+
+alter table folder
+    add manifest_ios_id int;
+
+alter table folder
+    add constraint folder_manifest_ios_id_fk
+        foreign key (manifest_ios_id) references file;
+
+drop table if exists tag_file_for_version;
+
+alter table file_for_version
+    add tag_id int;
+
+alter table file_for_version
+    add constraint file_for_version_tag_id_fk
+        foreign key (tag_id) references tag;
+
+create sequence tag_id_seq
+    as integer;
+
+alter table tag
+    alter column id set default nextval('public.tag_id_seq'::regclass);
+
+alter sequence tag_id_seq owned by tag.id;
+
+
+
+
+
+
+
 
 
 

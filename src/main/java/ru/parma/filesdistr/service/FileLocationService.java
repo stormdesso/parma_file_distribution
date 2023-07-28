@@ -10,7 +10,7 @@ import org.springframework.web.server.ResponseStatusException;
 import ru.parma.filesdistr.dto.SavedFileDto;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
-import ru.parma.filesdistr.mappers.FileMapper;
+import ru.parma.filesdistr.mappers.SavedFileMapper;
 import ru.parma.filesdistr.models.File;
 import ru.parma.filesdistr.models.Folder;
 import ru.parma.filesdistr.models.Scope;
@@ -84,7 +84,7 @@ public class FileLocationService {
 //                throw new Exception();
 //            }// сохраняет в БД
 
-            return FileMapper.INSTANCE.toSaveFileDto(savedFile);
+            return SavedFileMapper.INSTANCE.toSaveFileDto(savedFile);
 
         } catch (Exception e) {
             // убираем за собой

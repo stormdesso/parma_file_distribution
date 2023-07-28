@@ -10,5 +10,6 @@ public class SavedFileDto {
     private  String type;
 
     private  byte[] data;
+    //TODO:добавить тег
     //private final List<Tag> tags = new ArrayList<>();
 }

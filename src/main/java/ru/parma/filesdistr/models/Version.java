@@ -7,11 +7,9 @@ import lombok.NoArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import ru.parma.filesdistr.utils.IPathName;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.sql.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "version")
@@ -42,9 +40,29 @@ public class Version implements IPathName{
     boolean publish;
 
     @Column(name = "folder_id")
-    Integer parentId;
+    Integer folderId;
 
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "illustration_for_version",
+            joinColumns = {
+                    @JoinColumn(name = "version_id", referencedColumnName = "id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "file_id", referencedColumnName = "id")
+            }
+    )
+    List<File> images;
 
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @JoinTable(name = "file_for_version",
+            joinColumns = {
+                    @JoinColumn(name = "version_id", referencedColumnName = "id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "file_id", referencedColumnName = "id")
+            }
+    )
+    List<File> files;
     @Override
     public String getPath () {
         return getVersionNumber() + "//";
@@ -54,22 +72,4 @@ public class Version implements IPathName{
         return folder.getRootPath(scope) + getPath();
     }
 
-    //TODO: починить
-
-//    @Column(name = "title")
-//    @CollectionTable(name = "folder",
-//            joinColumns = @JoinColumn(name = "id"))
-//    String parentName;
-
-//    @ManyToMany
-//    @JoinTable(name = "illustration_for_version",
-//            joinColumns = @JoinColumn(name = "version_id"),
-//            inverseJoinColumns = @JoinColumn(name = "file_id"))
-//    List<File> illustrations = new ArrayList<>();
-//
-//    @ManyToMany
-//    @JoinTable(name = "file_for_version",
-//            joinColumns = @JoinColumn(name = "version_id"),
-//            inverseJoinColumns = @JoinColumn(name = "file_id"))
-//    List<File> files = new ArrayList<>();
 }
