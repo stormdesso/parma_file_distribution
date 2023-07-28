@@ -1,6 +1,9 @@
 package ru.parma.filesdistr.dto;
 
 import lombok.Data;
+import ru.parma.filesdistr.models.Tag;
+
+import java.util.List;
 
 
 @Data
@@ -10,6 +13,5 @@ public class SavedFileDto {
     private  String type;
 
     private  byte[] data;
-    //TODO:добавить тег
-    //private final List<Tag> tags = new ArrayList<>();
+    private List<Tag> tags;
 }

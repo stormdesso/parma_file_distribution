@@ -34,8 +34,6 @@ public class FileLocationService {
 //    final ScopeRepository scopeRepository;
 //    final LicenseAgreementFileForScopeRepository licenseAgreementFileForScopeRepository;
 
-    //TODO: папки сделать, убрать scopeId
-
     @Transactional
     public SavedFileDto save ( byte[] bytes, String fileName, String filetype,
                                int generalId, TypeInScopePage typeInScopePage,
