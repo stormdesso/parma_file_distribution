@@ -6,8 +6,7 @@ import ru.parma.filesdistr.models.File;
 import java.util.List;
 @Data
 public class FolderDto {
-    private Integer id;
-    private Integer scopeId;
+    private Long id;
     private String name;
     private boolean publish;
     private boolean manifestForIOS;

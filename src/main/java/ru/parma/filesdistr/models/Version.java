@@ -4,7 +4,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import ru.parma.filesdistr.utils.IPathName;
 
 import javax.persistence.*;
@@ -22,27 +21,28 @@ public class Version implements IPathName{
 
     @Id
     @Column(name = "id")
-    Integer id;
+    private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "folder_id", referencedColumnName = "id")//folder_id(fk) version -> id(pk) folder
+    private  Folder folder;
 
     @Column(name = "version_number")
-    String versionNumber;
+    private String versionNumber;
 
     @Column(name = "date_of_publication")
-    Date dateOfPublication;
+    private Date dateOfPublication;
 
     @Column(name = "description")
-    String description;
+    private String description;
 
     @Column(name = "show_illustration")
-    boolean showIllustration;
+    private boolean showIllustration;
 
     @Column(name = "publish")
-    boolean publish;
+    private boolean publish;
 
-    @Column(name = "folder_id")
-    Integer folderId;
-
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "illustration_for_version",
             joinColumns = {
                     @JoinColumn(name = "version_id", referencedColumnName = "id")
@@ -51,9 +51,9 @@ public class Version implements IPathName{
                     @JoinColumn(name = "file_id", referencedColumnName = "id")
             }
     )
-    List<File> images;
+    private  List<File> images;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "file_for_version",
             joinColumns = {
                     @JoinColumn(name = "version_id", referencedColumnName = "id")
@@ -62,14 +62,15 @@ public class Version implements IPathName{
                     @JoinColumn(name = "file_id", referencedColumnName = "id")
             }
     )
-    List<File> files;
+    private List<File> files;
+
     @Override
     public String getPath () {
         return getVersionNumber() + "//";
     }
 
-    public String getRootPath ( @NotNull Folder folder, Scope scope ) {
-        return folder.getRootPath(scope) + getPath();
+    @Override
+    public String getRootPath () {
+        return folder.getRootPath() + getPath();
     }
-
 }

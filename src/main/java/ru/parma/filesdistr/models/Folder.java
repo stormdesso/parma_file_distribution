@@ -2,9 +2,9 @@ package ru.parma.filesdistr.models;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import ru.parma.filesdistr.utils.IPathName;
 
 import javax.persistence.*;
@@ -20,28 +20,29 @@ import java.util.List;
 public class Folder implements IPathName{
     @Id
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
-    @Column(name = "scope_id")
-    private Integer scopeId;
+    @ManyToOne
+    @JoinColumn(name = "scope_id", referencedColumnName = "id")//scope_id(fk) folder -> id(pk) scope
+    private  Scope scope;
 
     @Column(name = "title")
-    String name;
+    private String name;
 
     @Column(name = "publish")
-    boolean publish;
+    private boolean publish;
 
     @Column(name = "manifest_ios")
-    boolean manifestForIOS;
+    private boolean manifestForIOS;
 
     @Column(name = "identifier")
-    String identifier;
+    private String identifier;
 
     @OneToOne
     @JoinColumn(name = "manifest_ios_id")//manifest_ios_id(fk) folder -> id(pk) file
     private File manifestForIOSFile;
 
-    @OneToMany( targetEntity = Version.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany( targetEntity = Version.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id", referencedColumnName = "id")
     private List<Version> versions;
 
@@ -50,9 +51,8 @@ public class Folder implements IPathName{
         return getName() + "//";
     }
 
-    public String getRootPath ( @NotNull Scope scope ) {
-        return  scope.getPath() + getPath();
+    @Override
+    public String getRootPath () {
+        return scope.getRootPath() + getPath();
     }
-
-
 }

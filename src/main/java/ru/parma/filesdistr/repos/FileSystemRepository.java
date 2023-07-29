@@ -59,7 +59,7 @@ public class FileSystemRepository{
         }
 
         path += "//" + fileName;
-        Path newFile = Paths.get(  path + fileName);
+        Path newFile = Paths.get(path);
         Files.write(newFile, content);
         return newFile.toAbsolutePath().toString();
     }
@@ -93,10 +93,26 @@ public class FileSystemRepository{
         return createFileLocation(path, fileName, content);
     }
 
+    public String save ( byte[] content, String fileName, MediaTypeInScopePage mediaTypeInScopePage,
+                         String scopeName, String folderName, String versionNumber) throws IOException {
+
+        Files.createDirectories(Paths.get(resourcesDir));
+        String path = resourcesDir + scopeName + "//" + folderName + "//" + versionNumber + "//";
+
+        if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
+            path += MediaTypeInScopePage.ILLUSTRATION.toString().toLowerCase();
+        }
+        if(mediaTypeInScopePage == MediaTypeInScopePage.FILE) {
+            path += MediaTypeInScopePage.FILE.toString().toLowerCase();
+        }
+        return createFileLocation(path, fileName, content);
+    }
+
+
     public String saveInScope ( byte[] content, String fileName, MediaTypeInScopePage mediaTypeInScopePage,
                                 String fullPath) throws IOException {
         Files.createDirectories(Paths.get(resourcesDir));
-        String path = resourcesDir + fullPath + "//";
+        String path = resourcesDir + fullPath;
 
         if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
             path += MediaTypeInScopePage.ILLUSTRATION.toString().toLowerCase();
@@ -139,20 +155,7 @@ public class FileSystemRepository{
     }
 
 
-    public String save ( byte[] content, String fileName, MediaTypeInScopePage mediaTypeInScopePage,
-                         String scopeName, String folderName, String versionNumber) throws IOException {
 
-        Files.createDirectories(Paths.get(resourcesDir));
-        String path = resourcesDir + scopeName + "//" + folderName + "//" + versionNumber + "//";
-
-        if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
-            path += MediaTypeInScopePage.ILLUSTRATION.toString().toLowerCase();
-        }
-        if(mediaTypeInScopePage == MediaTypeInScopePage.FILE) {
-            path += MediaTypeInScopePage.FILE.toString().toLowerCase();
-        }
-        return createFileLocation(path, fileName, content);
-    }
 
 
     public void delete ( String location ) {

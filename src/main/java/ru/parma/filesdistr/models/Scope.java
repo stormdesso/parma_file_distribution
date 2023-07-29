@@ -33,7 +33,7 @@ public class Scope implements IPathName {
     @Column(name = "show_illustrations")
     private boolean showIllustration;
 
-    @OneToMany(targetEntity = Folder.class, cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(targetEntity = Folder.class)
     @JoinColumn(name = "scope_id", referencedColumnName = "id")
     private List<Folder> folders;
 
@@ -59,5 +59,10 @@ public class Scope implements IPathName {
     @Override
     public String getPath () {
         return getName() + "//";
+    }
+
+    @Override
+    public String getRootPath () {
+        return getPath();
     }
 }

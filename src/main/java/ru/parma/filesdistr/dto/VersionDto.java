@@ -9,13 +9,12 @@ import java.util.List;
 @Data
 @Builder
 public class VersionDto {
-    private Integer id;
+    private Long id;
     private String versionNumber;
     private Date dateOfPublication;
     private String description;
     private boolean showIllustration;
     private boolean publish;
-    private Integer folderId;
     private List<FileDto> images;
     private List<FileDto> files;
 }

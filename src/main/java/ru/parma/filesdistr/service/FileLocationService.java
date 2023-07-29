@@ -2,6 +2,7 @@ package ru.parma.filesdistr.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -11,12 +12,8 @@ import ru.parma.filesdistr.dto.SavedFileDto;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.SavedFileMapper;
-import ru.parma.filesdistr.models.File;
-import ru.parma.filesdistr.models.Folder;
-import ru.parma.filesdistr.models.Scope;
-import ru.parma.filesdistr.models.Version;
-import ru.parma.filesdistr.repos.FileRepository;
-import ru.parma.filesdistr.repos.FileSystemRepository;
+import ru.parma.filesdistr.models.*;
+import ru.parma.filesdistr.repos.*;
 import ru.parma.filesdistr.utils.Utils;
 
 import java.util.Date;
@@ -27,12 +24,35 @@ import java.util.Date;
 public class FileLocationService {
     final FileSystemRepository fileSystemRepository;
     final FileRepository fileDbRepository;
-//    final FileVersionRepository fileVersionRepository;
-//    final IllustrationVersionRepository illustrationVersionRepository;
-//    final IllustrationScopeRepository illustrationScopeRepository;
-//    final ManifestIOSFolderRepository manifestIOSFolderRepository;
-//    final ScopeRepository scopeRepository;
-//    final LicenseAgreementFileForScopeRepository licenseAgreementFileForScopeRepository;
+    final ScopeRepository scopeRepository;
+    final FolderRepository folderRepository;
+    final VersionRepository versionRepository;
+
+    final UserRepository userRepository;
+
+    private boolean getAccess ( Scope scope, @NotNull User user){
+        return user.getAvailableScopes().contains(scope);
+    }
+    public boolean tryGetAccess ( TypeInScopePage typeInScopePage, Integer generalId, @NotNull Integer userId){
+
+            User user = userRepository.getReferenceById(userId.longValue());
+
+            if( typeInScopePage == TypeInScopePage.SCOPE ){
+                Scope scope = scopeRepository.getReferenceById(generalId.longValue());
+                return getAccess(scope, user);
+            }
+            else if( typeInScopePage == TypeInScopePage.FOLDER ){
+                Folder folder = folderRepository.getReferenceById(generalId.longValue());
+                return getAccess(folder.getScope(), user);
+            }
+            else if( typeInScopePage == TypeInScopePage.VERSION ){
+                Version version = versionRepository.getReferenceById(Long.valueOf(generalId));
+                return getAccess(version.getFolder().getScope(), user);
+            }
+
+
+        return false;
+    }
 
     @Transactional
     public SavedFileDto save ( byte[] bytes, String fileName, String filetype,
@@ -42,30 +62,19 @@ public class FileLocationService {
         Date currDate = Utils.getDateWithoutTime();
         String location = null;
 
-        //test
-        Scope scope = Scope.builder()
-                .name("test")
-                .build();
-        Folder folder = Folder.builder()
-                .name("test")
-                .build();
-        Version version = Version.builder()
-                .versionNumber("1.1.1")
-                .build();
-
         try {
             if( typeInScopePage == TypeInScopePage.SCOPE ){
-                //location = fileSystemRepository.save(bytes, fileName, mediaTypeInScopePage, "testScope3");
-                location = fileSystemRepository.saveInScope(bytes, fileName, mediaTypeInScopePage, scope.getPath());//заглушка
+                String fullpath = scopeRepository.getReferenceById((long) generalId).getRootPath();
+                location = fileSystemRepository.saveInScope(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else if( typeInScopePage == TypeInScopePage.FOLDER ){
-                //location = fileSystemRepository.save(bytes, fileName, mediaTypeInScopePage, "testScope2","testFolder");
-                location = fileSystemRepository.saveInFolder(bytes, fileName, mediaTypeInScopePage, folder.getRootPath(scope));//заглушка
+                Folder folder = folderRepository.getReferenceById((long) generalId);
+                String fullpath = folder.getRootPath();
+                location = fileSystemRepository.saveInFolder(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else if( typeInScopePage == TypeInScopePage.VERSION ){
-                //location = fileSystemRepository.save(bytes, fileName, mediaTypeInScopePage, "testScope3","testFolder2","testVersion2");
-                location = fileSystemRepository.saveInVersion(bytes, fileName, mediaTypeInScopePage,version.getRootPath(folder,scope) );
-
+                String fullpath = versionRepository.getReferenceById((long) generalId).getRootPath();
+                location = fileSystemRepository.saveInVersion(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
 
             File file = File

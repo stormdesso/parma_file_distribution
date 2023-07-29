@@ -8,6 +8,7 @@ import ru.parma.filesdistr.enums.Roles;
 import javax.persistence.*;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -50,6 +51,17 @@ public class User implements UserDetails {
     @CollectionTable(name = "role", joinColumns = @JoinColumn(name = "user_id"))    //join с user по полю user_id
     @Enumerated(EnumType.STRING)// хранится в виде строки
     private Set<Roles> roles = new HashSet<>();
+
+    @ManyToMany
+    @JoinTable(name = "user_scope",
+            joinColumns = {
+                    @JoinColumn(name = "user_id", referencedColumnName = "id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "scope_id", referencedColumnName = "id")
+            }
+    )
+    List<Scope> availableScopes;
 
 
     // security

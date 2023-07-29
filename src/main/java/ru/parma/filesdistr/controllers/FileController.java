@@ -13,6 +13,8 @@ import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.service.FileLocationService;
 
+import java.nio.file.AccessDeniedException;
+
 //если не работает запись файлов -> включить админские права для IDEA
 
 @Controller
@@ -24,6 +26,10 @@ public class FileController {
     //TODO: async подгрузка и загрузка, связка с версией
     //для определения доступа к scope(для admin_scope, user) будем подниматься по иерархии вверх до scope(от версии или папки)
     //userId доставать из cookie
+
+    //TODO: заменить
+    static int userId = 1;//test
+
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     SavedFileDto upload ( @RequestParam @NotNull MultipartFile file,
@@ -33,8 +39,12 @@ public class FileController {
             throws Exception {
         String fileType = FilenameUtils.getExtension(file.getOriginalFilename());
 
-        return fileLocationService.save(file.getBytes(), file.getOriginalFilename(), fileType,
-                generalId, typeInScopePage, mediaTypeInScopePage);
+        if(fileLocationService.tryGetAccess(typeInScopePage, generalId, userId)){
+            return fileLocationService.save(file.getBytes(), file.getOriginalFilename(), fileType,
+                    generalId, typeInScopePage, mediaTypeInScopePage);
+        }
+        //TODO: бросить исключение
+        else return null;
     }
 
     @GetMapping(value = "/download/{fileId}", produces = MediaType.ALL_VALUE)
@@ -51,8 +61,11 @@ public class FileController {
     void delete ( @PathVariable Long fileId,
                   @RequestParam Integer generalId,   //указывает id пространства, папки, версии
                   @RequestParam TypeInScopePage typeInScopePage,
-                  @RequestParam MediaTypeInScopePage mediaTypeInScopePage ){
-        fileLocationService.delete(fileId);
+                  @RequestParam MediaTypeInScopePage mediaTypeInScopePage ) throws AccessDeniedException {
+        if(fileLocationService.tryGetAccess(typeInScopePage, generalId, userId)) {
+            fileLocationService.delete(fileId);
+        }
+        else throw new AccessDeniedException("Access denied");
     }
 }
 
