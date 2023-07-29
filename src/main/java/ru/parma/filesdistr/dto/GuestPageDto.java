@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class GuestPageDto {
 
-    String versionNumber;
-    List<FolderDto> folders = new ArrayList<>();
+    private String versionNumber;
+    private List<FolderDto> folders;
     //TODO !!!не забыть добавить, если необходимо!!!
 }
