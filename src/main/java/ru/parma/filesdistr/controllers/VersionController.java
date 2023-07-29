@@ -23,7 +23,7 @@ public class VersionController {
     @GetMapping("/{version_id}")
     @ResponseBody
     public VersionDto get(@PathVariable Long version_id) {
-        return new VersionDto();
+        return null;
     }
 
     @PutMapping("/update")

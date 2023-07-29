@@ -1,54 +1,68 @@
 package ru.parma.filesdistr.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.parma.filesdistr.utils.IPathName;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
 @Entity
 @Table(name = "scope")
 @Data
-public class Scope {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Scope implements IPathName {
 
     @Id
     @Column(name = "id")
-    Long id;
+    private Long id;
 
     @Column(name = "title")
-    String name;
+    private String name;
 
     @Column(name = "description")
-    String description;
+    private String description;
 
     @Column(name = "copyright")
-    String copyright;
+    private String copyright;
 
     @Column(name = "show_illustrations")
-    boolean showIllustration;
+    private boolean showIllustration;
 
-    @Column(name = "icon_id")
-    Long iconId;
+    @OneToMany(targetEntity = Folder.class)
+    @JoinColumn(name = "scope_id", referencedColumnName = "id")
+    private List<Folder> folders;
 
     @OneToOne
-    @JoinColumn(name = "icon_id", //icon_id - fk,
-            insertable = false, updatable = false)//инчае не компилирует
-    File icon; //картинка
+    @JoinColumn(name = "icon_id")//icon_id(fk) scope -> id(pk) file
+    private File icon;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     @JoinTable(name = "illustration_for_scope",
-            joinColumns = @JoinColumn(name = "scope_id"),
-            inverseJoinColumns = @JoinColumn(name = "file_id"))//используется для маппинга с другой таблицей, т.к отношениу Many To Many
-    List<File> images = new ArrayList<>();
+            joinColumns = {
+                    @JoinColumn(name = "scope_id", referencedColumnName = "id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "file_id", referencedColumnName = "id")
+            }
+    )
+    List<File> images;
 
+    @OneToOne
+    @JoinColumn(name = "distribution_agreement_id")
+    private File distributionAgreement;
 
-//    @Column(name = "content")
-//    @CollectionTable(name = "license_agreement_file_for_scope",
-//            joinColumns = @JoinColumn(name = "scope_id"))
-//    byte[] licenseAgreement;
+    @Override
+    public String getPath () {
+        return getName() + "//";
+    }
 
-    @OneToMany(fetch = FetchType.LAZY)
-            @JoinTable(name = "folder",
-                    joinColumns = @JoinColumn(name = "scope_id"))
-    List<Folder> folders;
+    @Override
+    public String getRootPath () {
+        return getPath();
+    }
 }

@@ -1,4 +1,4 @@
-package ru.parma.filesdistr.models;
+package ru.parma.filesdistr.enums;
 
 import org.springframework.security.core.GrantedAuthority;
 

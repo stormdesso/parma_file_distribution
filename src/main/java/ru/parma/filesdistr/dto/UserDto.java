@@ -1,7 +1,7 @@
 package ru.parma.filesdistr.dto;
 
 import lombok.Data;
-import ru.parma.filesdistr.models.Roles;
+import ru.parma.filesdistr.enums.Roles;
 
 import java.util.HashSet;
 import java.util.Set;
