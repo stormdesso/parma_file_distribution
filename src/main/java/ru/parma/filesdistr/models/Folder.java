@@ -22,7 +22,7 @@ public class Folder implements IPathName{
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "scope_id", referencedColumnName = "id")//scope_id(fk) folder -> id(pk) scope
     private  Scope scope;
 
@@ -38,11 +38,11 @@ public class Folder implements IPathName{
     @Column(name = "identifier")
     private String identifier;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "manifest_ios_id")//manifest_ios_id(fk) folder -> id(pk) file
     private File manifestForIOSFile;
 
-    @OneToMany( targetEntity = Version.class, fetch = FetchType.LAZY)
+    @OneToMany( cascade = CascadeType.ALL, targetEntity = Version.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id", referencedColumnName = "id")
     private List<Version> versions;
 

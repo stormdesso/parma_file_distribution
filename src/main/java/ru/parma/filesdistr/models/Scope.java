@@ -33,15 +33,15 @@ public class Scope implements IPathName {
     @Column(name = "show_illustrations")
     private boolean showIllustration;
 
-    @OneToMany(targetEntity = Folder.class)
+    @OneToMany(cascade = CascadeType.ALL, targetEntity = Folder.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "scope_id", referencedColumnName = "id")
     private List<Folder> folders;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "icon_id")//icon_id(fk) scope -> id(pk) file
     private File icon;
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "illustration_for_scope",
             joinColumns = {
                     @JoinColumn(name = "scope_id", referencedColumnName = "id")
@@ -52,7 +52,7 @@ public class Scope implements IPathName {
     )
     List<File> images;
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "distribution_agreement_id")
     private File distributionAgreement;
 
