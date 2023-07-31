@@ -39,10 +39,10 @@ public class FileSystemRepository{
         if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
             path += MediaTypeInScopePage.ILLUSTRATION.toString().toLowerCase();
         }
-        if(mediaTypeInScopePage == MediaTypeInScopePage.ICON) {
+        else if(mediaTypeInScopePage == MediaTypeInScopePage.ICON) {
             path += MediaTypeInScopePage.ICON.toString().toLowerCase();
         }
-        if( mediaTypeInScopePage == MediaTypeInScopePage.DISTRIBUTION_AGREEMENT){
+        else if( mediaTypeInScopePage == MediaTypeInScopePage.DISTRIBUTION_AGREEMENT){
             path += MediaTypeInScopePage.DISTRIBUTION_AGREEMENT.toString().toLowerCase();
         }
         else throw new IllegalArgumentException();

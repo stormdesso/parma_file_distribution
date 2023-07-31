@@ -8,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import ru.parma.filesdistr.service.ScopeAccessService;
 import ru.parma.filesdistr.dto.SavedFileDto;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
@@ -22,6 +23,7 @@ import java.nio.file.AccessDeniedException;
 @RequestMapping("file")
 public class FileController {
     private final FileLocationService fileLocationService;
+    private final ScopeAccessService scopeAccessService;
 
     //TODO: async подгрузка и загрузка, связка с версией
     //для определения доступа к scope(для admin_scope, user) будем подниматься по иерархии вверх до scope(от версии или папки)
@@ -39,7 +41,7 @@ public class FileController {
             throws Exception {
         String fileType = FilenameUtils.getExtension(file.getOriginalFilename());
 
-        if(fileLocationService.tryGetAccess(typeInScopePage, generalId, userId)){
+        if(scopeAccessService.tryGetAccess(typeInScopePage, generalId, userId)){
             return fileLocationService.save(file.getBytes(), file.getOriginalFilename(), fileType,
                     generalId, typeInScopePage, mediaTypeInScopePage);
         }
@@ -61,7 +63,7 @@ public class FileController {
     void delete ( @PathVariable Long fileId,
                   @RequestParam Integer generalId,   //указывает id пространства, папки, версии
                   @RequestParam TypeInScopePage typeInScopePage) throws AccessDeniedException {
-        if(fileLocationService.tryGetAccess(typeInScopePage, generalId, userId)) {
+        if(scopeAccessService.tryGetAccess(typeInScopePage, generalId, userId)) {
             fileLocationService.delete(fileId);
         }
         else throw new AccessDeniedException("Access denied");
