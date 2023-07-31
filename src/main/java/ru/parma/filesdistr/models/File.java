@@ -38,7 +38,7 @@ public class File {
     private String location;
 
 
-    @ManyToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(name = "file_for_version",
             joinColumns = {
                     @JoinColumn(name = "file_id", referencedColumnName = "id")
@@ -48,5 +48,8 @@ public class File {
             }
     )
     private List<Tag> tags;
+
+
+
 
 }

@@ -52,7 +52,7 @@ public class User implements UserDetails {
     @Enumerated(EnumType.STRING)// хранится в виде строки
     private Set<Roles> roles = new HashSet<>();
 
-    @ManyToMany
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "user_scope",
             joinColumns = {
                     @JoinColumn(name = "user_id", referencedColumnName = "id")

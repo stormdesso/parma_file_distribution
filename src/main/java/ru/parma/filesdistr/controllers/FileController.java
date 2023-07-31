@@ -60,8 +60,7 @@ public class FileController {
     @ResponseBody
     void delete ( @PathVariable Long fileId,
                   @RequestParam Integer generalId,   //указывает id пространства, папки, версии
-                  @RequestParam TypeInScopePage typeInScopePage,
-                  @RequestParam MediaTypeInScopePage mediaTypeInScopePage ) throws AccessDeniedException {
+                  @RequestParam TypeInScopePage typeInScopePage) throws AccessDeniedException {
         if(fileLocationService.tryGetAccess(typeInScopePage, generalId, userId)) {
             fileLocationService.delete(fileId);
         }

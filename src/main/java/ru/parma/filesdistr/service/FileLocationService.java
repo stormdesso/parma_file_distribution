@@ -14,8 +14,10 @@ import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.SavedFileMapper;
 import ru.parma.filesdistr.models.*;
 import ru.parma.filesdistr.repos.*;
+import ru.parma.filesdistr.utils.IPathName;
 import ru.parma.filesdistr.utils.Utils;
 
+import java.nio.file.FileSystemNotFoundException;
 import java.util.Date;
 
 
@@ -27,7 +29,6 @@ public class FileLocationService {
     final ScopeRepository scopeRepository;
     final FolderRepository folderRepository;
     final VersionRepository versionRepository;
-
     final UserRepository userRepository;
 
     private boolean getAccess ( Scope scope, @NotNull User user){
@@ -68,14 +69,14 @@ public class FileLocationService {
                 location = fileSystemRepository.saveInScope(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else if( typeInScopePage == TypeInScopePage.FOLDER ){
-                Folder folder = folderRepository.getReferenceById((long) generalId);
-                String fullpath = folder.getRootPath();
+                String fullpath = folderRepository.getReferenceById((long) generalId).getRootPath();
                 location = fileSystemRepository.saveInFolder(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else if( typeInScopePage == TypeInScopePage.VERSION ){
                 String fullpath = versionRepository.getReferenceById((long) generalId).getRootPath();
                 location = fileSystemRepository.saveInVersion(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
+            else throw new IllegalArgumentException();
 
             File file = File
                     .builder()
@@ -85,11 +86,10 @@ public class FileLocationService {
                     .dateCreated(currDate)
                     .location(location)
                     .build();
-            File savedFile = fileDbRepository.save(file);// сохраняет в БД
 
-//            if(!trySaveIntermediateEntity(typeInScopePage, mediaTypeInScopePage, generalId, savedFile)) {
-//                throw new Exception();
-//            }// сохраняет в БД
+            File savedFile = fileDbRepository.save(file);
+
+            attachFileToEntity(  generalId,  typeInScopePage, mediaTypeInScopePage,  savedFile);
 
             return SavedFileMapper.INSTANCE.toSaveFileDto(savedFile);
 
@@ -102,99 +102,70 @@ public class FileLocationService {
         }
     }
 
-//    @Transactional
-//    boolean trySaveIntermediateEntity ( TypeInScopePage typeInScopePage, MediaTypeInScopePage mediaTypeInScopePage,
-//                                        int generalId, File savedFile )
-//            throws EntityNotFoundException {
-//
-//        if(typeInScopePage == TypeInScopePage.VERSION) {
-//            if(mediaTypeInScopePage == MediaTypeInScopePage.FILE) {
-//                FileVersion fileVersion = FileVersion
-//                        .builder()
-//                        .versionId(generalId)
-//                        .fileId(savedFile.getId())
-//                        .build();
-//                fileVersionRepository.save(fileVersion);
-//                return true;
-//            }
-//
-//            if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
-//                IllustrationVersion illustrationVersion = IllustrationVersion
-//                        .builder()
-//                        .versionId(generalId)
-//                        .fileId(savedFile.getId())
-//                        .build();
-//                illustrationVersionRepository.save(illustrationVersion);
-//                return true;
-//            }
-//        }else if(typeInScopePage == TypeInScopePage.FOLDER) {
-//            if(mediaTypeInScopePage == MediaTypeInScopePage.MANIFEST) {
-//
-//                ManifestIOSFolder oldEntity = manifestIOSFolderRepository.findByFolderId(generalId);
-//                if(oldEntity != null) {
-//                    manifestIOSFolderRepository.delete(oldEntity);
-//                }
-//
-//                ManifestIOSFolder manifestIOSFolder = ManifestIOSFolder
-//                        .builder()
-//                        .folderId(generalId)
-//                        .fileId(savedFile.getId())
-//                        .build();
-//                manifestIOSFolderRepository.save(manifestIOSFolder);
-//                return true;
-//            }
-//        }else if(typeInScopePage == TypeInScopePage.SCOPE) {
-//            if(mediaTypeInScopePage == MediaTypeInScopePage.ICON) {
-//                Scope scope = scopeRepository.getReferenceById((long) generalId);
-//                if(scope.getIconId() != null) {
-//                    delete(scope.getIconId());// delete old icon from table "file"
-//                }
-//                scope.setIconId(Long.valueOf(savedFile.getId()));
-//                scopeRepository.save(scope);
-//                return true;
-//            }
-//            if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
-//                IllustrationScope illustrationScope = IllustrationScope
-//                        .builder()
-//                        .scopeId(generalId)
-//                        .fileId(savedFile.getId())
-//                        .build();
-//                illustrationScopeRepository.save(illustrationScope);
-//                return true;
-//            }
-//            if(mediaTypeInScopePage == MediaTypeInScopePage.DISTRIBUTION_AGREEMENT) {
-//
-//                LicenseAgreementFileForScope oldEntity = licenseAgreementFileForScopeRepository.findByScopeId(generalId);
-//                if(oldEntity != null) {
-//                    long oldFileId = oldEntity.getFileId();
-//                    oldEntity.setFileId(savedFile.getId());
-//                    delete(oldFileId);
-//                }
-//                else{
-//                    LicenseAgreementFileForScope licenseAgreementFileForScope = LicenseAgreementFileForScope
-//                            .builder()
-//                            .scopeId(generalId)
-//                            .fileId(savedFile.getId())
-//                            .build();
-//                    licenseAgreementFileForScopeRepository.save(licenseAgreementFileForScope);
-//                }
-//                return true;
-//            }
-//        }
-//
-//
-//        return false;
-//    }
-//
+    private void attachFileToEntity( int generalId, TypeInScopePage typeInScopePage,
+                                     MediaTypeInScopePage mediaTypeInScopePage, File savedFile){
+        IPathName iPathName = null;
+
+        if( typeInScopePage == TypeInScopePage.SCOPE ){
+
+            iPathName = scopeRepository.getReferenceById((long) generalId);
+
+            if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
+                ((Scope)iPathName).getImages().add(savedFile);
+            }
+            else if(mediaTypeInScopePage == MediaTypeInScopePage.ICON) {
+                ((Scope)iPathName).setIcon(savedFile);
+            }
+            else if( mediaTypeInScopePage == MediaTypeInScopePage.DISTRIBUTION_AGREEMENT){
+                ((Scope)iPathName).setDistributionAgreement(savedFile);
+            }
+            else throw new IllegalArgumentException();
+
+            scopeRepository.save((Scope)iPathName);
+
+        }
+        else if( typeInScopePage == TypeInScopePage.FOLDER ){
+
+            iPathName = folderRepository.getReferenceById((long) generalId);
+
+            if(mediaTypeInScopePage == MediaTypeInScopePage.MANIFEST) {
+                ((Folder)iPathName).setManifestForIOSFile(savedFile);
+            }
+            else throw new IllegalArgumentException();
+
+            folderRepository.save((Folder)iPathName);
+        }
+        else if( typeInScopePage == TypeInScopePage.VERSION ){
+            iPathName = versionRepository.getReferenceById((long) generalId);
+
+            if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
+                ((Version)iPathName).getImages().add(savedFile);
+            }
+            else if(mediaTypeInScopePage == MediaTypeInScopePage.FILE) {
+                ((Version)iPathName).getFiles().add(savedFile);
+            }
+            else throw new IllegalArgumentException();
+
+            versionRepository.save((Version) iPathName);
+        }
 
 
+
+    }
+
+
+
+    //TODO: bug: не удаляет manifest для folder
     @Transactional
     public void delete ( Long fileId ) {
-        File fileDb = fileDbRepository.findById(Math.toIntExact(fileId))// parma.File
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        String location = fileDb.getLocation();
-        fileDbRepository.delete(fileDb);//удаляет в бд
-        fileSystemRepository.delete(location);//удаляет с сервера
+        if(fileDbRepository.existsById(Math.toIntExact(fileId))) {
+            File fileDb = fileDbRepository.getReferenceById(Math.toIntExact(fileId));
+            String location = fileDb.getLocation();
+
+            fileDbRepository.deleteById(Math.toIntExact(fileId));//удаляет в бд
+            fileSystemRepository.delete(location);//удаляет с сервера
+        }
+        else throw new FileSystemNotFoundException("Файл не найден в БД");
     }
 
     public FileSystemResource get ( Long fileId ) {

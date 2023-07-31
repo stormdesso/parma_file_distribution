@@ -23,7 +23,7 @@ public class Version implements IPathName{
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "folder_id", referencedColumnName = "id")//folder_id(fk) version -> id(pk) folder
     private  Folder folder;
 
@@ -42,7 +42,7 @@ public class Version implements IPathName{
     @Column(name = "publish")
     private boolean publish;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(cascade = CascadeType.ALL,fetch = FetchType.LAZY)
     @JoinTable(name = "illustration_for_version",
             joinColumns = {
                     @JoinColumn(name = "version_id", referencedColumnName = "id")
@@ -53,7 +53,7 @@ public class Version implements IPathName{
     )
     private  List<File> images;
 
-    @ManyToMany(fetch = FetchType.LAZY)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinTable(name = "file_for_version",
             joinColumns = {
                     @JoinColumn(name = "version_id", referencedColumnName = "id")
