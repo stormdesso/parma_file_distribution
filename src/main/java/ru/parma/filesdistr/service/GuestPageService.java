@@ -9,6 +9,7 @@ import ru.parma.filesdistr.models.Version;
 import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.VersionRepository;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,8 +20,19 @@ public class GuestPageService {
     private final ScopeRepository scopeRepository;
 
 
-    public GuestPageDto getGuestPageByScopeIdAndVersionId(Long scopeId, Long versionId) {
-        Scope scope = scopeRepository.getScopeByScopeIdAndVersionId(scopeId, versionId);
+    public GuestPageDto getGuestPageByScopeId(Long scopeId) {
+        Scope scope = scopeRepository.getScopeByScopeIdAndLatestVersion(scopeId);
+        if (scope==null) {
+            throw new EntityNotFoundException("Scope с таким id не найден");
+        }
+        return convertEntityToDto(scope);
+    }
+
+    public GuestPageDto getGuestPageByVersionId(Long versionId) {
+        Scope scope = scopeRepository.getScopeByVersionId(versionId);
+        if (scope==null) {
+            throw new EntityNotFoundException("Scope с такой версией не найден");
+        }
         return convertEntityToDto(scope);
     }
 

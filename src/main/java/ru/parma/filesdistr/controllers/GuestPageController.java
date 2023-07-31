@@ -11,15 +11,20 @@ import ru.parma.filesdistr.service.GuestPageService;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("view")
-public class ViewController {
+@RequestMapping("guest_page")
+public class GuestPageController {
 
     private final GuestPageService guestPageService;
 
-    @GetMapping("/s/{scope_id}/v/{version_id}")
+    @GetMapping("v/{version_id}")
     @ResponseBody
-    public GuestPageDto get(@PathVariable Long scope_id, @PathVariable Long version_id) {
-        return guestPageService.getGuestPageByScopeIdAndVersionId(scope_id, version_id);
+    public GuestPageDto getGuestPageByVersionId(@PathVariable Long version_id) {
+        return guestPageService.getGuestPageByVersionId( version_id);
     }
 
+    @GetMapping("s/{scope_id}")
+    @ResponseBody
+    public GuestPageDto getGuestPageByScopeId(@PathVariable Long scope_id) {
+        return guestPageService.getGuestPageByScopeId(scope_id);
+    }
 }
