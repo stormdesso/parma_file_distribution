@@ -17,6 +17,7 @@ import ru.parma.filesdistr.repos.*;
 import ru.parma.filesdistr.utils.IPathName;
 import ru.parma.filesdistr.utils.Utils;
 
+import java.nio.file.FileSystemNotFoundException;
 import java.util.Date;
 
 
@@ -153,13 +154,18 @@ public class FileLocationService {
     }
 
 
+
+    //TODO: bug: не удаляет manifest для folder
     @Transactional
     public void delete ( Long fileId ) {
-        File fileDb = fileDbRepository.findById(Math.toIntExact(fileId))// parma.File
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        String location = fileDb.getLocation();
-        fileDbRepository.delete(fileDb);//удаляет в бд
-        fileSystemRepository.delete(location);//удаляет с сервера
+        if(fileDbRepository.existsById(Math.toIntExact(fileId))) {
+            File fileDb = fileDbRepository.getReferenceById(Math.toIntExact(fileId));
+            String location = fileDb.getLocation();
+
+            fileDbRepository.deleteById(Math.toIntExact(fileId));//удаляет в бд
+            fileSystemRepository.delete(location);//удаляет с сервера
+        }
+        else throw new FileSystemNotFoundException("Файл не найден в БД");
     }
 
     public FileSystemResource get ( Long fileId ) {

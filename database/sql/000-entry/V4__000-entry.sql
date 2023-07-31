@@ -78,16 +78,62 @@ alter table tag
 
 alter sequence tag_id_seq owned by tag.id;
 
+alter table scope
+    drop constraint icon_id_fk;
 
+alter table scope
+    add constraint icon_id_fk
+        foreign key (icon_id) references file
+            on delete cascade;
 
+alter table illustration_for_version
+    drop constraint illustration_for_version_version_id_fkey;
 
+alter table illustration_for_version
+    add foreign key (version_id) references version
+        on delete cascade;
 
+alter table illustration_for_version
+    drop constraint illustration_for_version_file_id_fkey;
 
+alter table illustration_for_version
+    add foreign key (file_id) references file
+        on delete cascade;
 
+alter table illustration_for_version
+    drop constraint illustration_for_version_version_id_fkey;
 
+alter table illustration_for_version
+    add foreign key (version_id) references version;
 
+alter table file_for_version
+    drop constraint file_for_version_file_id_fkey;
 
+alter table file_for_version
+    add foreign key (file_id) references file
+        on delete cascade;
 
+alter table folder
+    drop constraint folder_manifest_ios_id_fk;
 
+alter table folder
+    add constraint folder_manifest_ios_id_fk
+        foreign key (manifest_ios_id) references file
+            on delete set null;
+
+alter table folder
+    drop constraint folder_manifest_ios_id_fk;
+
+alter table folder
+    add constraint folder_manifest_ios_id_fk
+        foreign key (manifest_ios_id) references file;
+
+alter table folder
+    drop constraint folder_manifest_ios_id_fk;
+
+alter table folder
+    add constraint folder_manifest_ios_id_fk
+        foreign key (manifest_ios_id) references file
+            on delete set null;
 
 
