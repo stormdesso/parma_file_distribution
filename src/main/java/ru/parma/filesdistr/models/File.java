@@ -49,7 +49,4 @@ public class File {
     )
     private List<Tag> tags;
 
-
-
-
 }

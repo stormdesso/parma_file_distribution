@@ -136,4 +136,9 @@ alter table folder
         foreign key (manifest_ios_id) references file
             on delete set null;
 
+ALTER TYPE roles ADD VALUE 'ADMIN_SCOPES' AFTER 'ADMIN';
+ALTER TYPE roles ADD VALUE 'ROOT' BEFORE 'ADMIN';
+
+alter table users
+    add unique (name);
 

@@ -2,7 +2,6 @@ package ru.parma.filesdistr.service;
 
 
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -12,13 +11,17 @@ import ru.parma.filesdistr.dto.SavedFileDto;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.SavedFileMapper;
-import ru.parma.filesdistr.models.*;
+import ru.parma.filesdistr.models.File;
+import ru.parma.filesdistr.models.Folder;
+import ru.parma.filesdistr.models.Scope;
+import ru.parma.filesdistr.models.Version;
 import ru.parma.filesdistr.repos.*;
 import ru.parma.filesdistr.utils.IPathName;
 import ru.parma.filesdistr.utils.Utils;
 
 import java.nio.file.FileSystemNotFoundException;
 import java.util.Date;
+import java.util.Optional;
 
 
 @Service
@@ -31,29 +34,6 @@ public class FileLocationService {
     final VersionRepository versionRepository;
     final UserRepository userRepository;
 
-    private boolean getAccess ( Scope scope, @NotNull User user){
-        return user.getAvailableScopes().contains(scope);
-    }
-    public boolean tryGetAccess ( TypeInScopePage typeInScopePage, Integer generalId, @NotNull Integer userId){
-
-            User user = userRepository.getReferenceById(userId.longValue());
-
-            if( typeInScopePage == TypeInScopePage.SCOPE ){
-                Scope scope = scopeRepository.getReferenceById(generalId.longValue());
-                return getAccess(scope, user);
-            }
-            else if( typeInScopePage == TypeInScopePage.FOLDER ){
-                Folder folder = folderRepository.getReferenceById(generalId.longValue());
-                return getAccess(folder.getScope(), user);
-            }
-            else if( typeInScopePage == TypeInScopePage.VERSION ){
-                Version version = versionRepository.getReferenceById(Long.valueOf(generalId));
-                return getAccess(version.getFolder().getScope(), user);
-            }
-
-
-        return false;
-    }
 
     @Transactional
     public SavedFileDto save ( byte[] bytes, String fileName, String filetype,
@@ -158,14 +138,22 @@ public class FileLocationService {
     //TODO: bug: не удаляет manifest для folder
     @Transactional
     public void delete ( Long fileId ) {
-        if(fileDbRepository.existsById(Math.toIntExact(fileId))) {
-            File fileDb = fileDbRepository.getReferenceById(Math.toIntExact(fileId));
-            String location = fileDb.getLocation();
-
-            fileDbRepository.deleteById(Math.toIntExact(fileId));//удаляет в бд
-            fileSystemRepository.delete(location);//удаляет с сервера
+        Optional<File> optionalFile = fileDbRepository.findById(Math.toIntExact(fileId));
+        if(optionalFile.isPresent()){
+            File fileDb = optionalFile.get();
+            fileDbRepository.delete(fileDb);
         }
         else throw new FileSystemNotFoundException("Файл не найден в БД");
+
+
+//        if(fileDbRepository.existsById(Math.toIntExact(fileId))) {
+//            File fileDb = fileDbRepository.getReferenceById(Math.toIntExact(fileId));
+//            String location = fileDb.getLocation();
+//
+//            fileDbRepository.deleteById(Math.toIntExact(fileId));//удаляет в бд
+//            fileSystemRepository.delete(location);//удаляет с сервера
+//        }
+//        else throw new FileSystemNotFoundException("Файл не найден в БД");
     }
 
     public FileSystemResource get ( Long fileId ) {
