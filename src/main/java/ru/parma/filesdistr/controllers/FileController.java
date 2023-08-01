@@ -34,7 +34,7 @@ public class FileController {
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     SavedFileDto upload ( @RequestParam @NotNull MultipartFile file,
-                          @RequestParam Integer generalId,   //указывает id пространства, папки, версии
+                          @RequestParam Long generalId,   //указывает id пространства, папки, версии
                           @RequestParam TypeInScopePage typeInScopePage,
                           @RequestParam MediaTypeInScopePage mediaTypeInScopePage) {
         String fileType = FilenameUtils.getExtension(file.getOriginalFilename());
@@ -55,7 +55,7 @@ public class FileController {
     @GetMapping(value = "/download/{fileId}", produces = MediaType.ALL_VALUE)
     @ResponseBody
     FileSystemResource download ( @PathVariable Long fileId,
-                                  @RequestParam Integer generalId,   //указывает id пространства, папки, версии
+                                  @RequestParam Long generalId,   //указывает id пространства, папки, версии
                                   @RequestParam TypeInScopePage typeInScopePage){
         try {
             if(scopeAccessService.tryGetAccess(typeInScopePage, generalId, userId)) {
@@ -73,7 +73,7 @@ public class FileController {
     @DeleteMapping(value = "/delete/{fileId}")
     @ResponseBody
     void delete ( @PathVariable Long fileId,
-                  @RequestParam Integer generalId,   //указывает id пространства, папки, версии
+                  @RequestParam Long generalId,   //указывает id пространства, папки, версии
                   @RequestParam TypeInScopePage typeInScopePage) {
         try {
             if(scopeAccessService.tryGetAccess(typeInScopePage, generalId, userId)) {

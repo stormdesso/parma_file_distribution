@@ -37,7 +37,7 @@ public class FileLocationService {
 
     @Transactional
     public SavedFileDto save ( byte[] bytes, String fileName, String filetype,
-                               int generalId, TypeInScopePage typeInScopePage,
+                               Long generalId, TypeInScopePage typeInScopePage,
                                MediaTypeInScopePage mediaTypeInScopePage
     ) throws Exception {
         Date currDate = Utils.getDateWithoutTime();
@@ -45,15 +45,15 @@ public class FileLocationService {
 
         try {
             if( typeInScopePage == TypeInScopePage.SCOPE ){
-                String fullpath = scopeRepository.getReferenceById((long) generalId).getRootPath();
+                String fullpath = scopeRepository.getReferenceById(generalId).getRootPath();
                 location = fileSystemRepository.saveInScope(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else if( typeInScopePage == TypeInScopePage.FOLDER ){
-                String fullpath = folderRepository.getReferenceById((long) generalId).getRootPath();
+                String fullpath = folderRepository.getReferenceById(generalId).getRootPath();
                 location = fileSystemRepository.saveInFolder(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else if( typeInScopePage == TypeInScopePage.VERSION ){
-                String fullpath = versionRepository.getReferenceById((long) generalId).getRootPath();
+                String fullpath = versionRepository.getReferenceById( generalId).getRootPath();
                 location = fileSystemRepository.saveInVersion(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else throw new IllegalArgumentException();
@@ -82,13 +82,13 @@ public class FileLocationService {
         }
     }
 
-    private void attachFileToEntity( int generalId, TypeInScopePage typeInScopePage,
+    private void attachFileToEntity( Long generalId, TypeInScopePage typeInScopePage,
                                      MediaTypeInScopePage mediaTypeInScopePage, File savedFile){
         IPathName iPathName = null;
 
         if( typeInScopePage == TypeInScopePage.SCOPE ){
 
-            iPathName = scopeRepository.getReferenceById((long) generalId);
+            iPathName = scopeRepository.getReferenceById( generalId);
 
             if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
                 ((Scope)iPathName).getImages().add(savedFile);
@@ -106,7 +106,7 @@ public class FileLocationService {
         }
         else if( typeInScopePage == TypeInScopePage.FOLDER ){
 
-            iPathName = folderRepository.getReferenceById((long) generalId);
+            iPathName = folderRepository.getReferenceById(generalId);
 
             if(mediaTypeInScopePage == MediaTypeInScopePage.MANIFEST) {
                 ((Folder)iPathName).setManifestForIOSFile(savedFile);
@@ -116,7 +116,7 @@ public class FileLocationService {
             folderRepository.save((Folder)iPathName);
         }
         else if( typeInScopePage == TypeInScopePage.VERSION ){
-            iPathName = versionRepository.getReferenceById((long) generalId);
+            iPathName = versionRepository.getReferenceById( generalId);
 
             if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
                 ((Version)iPathName).getImages().add(savedFile);

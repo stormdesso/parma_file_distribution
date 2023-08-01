@@ -25,7 +25,7 @@ public class ScopeAccessService {
     private boolean getAccess ( Scope scope, @NotNull User user){
         return user.getAvailableScopes().contains(scope);
     }
-    public boolean tryGetAccess ( TypeInScopePage typeInScopePage, Integer generalId, @NotNull Integer userId){
+    public boolean tryGetAccess ( TypeInScopePage typeInScopePage, Long generalId, @NotNull Integer userId){
 
         if(isAdminOrRoot())
             return true;
@@ -33,15 +33,15 @@ public class ScopeAccessService {
         User user = userRepository.getReferenceById(userId.longValue());
 
         if( typeInScopePage == TypeInScopePage.SCOPE ){
-            Scope scope = scopeRepository.getReferenceById(generalId.longValue());
+            Scope scope = scopeRepository.getReferenceById(generalId);
             return getAccess(scope, user);
         }
         else if( typeInScopePage == TypeInScopePage.FOLDER ){
-            Folder folder = folderRepository.getReferenceById(generalId.longValue());
+            Folder folder = folderRepository.getReferenceById(generalId);
             return getAccess(folder.getScope(), user);
         }
         else if( typeInScopePage == TypeInScopePage.VERSION ){
-            Version version = versionRepository.getReferenceById(Long.valueOf(generalId));
+            Version version = versionRepository.getReferenceById(generalId);
             return getAccess(version.getFolder().getScope(), user);
         }
 
