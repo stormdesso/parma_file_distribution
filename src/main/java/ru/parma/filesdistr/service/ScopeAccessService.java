@@ -2,13 +2,18 @@ package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.models.Folder;
 import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.models.Version;
-import ru.parma.filesdistr.repos.*;
+import ru.parma.filesdistr.repos.FolderRepository;
+import ru.parma.filesdistr.repos.ScopeRepository;
+import ru.parma.filesdistr.repos.UserRepository;
+import ru.parma.filesdistr.repos.VersionRepository;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +26,9 @@ public class ScopeAccessService {
         return user.getAvailableScopes().contains(scope);
     }
     public boolean tryGetAccess ( TypeInScopePage typeInScopePage, Integer generalId, @NotNull Integer userId){
+
+        if(isAdminOrRoot())
+            return true;
 
         User user = userRepository.getReferenceById(userId.longValue());
 
@@ -38,6 +46,13 @@ public class ScopeAccessService {
         }
 
         return false;
+    }
+
+    private boolean isAdminOrRoot(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(r -> r.getAuthority().equals("ROOT") || r.getAuthority().equals("ADMIN"));
     }
 
 }

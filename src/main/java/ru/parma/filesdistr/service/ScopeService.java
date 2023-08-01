@@ -18,11 +18,6 @@ public class ScopeService {
 
     public List<ScopeDto> getAll() {
         List<Scope> scopes = scopeRepository.findAll();
-
-        //TODO:удалить перед коммитом
-//        Version version = scopes.get(0).getFolders().get(0).getVersions().get(0);
-//        String path = version.getRootPath();
-
         deleteVersionFromFolder(scopes);
         return ScopeMapper.INSTANCE.toScopeDtos(scopes);
     }
