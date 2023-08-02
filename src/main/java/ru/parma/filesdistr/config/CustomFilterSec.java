@@ -17,12 +17,12 @@ import java.util.Collection;
 
 @RequiredArgsConstructor
 public class CustomFilterSec extends GenericFilterBean {
-
     @Override
-    public void doFilter(
+    public void doFilter (
             ServletRequest request,
             ServletResponse response,
-            FilterChain chain) throws IOException, ServletException {
+            FilterChain chain ) throws IOException, ServletException {
+
 
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if(authentication != null) {

@@ -20,33 +20,33 @@ public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    Integer id;
+    private Integer id;
 
     @Column(name = "name")
-    String name;
+    private String name;
 
     @Column(name = "size")
-    Double size;
+    private Double size;
 
     @Column(name = "type")
-    String type;
+    private String type;
 
     @Column(name = "date_created")
-    Date dateCreated;
+    private Date dateCreated;
 
     @Column(name = "location")
-    String location;
+    private String location;
 
-    //@Nullable
-    //List<Tag> tags;
 
-//    @ManyToMany(mappedBy = "images")
-//    List<Scope> scopes;
-
-//    @ManyToMany(mappedBy = "illustrations")
-//    List<Version> IllustrationsForVersion;
-//
-//    @ManyToMany(mappedBy = "files")
-//    List<Version> filesForVersion;
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JoinTable(name = "file_for_version",
+            joinColumns = {
+                    @JoinColumn(name = "file_id", referencedColumnName = "id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "tag_id", referencedColumnName = "id")
+            }
+    )
+    private List<Tag> tags;
 
 }

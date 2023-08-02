@@ -1,21 +1,20 @@
 package ru.parma.filesdistr.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Date;
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@Builder
 public class VersionDto {
-    Integer id;
-    String versionNumber;
-    Date dateOfPublication;
-    String description;
-    boolean showIllustration;
-    boolean publish;
-    Integer parentId;
-    String parentName;
-    List<SavedFileDto> illustrations = new ArrayList<>();
-    List<SavedFileDto> files = new ArrayList<>();
+    private Long id;
+    private String versionNumber;
+    private Date dateOfPublication;
+    private String description;
+    private boolean showIllustration;
+    private boolean publish;
+    private List<FileDto> images;
+    private List<FileDto> files;
 }

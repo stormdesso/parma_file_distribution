@@ -1,22 +1,20 @@
 package ru.parma.filesdistr.dto;
 
+import lombok.Builder;
 import lombok.Data;
-import ru.parma.filesdistr.models.File;
-
-import java.util.ArrayList;
 import java.util.List;
 
-
-
 @Data
+@Builder
 public class ScopeDto {
-    Long id;
-    String name;
-    String description;
-    String copyright;
-    boolean showIllustration;
-    File icon;
-    List<SavedFileDto> images = new ArrayList<>();
-    byte[] licenseAgreement;
-    List<FolderDto> folders = new ArrayList<>();
+    private Long id;
+    private String name;
+    private String description;
+    private String copyright;
+    private boolean showIllustration;
+
+    private List<FolderDto> folders;
+    private FileDto icon;
+    private List<FileDto> images;
+    private FileDto distributionAgreement;
 }

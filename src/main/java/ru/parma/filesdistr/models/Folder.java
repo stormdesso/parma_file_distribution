@@ -1,41 +1,58 @@
 package ru.parma.filesdistr.models;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+
 import lombok.Data;
+import lombok.NoArgsConstructor;
+import ru.parma.filesdistr.utils.IPathName;
 
 import javax.persistence.*;
-import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+
 @Table(name = "folder")
+@Entity
 @Data
-public class Folder {
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
+public class Folder implements IPathName{
     @Id
     @Column(name = "id")
-    Integer id;
+    private Long id;
 
-    @Column(name = "scope_id")
-    Integer parentId;
+    @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "scope_id", referencedColumnName = "id")//scope_id(fk) folder -> id(pk) scope
+    private  Scope scope;
 
     @Column(name = "title")
-    String name;
+    private String name;
 
     @Column(name = "publish")
-    boolean publish;
+    private boolean publish;
 
-    @Column(name = "manifest_IOS")
-    boolean manifestForIOS;
+    @Column(name = "manifest_ios")
+    private boolean manifestForIOS;
 
     @Column(name = "identifier")
-    String identifier;
+    private String identifier;
 
-    @Column(name = "content")
-    @CollectionTable(name = "manifest_for_IOS",
-            joinColumns = @JoinColumn(name = "folder_id"))
-    byte[] manifestIOS;
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "manifest_ios_id")//manifest_ios_id(fk) folder -> id(pk) file
+    private File manifestForIOSFile;
 
-    @OneToMany(fetch = FetchType.LAZY)
-        @JoinTable(name = "version",
-                joinColumns = @JoinColumn(name = "folder_id"))
-    List<Version> versions = new ArrayList<>();
+    @OneToMany( cascade = CascadeType.ALL, targetEntity = Version.class, fetch = FetchType.LAZY)
+    @JoinColumn(name = "folder_id", referencedColumnName = "id")
+    private List<Version> versions;
+
+    @Override
+    public String getPath () {
+        return getName() + "//";
+    }
+
+    @Override
+    public String getRootPath () {
+        return scope.getRootPath() + getPath();
+    }
 }
