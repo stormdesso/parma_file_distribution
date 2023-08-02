@@ -5,11 +5,11 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 
 @Entity
 @Table(name = "file")
+@Data
 @Getter
 @Setter
 @Builder
@@ -20,7 +20,7 @@ public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    private Integer id;
+    private Long id;
 
     @Column(name = "name")
     private String name;
@@ -37,16 +37,8 @@ public class File {
     @Column(name = "location")
     private String location;
 
-
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(name = "file_for_version",
-            joinColumns = {
-                    @JoinColumn(name = "file_id", referencedColumnName = "id")
-            },
-            inverseJoinColumns = {
-                    @JoinColumn(name = "tag_id", referencedColumnName = "id")
-            }
-    )
-    private List<Tag> tags;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "tag_id")
+    private Tag tag;
 
 }

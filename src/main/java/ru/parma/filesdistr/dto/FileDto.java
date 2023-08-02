@@ -4,14 +4,12 @@ import lombok.Builder;
 import lombok.Data;
 import ru.parma.filesdistr.models.Tag;
 
-import java.util.List;
-
 //для отображения в списке
 @Data
 @Builder
 public class FileDto {
-    private  Integer id;
+    private  Long id;
     private  String name;
     private  String type;
-    private List<Tag> tags;
+    private Tag tag;
 }

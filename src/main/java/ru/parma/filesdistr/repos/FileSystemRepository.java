@@ -88,6 +88,7 @@ public class FileSystemRepository{
             file.deleteOnExit();
         } catch (NullPointerException | SecurityException exception) {
             exception.getStackTrace();
+            throw  exception;
         }
     }
 
@@ -96,7 +97,7 @@ public class FileSystemRepository{
         try {
             return new FileSystemResource(Paths.get(location));
         } catch (Exception e) {
-            throw new RuntimeException();
+            throw e;
         }
     }
 }
