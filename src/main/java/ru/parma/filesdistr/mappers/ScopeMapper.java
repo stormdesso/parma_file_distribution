@@ -12,4 +12,5 @@ public interface ScopeMapper {
     ScopeMapper INSTANCE = Mappers.getMapper(ScopeMapper.class);
     ScopeDto toScopeDto(Scope scope);
     List<ScopeDto> toScopeDtos(List<Scope> scope);
+    Scope toScope(ScopeDto scopeDto);
 }

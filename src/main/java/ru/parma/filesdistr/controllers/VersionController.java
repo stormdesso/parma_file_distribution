@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.VersionDto;
 import ru.parma.filesdistr.service.VersionService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -17,32 +16,32 @@ public class VersionController {
     @GetMapping("/all/{folder_id}")
     @ResponseBody
     public List<VersionDto> getAll(@PathVariable Long folder_id) {
-        return new ArrayList<>();
+        return versionService.getAll(folder_id);
     }
 
     @GetMapping("/{version_id}")
     @ResponseBody
     public VersionDto get(@PathVariable Long version_id) {
-        return null;
+        return versionService.get(version_id);
     }
 
     @PutMapping("/update")
     public void update(@RequestBody VersionDto versionDto)
     {
-        //System.out.println("Изменения сохранены");
+        versionService.updateVersion(versionDto);
     }
 
-    @PostMapping("/add")
-    public void add (@RequestBody VersionDto versionDto)
+    @PostMapping("/add/{folder_id}")
+    public void add (@RequestBody VersionDto versionDto, @PathVariable long folder_id)
     {
-        //System.out.println("Пространство добавлено");
+        versionService.addVersion(versionDto, folder_id);
 
     }
 
     @DeleteMapping("/delete/{version_id}")
     public void delete(@PathVariable Long version_id)
     {
-        //System.out.println("Пространство удалено");
+        versionService.deleteVersion(version_id);
     }
 }
 

@@ -12,4 +12,6 @@ public interface FolderMapper {
     FolderMapper INSTANCE = Mappers.getMapper(FolderMapper.class);
     FolderDto toFolderDto(Folder folder);
     List<FolderDto> toFolderDtos( List<Folder> folders);
+
+    Folder toFolder(FolderDto folderDto);
 }
