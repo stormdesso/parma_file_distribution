@@ -156,17 +156,22 @@ public class FileLocationService {
 
     @Transactional
     public void delete ( Long fileId ) {
-        if(fileDbRepository.existsById(fileId)) {
-            File fileDb = fileDbRepository.getReferenceById(fileId);
-            String location = fileDb.getLocation();
+        try {
+            if(fileDbRepository.existsById(fileId)) {
+                File fileDb = fileDbRepository.getReferenceById(fileId);
+                String location = fileDb.getLocation();
 
-            fileDbRepository.deleteById(fileId );//удаляет в бд
-            fileSystemRepository.delete(location);//удаляет с сервера
+                fileDbRepository.deleteById(fileId );//удаляет в бд
+                fileSystemRepository.delete(location);//удаляет с сервера
+            }
+            else {
+                throw new FileSystemNotFoundException("Файл не найден в БД");
+            }
         }
-        else {
-            // TODO ловить нужные исключения и соответсвующе реагировать
-            throw new FileSystemNotFoundException("Файл не найден в БД");
+        catch (IllegalArgumentException | FileSystemNotFoundException e){
+            throw e;
         }
+
     }
 
     public FileSystemResource get ( Long fileId ) {
