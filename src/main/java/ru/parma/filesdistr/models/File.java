@@ -5,11 +5,11 @@ import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
-import java.util.List;
 
 
 @Entity
 @Table(name = "file")
+@Data
 @Getter
 @Setter
 @Builder
@@ -20,33 +20,25 @@ public class File {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
-    Integer id;
+    private Long id;
 
     @Column(name = "name")
-    String name;
+    private String name;
 
     @Column(name = "size")
-    Double size;
+    private Double size;
 
     @Column(name = "type")
-    String type;
+    private String type;
 
     @Column(name = "date_created")
-    Date dateCreated;
+    private Date dateCreated;
 
     @Column(name = "location")
-    String location;
+    private String location;
 
-    //@Nullable
-    //List<Tag> tags;
-
-//    @ManyToMany(mappedBy = "images")
-//    List<Scope> scopes;
-
-//    @ManyToMany(mappedBy = "illustrations")
-//    List<Version> IllustrationsForVersion;
-//
-//    @ManyToMany(mappedBy = "files")
-//    List<Version> filesForVersion;
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "tag_id")
+    private Tag tag;
 
 }
