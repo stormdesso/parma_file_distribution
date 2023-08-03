@@ -85,9 +85,13 @@ public class FileSystemRepository{
             if(! file.exists()) {
                 // TODO logs - no file
             }
-            file.deleteOnExit();
+            // TODO мы уже проверили что он существует выше
+            if(!file.delete()){
+                throw new RuntimeException();
+            }
         } catch (NullPointerException | SecurityException exception) {
             exception.getStackTrace();
+            throw  exception;
         }
     }
 
@@ -96,7 +100,7 @@ public class FileSystemRepository{
         try {
             return new FileSystemResource(Paths.get(location));
         } catch (Exception e) {
-            throw new RuntimeException();
+            throw e;
         }
     }
 }

@@ -3,6 +3,7 @@ package ru.parma.filesdistr.controllers;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.io.FilenameUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -11,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 import ru.parma.filesdistr.dto.SavedFileDto;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
+import ru.parma.filesdistr.service.CustomUserDetailsService;
 import ru.parma.filesdistr.service.FileLocationService;
 import ru.parma.filesdistr.service.ScopeAccessService;
 
@@ -25,66 +27,39 @@ public class FileController {
     private final FileLocationService fileLocationService;
     private final ScopeAccessService scopeAccessService;
 
-    //TODO: async подгрузка и загрузка, связка с версией
-    //userId доставать из cookie
-
-    //TODO: заменить
-    static int userId = 2;//test
+    //TODO: async подгрузка и загрузка
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    SavedFileDto upload ( @RequestParam @NotNull MultipartFile file,
-                          @RequestParam Long generalId,   //указывает id пространства, папки, версии
-                          @RequestParam TypeInScopePage typeInScopePage,
-                          @RequestParam MediaTypeInScopePage mediaTypeInScopePage) {
+    SavedFileDto upload (@RequestParam @NotNull MultipartFile file,
+                         @RequestParam Long generalId,   //указывает id пространства, папки, версии
+                         @RequestParam TypeInScopePage typeInScopePage,
+                         @RequestParam MediaTypeInScopePage mediaTypeInScopePage,
+                         @RequestParam(required = false) @Nullable Long tagId) throws Exception {
         String fileType = FilenameUtils.getExtension(file.getOriginalFilename());
 
-        try {
-            if(scopeAccessService.tryGetAccess(typeInScopePage, generalId, userId)){
-                return fileLocationService.save(file.getBytes(), file.getOriginalFilename(), fileType,
-                        generalId, typeInScopePage, mediaTypeInScopePage);
-            }
-            else throw new AccessDeniedException("Access denied");
-        }
-        catch (Exception e){
+        scopeAccessService.tryGetAccess(typeInScopePage, generalId, CustomUserDetailsService.getAuthorizedUserId());
 
-        }
-        return null;
+        return fileLocationService.save(file.getBytes(), file.getOriginalFilename(), fileType,
+                generalId, typeInScopePage, mediaTypeInScopePage, tagId);
     }
 
     @GetMapping(value = "/download/{fileId}", produces = MediaType.ALL_VALUE)
     @ResponseBody
-    FileSystemResource download ( @PathVariable Long fileId,
-                                  @RequestParam Long generalId,   //указывает id пространства, папки, версии
-                                  @RequestParam TypeInScopePage typeInScopePage){
-        try {
-            if(scopeAccessService.tryGetAccess(typeInScopePage, generalId, userId)) {
-                return fileLocationService.get(fileId);
-            }
-            else throw new AccessDeniedException("Access denied");
-
-        }
-        catch (Exception e){
-
-        }
-        return null;
+    FileSystemResource download (@PathVariable Long fileId,
+                                 @RequestParam Long generalId,   //указывает id пространства, папки, версии
+                                 @RequestParam TypeInScopePage typeInScopePage) throws AccessDeniedException {
+        scopeAccessService.tryGetAccess(typeInScopePage, generalId, CustomUserDetailsService.getAuthorizedUserId());
+        return fileLocationService.get(fileId);
     }
 
     @DeleteMapping(value = "/delete/{fileId}")
     @ResponseBody
-    void delete ( @PathVariable Long fileId,
-                  @RequestParam Long generalId,   //указывает id пространства, папки, версии
-                  @RequestParam TypeInScopePage typeInScopePage) {
-        try {
-            if(scopeAccessService.tryGetAccess(typeInScopePage, generalId, userId)) {
-                fileLocationService.delete(fileId);
-            }
-            else throw new AccessDeniedException("Access denied");
-        }
-        catch (Exception e){
-
-        }
-
+    void delete (@PathVariable Long fileId,
+                 @RequestParam Long generalId,   //указывает id пространства, папки, версии
+                 @RequestParam TypeInScopePage typeInScopePage) throws AccessDeniedException {
+        scopeAccessService.tryGetAccess(typeInScopePage, generalId, CustomUserDetailsService.getAuthorizedUserId());
+        fileLocationService.delete(fileId);
     }
 }
 
