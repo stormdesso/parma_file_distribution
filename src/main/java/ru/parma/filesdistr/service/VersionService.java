@@ -39,7 +39,7 @@ public class VersionService {
         return VersionMapper.INSTANCE.toVersionDto(version);
     }
 
-    public void addVersion(VersionDto versionDto, Long folder_id) {
+    public void add(VersionDto versionDto, Long folder_id) {
         checkDto(versionDto);
         Folder folder = folderRepository.getReferenceById(folder_id);
         if (folder==null) {
@@ -53,7 +53,7 @@ public class VersionService {
 
     }
 
-    public void updateVersion(VersionDto versionDto) {
+    public void update(VersionDto versionDto) {
         checkDto(versionDto);
         Version existedVersion = versionRepository.getReferenceById(versionDto.getId());
         if (existedVersion==null) {
@@ -76,7 +76,7 @@ public class VersionService {
         //TODO добавить проверки
     }
 
-    public void deleteVersion(Long version_id) {
+    public void delete(Long version_id) {
         Version version = versionRepository.getReferenceById(version_id);
         if (version==null) {
             throw new EntityNotFoundException( String.format("Версии с id %d не существует", version_id));

@@ -38,7 +38,7 @@ public class FolderService {
         return FolderMapper.INSTANCE.toFolderDto(folder);
     }
 
-    public void addFolder(FolderDto folderDto, long scope_id) {
+    public void add(FolderDto folderDto, long scope_id) {
         checkDto(folderDto);
         Scope scope = scopeRepository.getReferenceById(scope_id);
         if (scope == null) {
@@ -51,7 +51,7 @@ public class FolderService {
         folderRepository.save(folder);
     }
 
-    public void updateFolder(FolderDto folderDto) {
+    public void update(FolderDto folderDto) {
         checkDto(folderDto);
         Folder existedFolder = folderRepository.getReferenceById(folderDto.getId());
         if (existedFolder == null) {
@@ -74,7 +74,7 @@ public class FolderService {
         //TODO добавить проверки
     }
 
-    public void deleteFolder(Long folder_id) {
+    public void delete(Long folder_id) {
         Folder folder = folderRepository.getReferenceById(folder_id);
         if (folder==null) {
             throw new EntityNotFoundException( String.format("Папки с id %d не существует", folder_id));

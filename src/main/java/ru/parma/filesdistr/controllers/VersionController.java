@@ -28,20 +28,20 @@ public class VersionController {
     @PutMapping("/update")
     public void update(@RequestBody VersionDto versionDto)
     {
-        versionService.updateVersion(versionDto);
+        versionService.update(versionDto);
     }
 
     @PostMapping("/add/{folder_id}")
     public void add (@RequestBody VersionDto versionDto, @PathVariable long folder_id)
     {
-        versionService.addVersion(versionDto, folder_id);
+        versionService.add(versionDto, folder_id);
 
     }
 
     @DeleteMapping("/delete/{version_id}")
     public void delete(@PathVariable Long version_id)
     {
-        versionService.deleteVersion(version_id);
+        versionService.delete(version_id);
     }
 }
 

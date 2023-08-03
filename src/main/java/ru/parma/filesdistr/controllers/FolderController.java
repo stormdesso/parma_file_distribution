@@ -29,20 +29,20 @@ public class FolderController {
     @PutMapping("/update")
     public void update(@RequestBody FolderDto folderDto)
     {
-        folderService.updateFolder(folderDto);
+        folderService.update(folderDto);
     }
 
     @PostMapping("/add/{scope_id}")
     public void add (@RequestBody FolderDto folderDto, @PathVariable long scope_id)
     {
-        folderService.addFolder(folderDto, scope_id);
+        folderService.add(folderDto, scope_id);
 
     }
 
     @DeleteMapping("/delete/{folder_id}")
     public void delete(@PathVariable Long folder_id)
     {
-        folderService.deleteFolder(folder_id);
+        folderService.delete(folder_id);
     }
 }
 
