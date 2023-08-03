@@ -24,6 +24,8 @@ public class ScopeService {
         deleteVersionFromFolder(scopes);
         return ScopeMapper.INSTANCE.toScopeDtos(scopes);
     }
+
+    // TODO шляпа какая-то
     private void deleteVersionFromFolder ( @NotNull List<Scope> scopes){
         for (Scope scope: scopes) {
             for (Folder folder: scope.getFolders()) {
@@ -34,7 +36,6 @@ public class ScopeService {
 
     public void delete(long id) {
         Scope scope = scopeRepository.getReferenceById(id);
-
         fileSystemRepository.delete(scope.getRootPath());
     }
 

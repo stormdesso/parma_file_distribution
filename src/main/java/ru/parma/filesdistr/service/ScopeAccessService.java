@@ -25,31 +25,10 @@ public class ScopeAccessService {
     final FolderRepository folderRepository;
     final VersionRepository versionRepository;
     final UserRepository userRepository;
+
     private boolean getAccess ( Scope scope, @NotNull User user){
         return user.getAvailableScopes().contains(scope);
     }
-//    public boolean tryGetAccess ( TypeInScopePage typeInScopePage, Long generalId, @NotNull Long userId){
-//
-//        if(isAdminOrRoot())
-//            return true;
-//
-//        User user = userRepository.getReferenceById(userId);
-//
-//        if( typeInScopePage == TypeInScopePage.SCOPE ){
-//            Scope scope = scopeRepository.getReferenceById(generalId);
-//            return getAccess(scope, user);
-//        }
-//        else if( typeInScopePage == TypeInScopePage.FOLDER ){
-//            Folder folder = folderRepository.getReferenceById(generalId);
-//            return getAccess(folder.getScope(), user);
-//        }
-//        else if( typeInScopePage == TypeInScopePage.VERSION ){
-//            Version version = versionRepository.getReferenceById(generalId);
-//            return getAccess(version.getFolder().getScope(), user);
-//        }
-//
-//        return false;
-//    }
 
     public void tryGetAccess ( TypeInScopePage typeInScopePage, Long generalId, @NotNull Long userId) throws AccessDeniedException {
 

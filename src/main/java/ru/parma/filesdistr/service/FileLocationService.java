@@ -163,7 +163,10 @@ public class FileLocationService {
             fileDbRepository.deleteById(fileId );//удаляет в бд
             fileSystemRepository.delete(location);//удаляет с сервера
         }
-        else throw new FileSystemNotFoundException("Файл не найден в БД");
+        else {
+            // TODO ловить нужные исключения и соответсвующе реагировать
+            throw new FileSystemNotFoundException("Файл не найден в БД");
+        }
     }
 
     public FileSystemResource get ( Long fileId ) {
