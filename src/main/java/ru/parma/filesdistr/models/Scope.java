@@ -33,6 +33,9 @@ public class Scope implements IPathName {
     @Column(name = "show_illustrations")
     private boolean showIllustration;
 
+    @Column(name = "permit_all")
+    private boolean permitAll;
+
     @OneToMany(cascade = CascadeType.ALL, targetEntity = Folder.class, fetch = FetchType.LAZY)
     @JoinColumn(name = "scope_id", referencedColumnName = "id")
     private List<Folder> folders;

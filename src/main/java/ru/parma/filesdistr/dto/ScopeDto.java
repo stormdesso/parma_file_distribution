@@ -12,7 +12,6 @@ public class ScopeDto {
     private String description;
     private String copyright;
     private boolean showIllustration;
-
     private List<FolderDto> folders;
     private FileDto icon;
     private List<FileDto> images;

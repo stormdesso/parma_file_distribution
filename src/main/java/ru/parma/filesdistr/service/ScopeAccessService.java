@@ -39,14 +39,17 @@ public class ScopeAccessService {
         boolean access = false;
         if( typeInScopePage == TypeInScopePage.SCOPE ){
             Scope scope = scopeRepository.getReferenceById(generalId);
+            if (scope.isPermitAll()) return;
             access = getAccess(scope, user);
         }
         else if( typeInScopePage == TypeInScopePage.FOLDER ){
             Folder folder = folderRepository.getReferenceById(generalId);
+            if (folder.getScope().isPermitAll()) return;
             access = getAccess(folder.getScope(), user);
         }
         else if( typeInScopePage == TypeInScopePage.VERSION ){
             Version version = versionRepository.getReferenceById(generalId);
+            if (version.getFolder().getScope().isPermitAll()) return;
             access = getAccess(version.getFolder().getScope(), user);
         }
         if(!access) {
@@ -61,5 +64,4 @@ public class ScopeAccessService {
         return authentication.getAuthorities().stream()
                 .anyMatch(r -> r.getAuthority().equals(Roles.ROOT.toString()) || r.getAuthority().equals(Roles.ADMIN.toString()));
     }
-
 }
