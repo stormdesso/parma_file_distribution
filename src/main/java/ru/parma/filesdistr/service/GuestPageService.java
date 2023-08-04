@@ -1,8 +1,14 @@
 package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.EnumUtils;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.parma.filesdistr.dto.GuestPageDto;
+import ru.parma.filesdistr.enums.Roles;
+import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.ScopeMapper;
 import ru.parma.filesdistr.models.Folder;
 import ru.parma.filesdistr.models.Scope;
@@ -11,6 +17,8 @@ import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.VersionRepository;
 
 import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.util.Comparator;
 import java.util.List;
 
@@ -22,10 +30,22 @@ public class GuestPageService {
 
     private final VersionRepository versionRepository;
 
-    public GuestPageDto getGuestPageByScopeId(Long scopeId) {
+    private final ScopeAccessService scopeAccessService;
+
+    public GuestPageDto getGuestPageByScopeId(Long scopeId) throws IOException {
         Scope scope = scopeRepository.getReferenceById(scopeId);
         if (scope==null) {
             throw new EntityNotFoundException(String.format("Scope с id %d  не найден", scopeId));
+        }
+        if (!scope.isPermitAll()) {
+            String role =  SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().findFirst().get().toString();
+            if (EnumUtils.isValidEnum(Roles.class, role)) {
+                scopeAccessService.tryGetAccess(TypeInScopePage.SCOPE, scopeId, CustomUserDetailsService.getAuthorizedUserId());
+            }
+            else {
+                HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+                response.sendRedirect("/login");
+            }
         }
         List<Folder> folders = scope.getFolders();
         for (Folder folder : folders) {
@@ -37,7 +57,7 @@ public class GuestPageService {
         return convertEntityToDto(scope);
     }
 
-    public GuestPageDto getGuestPageByVersionId(Long versionId) {
+    public GuestPageDto getGuestPageByVersionId(Long versionId) throws IOException {
         Version versionWithId = versionRepository.getReferenceById(versionId);
         if (versionWithId==null) {
             throw new EntityNotFoundException(String.format("Version с id %d  не найден", versionId));
@@ -45,6 +65,18 @@ public class GuestPageService {
         String versionNumber = versionWithId.getVersionNumber();
         Folder folderWithVersion = versionWithId.getFolder();
         Scope scope = folderWithVersion.getScope();
+
+        if (!scope.isPermitAll()) {
+            String role =  SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().findFirst().get().toString();
+            if (EnumUtils.isValidEnum(Roles.class, role)) {
+                scopeAccessService.tryGetAccess(TypeInScopePage.VERSION, versionId,  CustomUserDetailsService.getAuthorizedUserId());
+            }
+            else {
+                HttpServletResponse response = ((ServletRequestAttributes)RequestContextHolder.getRequestAttributes()).getResponse();
+                response.sendRedirect("/login");
+            }
+        }
+
         List<Folder> folders = scope.getFolders();
         for (Folder folder : folders) {
             List<Version> versions = folder.getVersions();
