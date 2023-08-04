@@ -71,7 +71,6 @@ public class FolderService {
         if (folderDto.getName() == null) {
             throw new IllegalArgumentException("Имя папки не может быть null");
         }
-        //TODO добавить проверки
     }
 
     public void delete(Long folder_id) {

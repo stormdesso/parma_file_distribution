@@ -73,7 +73,6 @@ public class VersionService {
         if (versionDto.getDateOfPublication() == null) {
             throw new IllegalArgumentException("Дата публикации не может быть null");
         }
-        //TODO добавить проверки
     }
 
     public void delete(Long version_id) {

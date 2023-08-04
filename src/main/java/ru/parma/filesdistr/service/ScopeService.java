@@ -48,7 +48,6 @@ public class ScopeService {
         if (scopeDto.getName() == null) {
             throw new IllegalArgumentException("Имя пространства не может быть null");
         }
-        //TODO добавить проверки
     }
 
     private void deleteVersionFromFolder ( @NotNull List<Scope> scopes){

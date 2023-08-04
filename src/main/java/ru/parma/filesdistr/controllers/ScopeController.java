@@ -35,7 +35,6 @@ public class ScopeController {
     public void add (@RequestBody ScopeDto scope)
     {
         scopeService.add(scope);
-
     }
 
     @DeleteMapping("/delete/{scope_id}")
