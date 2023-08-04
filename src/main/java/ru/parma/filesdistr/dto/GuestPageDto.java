@@ -7,5 +7,4 @@ import lombok.Data;
 public class GuestPageDto {
 
     private ScopeDto scopeDto;
-    //TODO !!!не забыть добавить, если необходимо!!!
 }

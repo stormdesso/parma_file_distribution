@@ -25,7 +25,7 @@ public class GuestPageService {
     public GuestPageDto getGuestPageByScopeId(Long scopeId) {
         Scope scope = scopeRepository.getReferenceById(scopeId);
         if (scope==null) {
-            throw new EntityNotFoundException("Scope с таким id не найден");
+            throw new EntityNotFoundException(String.format("Scope с id %d  не найден", scopeId));
         }
         List<Folder> folders = scope.getFolders();
         for (Folder folder : folders) {
@@ -40,7 +40,7 @@ public class GuestPageService {
     public GuestPageDto getGuestPageByVersionId(Long versionId) {
         Version versionWithId = versionRepository.getReferenceById(versionId);
         if (versionWithId==null) {
-            throw new EntityNotFoundException("Version с таким id не найден");
+            throw new EntityNotFoundException(String.format("Version с id %d  не найден", versionId));
         }
         String versionNumber = versionWithId.getVersionNumber();
         Folder folderWithVersion = versionWithId.getFolder();
@@ -65,7 +65,6 @@ public class GuestPageService {
 
        guestPageDto.setScopeDto(ScopeMapper.INSTANCE.toScopeDto(scope));
 
-        //TODO !!!не забыть добавить, если необходимо!!!
         return guestPageDto;
     }
 
