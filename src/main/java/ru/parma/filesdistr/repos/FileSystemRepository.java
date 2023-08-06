@@ -85,7 +85,6 @@ public class FileSystemRepository{
             if(! file.exists()) {
                 // TODO logs - no file
             }
-            // TODO мы уже проверили что он существует выше
             if(!file.delete()){
                 throw new RuntimeException();
             }

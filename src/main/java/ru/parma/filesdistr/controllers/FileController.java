@@ -9,7 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import ru.parma.filesdistr.dto.SavedFileDto;
+import ru.parma.filesdistr.dto.FileDto;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.service.CustomUserDetailsService;
@@ -31,17 +31,18 @@ public class FileController {
 
     @PostMapping(value = "/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
-    SavedFileDto upload (@RequestParam @NotNull MultipartFile file,
-                         @RequestParam Long generalId,   //указывает id пространства, папки, версии
-                         @RequestParam TypeInScopePage typeInScopePage,
-                         @RequestParam MediaTypeInScopePage mediaTypeInScopePage,
-                         @RequestParam(required = false) @Nullable Long tagId) throws Exception {
+    FileDto upload (@RequestParam @NotNull MultipartFile file,
+                    @RequestParam Long generalId,   //указывает id пространства, папки, версии
+                    @RequestParam TypeInScopePage typeInScopePage,
+                    @RequestParam MediaTypeInScopePage mediaTypeInScopePage,
+                    @RequestParam(required = false) @Nullable Long tagId,
+                    @RequestParam(required = false) @Nullable String comment) throws Exception {
         String fileType = FilenameUtils.getExtension(file.getOriginalFilename());
 
         scopeAccessService.tryGetAccess(typeInScopePage, generalId, CustomUserDetailsService.getAuthorizedUserId());
 
         return fileLocationService.save(file.getBytes(), file.getOriginalFilename(), fileType,
-                generalId, typeInScopePage, mediaTypeInScopePage, tagId);
+                generalId, typeInScopePage, mediaTypeInScopePage, tagId, comment);
     }
 
     @GetMapping(value = "/download/{fileId}", produces = MediaType.ALL_VALUE)
