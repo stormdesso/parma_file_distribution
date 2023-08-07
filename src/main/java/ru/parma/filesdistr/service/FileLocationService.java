@@ -8,10 +8,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
-import ru.parma.filesdistr.dto.SavedFileDto;
+import ru.parma.filesdistr.dto.FileDto;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
-import ru.parma.filesdistr.mappers.SavedFileMapper;
+import ru.parma.filesdistr.mappers.FileMapper;
 import ru.parma.filesdistr.models.*;
 import ru.parma.filesdistr.repos.*;
 import ru.parma.filesdistr.utils.IPathName;
@@ -34,11 +34,11 @@ public class FileLocationService {
 
 
     @Transactional
-    public SavedFileDto save ( byte[] bytes, String fileName, String filetype,
-                               Long generalId, TypeInScopePage typeInScopePage,
-                               MediaTypeInScopePage mediaTypeInScopePage,
-                               @Nullable Long tagId
-    ) throws Exception {
+    public FileDto save (byte[] bytes, String fileName, String filetype,
+                         Long generalId, TypeInScopePage typeInScopePage,
+                         MediaTypeInScopePage mediaTypeInScopePage,
+                         @Nullable Long tagId,
+                         @Nullable String comment) throws Exception {
         Date currDate = Utils.getDateWithoutTime();
         String location = null;
 
@@ -57,8 +57,6 @@ public class FileLocationService {
             }
             else throw new IllegalArgumentException();
 
-
-
             File file = File
                     .builder()
                     .name(fileName)
@@ -68,16 +66,21 @@ public class FileLocationService {
                     .location(location)
                     .build();
 
-            Tag tag = null;
-            if(tagId != null) {
-                tag = tagRepository.getReferenceById( tagId );
-                file.setTag( tag );
+            if(mediaTypeInScopePage == MediaTypeInScopePage.FILE & typeInScopePage == TypeInScopePage.VERSION){
+                Tag tag = null;
+                if(tagId != null) {
+                    tag = tagRepository.getReferenceById( tagId );
+                    file.setTag( tag );
+                }
+                if(comment != null){
+                    file.setComment(comment);
+                }
             }
 
             File savedFile = fileDbRepository.save(file);
 
             attachFileToEntity(generalId,  typeInScopePage, mediaTypeInScopePage,  savedFile);
-            return SavedFileMapper.INSTANCE.toSaveFileDto(savedFile);
+            return FileMapper.INSTANCE.toFileDto(savedFile);
 
         } catch (Exception e) {
             // убираем за собой
@@ -149,9 +152,7 @@ public class FileLocationService {
 
             versionRepository.save((Version) iPathName);
         }
-
-
-
+        else throw new IllegalArgumentException();
     }
 
     @Transactional

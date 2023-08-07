@@ -41,4 +41,7 @@ public class File {
     @JoinColumn(name = "tag_id")
     private Tag tag;
 
+    @Column(name = "comment")
+    private String comment;
+
 }
