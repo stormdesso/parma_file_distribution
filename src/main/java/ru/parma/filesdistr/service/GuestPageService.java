@@ -1,13 +1,10 @@
 package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.EnumUtils;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.parma.filesdistr.dto.GuestPageDto;
-import ru.parma.filesdistr.enums.Roles;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.ScopeMapper;
 import ru.parma.filesdistr.models.Folder;
@@ -38,8 +35,7 @@ public class GuestPageService {
             throw new EntityNotFoundException(String.format("Scope с id %d  не найден", scopeId));
         }
         if (!scope.isPermitAll()) {
-            String role =  SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().findFirst().get().toString();
-            if (EnumUtils.isValidEnum(Roles.class, role)) {
+            if (CustomUserDetailsService.isUserHasRole()) {
                 scopeAccessService.tryGetAccess(TypeInScopePage.SCOPE, scopeId, CustomUserDetailsService.getAuthorizedUserId());
             }
             else {
@@ -67,8 +63,7 @@ public class GuestPageService {
         Scope scope = folderWithVersion.getScope();
 
         if (!scope.isPermitAll()) {
-            String role =  SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().findFirst().get().toString();
-            if (EnumUtils.isValidEnum(Roles.class, role)) {
+            if (CustomUserDetailsService.isUserHasRole()) {
                 scopeAccessService.tryGetAccess(TypeInScopePage.VERSION, versionId,  CustomUserDetailsService.getAuthorizedUserId());
             }
             else {

@@ -1,11 +1,13 @@
 package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.lang3.EnumUtils;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import ru.parma.filesdistr.enums.Roles;
 import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.UserRepository;
 
@@ -26,6 +28,11 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     public static Long getAuthorizedUserId (){
         return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+    }
+
+    public static boolean isUserHasRole() {
+        String role =  SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().findFirst().get().toString();
+        return EnumUtils.isValidEnum(Roles.class, role);
     }
 
 }
