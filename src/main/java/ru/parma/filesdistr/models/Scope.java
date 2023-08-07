@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Formula;
 import ru.parma.filesdistr.utils.IPathName;
 
 import javax.persistence.*;
@@ -33,7 +34,7 @@ public class Scope implements IPathName {
     @Column(name = "show_illustrations")
     private boolean showIllustration;
 
-    @Column(name = "permit_all")
+    @Formula("(SELECT COUNT(*) = 0 FROM user_scope us WHERE us.scope_id = id)")
     private boolean permitAll;
 
     @OneToMany(cascade = CascadeType.ALL, targetEntity = Folder.class, fetch = FetchType.LAZY)

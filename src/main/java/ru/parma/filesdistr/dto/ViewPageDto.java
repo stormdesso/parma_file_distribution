@@ -4,7 +4,7 @@ import lombok.Data;
 
 
 @Data
-public class GuestPageDto {
+public class ViewPageDto {
 
     private ScopeDto scopeDto;
 }
