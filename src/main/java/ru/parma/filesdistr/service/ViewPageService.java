@@ -42,7 +42,7 @@ public class ViewPageService {
             List<Folder> folders = scope.getFolders();
             for (Folder folder : folders) {
                 List<Version> versions = folder.getVersions();
-                Version versionWithMaxId = versions.stream().max(Comparator.comparing(v -> v.getId())).get();
+                Version versionWithMaxId = versions.stream().max(Comparator.comparing(v -> v.getDateOfPublication().getTime())).get();
                 versions.clear();
                 versions.add(versionWithMaxId);
             }
