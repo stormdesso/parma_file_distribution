@@ -1,6 +1,7 @@
 package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -70,9 +71,9 @@ public class ViewPageService {
         return convertEntityToDto(scope);
     }
 
-    private void checkAccessToScope(Scope scope) throws IOException {
+    private void checkAccessToScope(@NotNull Scope scope) throws IOException {
         if (!scope.isPermitAll()) {
-            if (CustomUserDetailsService.isUserHasRole()) {
+            if (CustomUserDetailsService.tryGetAuthentication()) {
                 scopeAccessService.tryGetAccess(TypeInScopePage.SCOPE, scope.getId(), CustomUserDetailsService.getAuthorizedUserId());
             }
             else {
@@ -82,7 +83,7 @@ public class ViewPageService {
         }
     }
 
-    private ViewPageDto convertEntityToDto(Scope scope) {
+    private @NotNull ViewPageDto convertEntityToDto(Scope scope) {
         ViewPageDto viewPageDto = new ViewPageDto();
 
        viewPageDto.setScopeDto(ScopeMapper.INSTANCE.toScopeDto(scope));
