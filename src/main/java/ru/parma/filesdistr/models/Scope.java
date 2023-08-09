@@ -34,7 +34,10 @@ public class Scope implements IPathName {
     @Column(name = "show_illustrations")
     private boolean showIllustration;
 
-    @Formula("(SELECT COUNT(*) = 0 FROM user_scope us WHERE us.scope_id = id)")
+    @Formula("(SELECT COUNT(*) = 0 FROM user_scope AS us" +
+            "    WHERE (us.scope_id = id AND us.user_id IN" +
+            "        (SELECT r.user_id FROM role AS r" +
+            "             WHERE r.role_name = 'USER' AND us.user_id = r.user_id)))")
     private boolean permitAll;
 
     @OneToMany(cascade = CascadeType.ALL, targetEntity = Folder.class, fetch = FetchType.LAZY)

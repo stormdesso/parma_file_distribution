@@ -43,6 +43,14 @@ public class WebSecurityConfig{
                 .failureUrl("/login?error=true")
                 .and()
                 .logout().permitAll()
+
+                //ViewPage
+                .and()
+                    .authorizeRequests()
+                    .expressionHandler(defaultWebSecurityExpressionHandler())
+                    .antMatchers("/scope/{scope_id:\\d+}/version/{version_id:[\\w\\d]+}").permitAll()
+                //ViewPage
+
                 //пространства
                 .and()
                 .authorizeRequests()
@@ -83,14 +91,6 @@ public class WebSecurityConfig{
                 .antMatchers("/test/hello", "/test/jpa").permitAll()
                 .antMatchers("/test/user").hasAnyRole(Roles.USER.getAuthority(), Roles.ADMIN.getAuthority())
                 .antMatchers("/test/admin").hasAuthority(Roles.ADMIN.getAuthority())
-
-
-                //ViewPage
-                .and()
-                    .authorizeRequests()
-                    .expressionHandler(defaultWebSecurityExpressionHandler())
-                    .antMatchers("/scope/{scope_id:\\d+}/version/{version_id:[\\w\\d]+}").permitAll()
-                //ViewPage
 
                 .and()
                 .userDetailsService(customUserDetailsService)

@@ -1,13 +1,13 @@
 package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.EnumUtils;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import ru.parma.filesdistr.enums.Roles;
 import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.UserRepository;
 
@@ -31,8 +31,13 @@ public class CustomUserDetailsService implements UserDetailsService {
     }
 
     public static boolean isUserHasRole() {
-        String role =  SecurityContextHolder.getContext().getAuthentication().getAuthorities().stream().findFirst().get().toString();
-        return EnumUtils.isValidEnum(Roles.class, role);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || authentication instanceof AnonymousAuthenticationToken) {
+            return false;
+        }
+        else {
+            return true;
+        }
     }
 
 }
