@@ -85,12 +85,12 @@ public class WebSecurityConfig{
                 .antMatchers("/test/admin").hasAuthority(Roles.ADMIN.getAuthority())
 
 
-                //GuestPage
+                //ViewPage
                 .and()
                     .authorizeRequests()
                     .expressionHandler(defaultWebSecurityExpressionHandler())
-                    .antMatchers("/guest_page/**").permitAll()
-                //GuestPage
+                    .antMatchers("/scope/{scope_id:\\d+}/version/{version_id:[\\w\\d]+}").permitAll()
+                //ViewPage
 
                 .and()
                 .userDetailsService(customUserDetailsService)
