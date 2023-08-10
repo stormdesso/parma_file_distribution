@@ -19,6 +19,7 @@ import ru.parma.filesdistr.utils.Utils;
 
 import java.nio.file.FileSystemNotFoundException;
 import java.util.Date;
+import java.util.Optional;
 
 
 @Service
@@ -44,15 +45,17 @@ public class FileLocationService {
 
         try {
             if( typeInScopePage == TypeInScopePage.SCOPE ){
-                String fullpath = scopeRepository.getReferenceById(generalId).getRootPath();
+                Optional<Scope> scopeOptional = scopeRepository.findById(generalId);
+
+                String fullpath = scopeRepository.findById(generalId).getRootPath();
                 location = fileSystemRepository.saveInScope(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else if( typeInScopePage == TypeInScopePage.FOLDER ){
-                String fullpath = folderRepository.getReferenceById(generalId).getRootPath();
+                String fullpath = folderRepository.findById(generalId).getRootPath();
                 location = fileSystemRepository.saveInFolder(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else if( typeInScopePage == TypeInScopePage.VERSION ){
-                String fullpath = versionRepository.getReferenceById(generalId).getRootPath();
+                String fullpath = versionRepository.findById(generalId).getRootPath();
                 location = fileSystemRepository.saveInVersion(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else throw new IllegalArgumentException();
@@ -69,7 +72,7 @@ public class FileLocationService {
             if(mediaTypeInScopePage == MediaTypeInScopePage.FILE & typeInScopePage == TypeInScopePage.VERSION){
                 Tag tag = null;
                 if(tagId != null) {
-                    tag = tagRepository.getReferenceById( tagId );
+                    tag = tagRepository.findById( tagId );
                     file.setTag( tag );
                 }
                 if(comment != null){
@@ -97,7 +100,7 @@ public class FileLocationService {
 
         if( typeInScopePage == TypeInScopePage.SCOPE ){
 
-            iPathName = scopeRepository.getReferenceById( generalId );
+            iPathName = scopeRepository.findById( generalId );
 
             if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
                 ((Scope)iPathName).getImages().add(savedFile);
@@ -125,7 +128,7 @@ public class FileLocationService {
         }
         else if( typeInScopePage == TypeInScopePage.FOLDER ){
 
-            iPathName = folderRepository.getReferenceById( generalId );
+            iPathName = folderRepository.findById( generalId );
 
             if(mediaTypeInScopePage == MediaTypeInScopePage.MANIFEST) {
                 if(((Folder)iPathName).getManifestForIOSFile() != null) {
@@ -140,7 +143,7 @@ public class FileLocationService {
             folderRepository.save((Folder)iPathName);
         }
         else if( typeInScopePage == TypeInScopePage.VERSION ){
-            iPathName = versionRepository.getReferenceById( generalId );
+            iPathName = versionRepository.findById( generalId );
 
             if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
                 ((Version)iPathName).getImages().add(savedFile);
@@ -159,7 +162,7 @@ public class FileLocationService {
     public void delete ( Long fileId ) {
         try {
             if(fileDbRepository.existsById(fileId)) {
-                File fileDb = fileDbRepository.getReferenceById(fileId);
+                File fileDb = fileDbRepository.findById(fileId);
                 String location = fileDb.getLocation();
 
                 fileDbRepository.deleteById(fileId );//удаляет в бд

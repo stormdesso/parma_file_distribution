@@ -34,21 +34,21 @@ public class ScopeAccessService {
 
         if(isAdminOrRoot()) return ;
 
-        User user = userRepository.getReferenceById(userId);
+        User user = userRepository.findById(userId);
 
         boolean access = false;
         if( typeInScopePage == TypeInScopePage.SCOPE ){
-            Scope scope = scopeRepository.getReferenceById(generalId);
+            Scope scope = scopeRepository.findById(generalId);
             if (scope.isPermitAll()) return;
             access = getAccess(scope, user);
         }
         else if( typeInScopePage == TypeInScopePage.FOLDER ){
-            Folder folder = folderRepository.getReferenceById(generalId);
+            Folder folder = folderRepository.findById(generalId);
             if (folder.getScope().isPermitAll()) return;
             access = getAccess(folder.getScope(), user);
         }
         else if( typeInScopePage == TypeInScopePage.VERSION ){
-            Version version = versionRepository.getReferenceById(generalId);
+            Version version = versionRepository.findById(generalId);
             if (version.getFolder().getScope().isPermitAll()) return;
             access = getAccess(version.getFolder().getScope(), user);
         }

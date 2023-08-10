@@ -35,11 +35,11 @@ public class ScopeService {
     }
 
     public void delete(long id) {
-        Scope scope = scopeRepository.getReferenceById(id);
+        Scope scope = scopeRepository.findById(id);
         fileSystemRepository.delete(scope.getRootPath());
     }
 
     public ScopeDto getScopeById(Long scopeId) {
-        return ScopeMapper.INSTANCE.toScopeDto(scopeRepository.getReferenceById(scopeId));
+        return ScopeMapper.INSTANCE.toScopeDto(scopeRepository.findById(scopeId));
     }
 }

@@ -17,8 +17,10 @@ import ru.parma.filesdistr.repos.VersionRepository;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,37 +33,41 @@ public class ViewPageService {
     private final ScopeAccessService scopeAccessService;
 
     public ViewPageDto getViewPage(Long scopeId, String versionId) throws IOException {
-        Scope scope = scopeRepository.getReferenceById(scopeId);
-        if (scope==null) {
+        Optional<Scope> scopeOpt = scopeRepository.findById(scopeId);
+        if (scopeOpt.isPresent()) {
             throw new EntityNotFoundException(String.format("Scope с id %d  не найден", scopeId));
         }
-
+        Scope scope = scopeOpt.get();
         checkAccessToScope(scope);
 
-        if (versionId.equals("latest")) {
+        if (versionId.equalsIgnoreCase("latest")) {
             List<Folder> folders = scope.getFolders();
             for (Folder folder : folders) {
                 List<Version> versions = folder.getVersions();
-                Version versionWithMaxId = versions.stream().max(Comparator.comparing(v -> v.getDateOfPublication().getTime())).get();
-                versions.clear();
-                versions.add(versionWithMaxId);
+                if(!versions.isEmpty()) {
+                    Version versionWithMaxId = versions.stream()
+                            .max(Comparator.comparing(v -> v.getDateOfPublication().getTime()))
+                            .get();
+                    versions.clear();
+                    versions.add(versionWithMaxId);
+                }
             }
-        }
-
-        else {
-            long v = Long.parseLong(versionId);
-            Version versionWithId = versionRepository.getReferenceById(v);
-            if (versionWithId==null) {
+        } else {
+            long vId = Long.parseLong(versionId);
+            Version versionById = versionRepository.findById(vId);
+            if (versionById == null) {
                 throw new EntityNotFoundException(String.format("Version с id %s  не найден", versionId));
             }
-            String versionNumber = versionWithId.getVersionNumber();
+
+            String versionNumber = versionById.getVersionNumber();
             List<Folder> folders = scope.getFolders();
             for (Folder folder : folders) {
                 List<Version> versions = folder.getVersions();
                 Version version = null;
-                for (Version tmp : versions) {
-                    if (tmp.getVersionNumber().equals(versionNumber)) {
-                        version = tmp;
+                for (Version v : versions) {
+                    if (v.getVersionNumber().equals(versionNumber)) {
+                        version = v;
+                        break;
                     }
                 }
                 versions.clear();
@@ -73,7 +79,7 @@ public class ViewPageService {
 
     private void checkAccessToScope(@NotNull Scope scope) throws IOException {
         if (!scope.isPermitAll()) {
-            if (CustomUserDetailsService.tryGetAuthentication()) {
+            if (CustomUserDetailsService.isAuthenticated()) {
                 scopeAccessService.tryGetAccess(TypeInScopePage.SCOPE, scope.getId(), CustomUserDetailsService.getAuthorizedUserId());
             }
             else {
