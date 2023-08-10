@@ -10,19 +10,18 @@ import java.util.List;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByName(String name);
-    @Query(value = "SELECT * FROM users " +
-                        "WHERE (id != ?1 AND (is_admin_scope_manager = TRUE OR is_admin_manager = TRUE))",
-            nativeQuery = true)
 
-    List<User> findByIdIsNot(Long id);
-
-    @Query(value = "SELECT * FROM users  " +
-            "WHERE (id != ?1 AND is_admin_manager = TRUE)",
+    @Query(value = "SELECT * FROM users AS u\n" +
+            "         INNER JOIN role AS r\n" +
+            "             ON u.id = r.user_id\n" +
+            "         WHERE u.id != ?1 AND r.role_name = 'ADMIN'",
             nativeQuery = true)
-    List<User> findByIdIsNotAndAdminManagerIsTrue(Long id);
+    List<User> getAllAdmins (Long id);
 
-    @Query(value = "SELECT * FROM users  " +
-                        "WHERE (id != ?1 AND is_admin_scope_manager = TRUE)",
+    @Query(value = "SELECT * FROM users AS u\n" +
+            "         INNER JOIN role AS r\n" +
+            "             ON u.id = r.user_id\n" +
+            "         WHERE u.id != ?1 AND r.role_name = 'ADMIN_SCOPES'",
             nativeQuery = true)
-    List<User> findByIdIsNotAndAdminScopeManagerIsTrue(Long id);
+    List<User> getAllAdminsScopes (Long id);
 }

@@ -11,5 +11,8 @@ import java.util.List;
 public interface ScopeMapper {
     ScopeMapper INSTANCE = Mappers.getMapper(ScopeMapper.class);
     ScopeDto toScopeDto(Scope scope);
+
     List<ScopeDto> toScopeDtos(List<Scope> scope);
+
+
 }
