@@ -31,14 +31,13 @@ public class CustomUserDetailsService implements UserDetailsService {
         return SecurityContextHolder.getContext().getAuthentication();
     }
 
-    public static boolean tryGetAuthentication(){
+    public static boolean isAuthenticated(){
         Authentication authentication = getAuthentication();
-
         return authentication != null && ! (authentication instanceof AnonymousAuthenticationToken);
     }
 
     public static @Nullable Long getAuthorizedUserId (){
-        if(tryGetAuthentication()) {
+        if(isAuthenticated()) {
             return ((User) (getAuthentication().getPrincipal())).getId();
         }
         return null;
