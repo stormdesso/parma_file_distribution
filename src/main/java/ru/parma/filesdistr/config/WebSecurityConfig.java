@@ -48,8 +48,8 @@ public class WebSecurityConfig{
                 .and()
                     .authorizeRequests()
                     .expressionHandler(defaultWebSecurityExpressionHandler())
-                    .antMatchers("/scope/{scope_id:\\d+}/version/{version_id:[\\w\\d]+}").permitAll()
-                //ViewPage
+                    .antMatchers("/scope/{scope_id:\\d+}/version/{version_id:\\d+|latest}").permitAll()
+                // -ViewPage
 
                 //пространства
                 .and()
