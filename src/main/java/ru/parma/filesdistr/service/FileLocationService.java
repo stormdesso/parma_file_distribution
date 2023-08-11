@@ -17,6 +17,7 @@ import ru.parma.filesdistr.repos.*;
 import ru.parma.filesdistr.utils.IPathName;
 import ru.parma.filesdistr.utils.Utils;
 
+import javax.persistence.EntityNotFoundException;
 import java.nio.file.FileSystemNotFoundException;
 import java.util.Date;
 import java.util.Optional;
@@ -46,16 +47,26 @@ public class FileLocationService {
         try {
             if( typeInScopePage == TypeInScopePage.SCOPE ){
                 Optional<Scope> scopeOptional = scopeRepository.findById(generalId);
-
-                String fullpath = scopeRepository.findById(generalId).getRootPath();
+                if (!scopeOptional.isPresent()) {
+                    throw new EntityNotFoundException(String.format("Scope с id %d  не найден", generalId));
+                }
+                String fullpath = scopeOptional.get().getRootPath();
                 location = fileSystemRepository.saveInScope(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else if( typeInScopePage == TypeInScopePage.FOLDER ){
-                String fullpath = folderRepository.findById(generalId).getRootPath();
+                Optional<Folder> folderOptional = folderRepository.findById(generalId);
+                if (!folderOptional.isPresent()) {
+                    throw new EntityNotFoundException(String.format("Folder с id %d  не найден", generalId));
+                }
+                String fullpath = folderOptional.get().getRootPath();
                 location = fileSystemRepository.saveInFolder(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else if( typeInScopePage == TypeInScopePage.VERSION ){
-                String fullpath = versionRepository.findById(generalId).getRootPath();
+                Optional<Version> versionOptional = versionRepository.findById(generalId);
+                if (!versionOptional.isPresent()) {
+                    throw new EntityNotFoundException(String.format("Version с id %d  не найден", generalId));
+                }
+                String fullpath = versionOptional.get().getRootPath();
                 location = fileSystemRepository.saveInVersion(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
             else throw new IllegalArgumentException();
@@ -70,9 +81,13 @@ public class FileLocationService {
                     .build();
 
             if(mediaTypeInScopePage == MediaTypeInScopePage.FILE & typeInScopePage == TypeInScopePage.VERSION){
-                Tag tag = null;
+                Tag tag;
                 if(tagId != null) {
-                    tag = tagRepository.findById( tagId );
+                    Optional<Tag> tagOptional = tagRepository.findById( tagId );
+                    if (!tagOptional.isPresent()) {
+                        throw new EntityNotFoundException(String.format("Tag с id %d  не найден", tagId));
+                    }
+                    tag = tagOptional.get();
                     file.setTag( tag );
                 }
                 if(comment != null){
@@ -96,12 +111,15 @@ public class FileLocationService {
 
     private void attachFileToEntity( long generalId, TypeInScopePage typeInScopePage,
                                      MediaTypeInScopePage mediaTypeInScopePage, File savedFile){
-        IPathName iPathName = null;
+        IPathName iPathName;
 
         if( typeInScopePage == TypeInScopePage.SCOPE ){
 
-            iPathName = scopeRepository.findById( generalId );
-
+            Optional<Scope> scopeOptional = scopeRepository.findById( generalId );
+            if (!scopeOptional.isPresent()) {
+                throw new EntityNotFoundException(String.format("Scope с id %d  не найден", generalId));
+            }
+            iPathName = scopeOptional.get();
             if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
                 ((Scope)iPathName).getImages().add(savedFile);
             }
@@ -128,8 +146,11 @@ public class FileLocationService {
         }
         else if( typeInScopePage == TypeInScopePage.FOLDER ){
 
-            iPathName = folderRepository.findById( generalId );
-
+            Optional<Folder> folderOptional = folderRepository.findById( generalId );
+            if (!folderOptional.isPresent()) {
+                throw new EntityNotFoundException(String.format("Folder с id %d  не найден", generalId));
+            }
+            iPathName = folderOptional.get();
             if(mediaTypeInScopePage == MediaTypeInScopePage.MANIFEST) {
                 if(((Folder)iPathName).getManifestForIOSFile() != null) {
                     Long oldManifestId = ((Folder) iPathName).getManifestForIOSFile().getId();
@@ -143,8 +164,11 @@ public class FileLocationService {
             folderRepository.save((Folder)iPathName);
         }
         else if( typeInScopePage == TypeInScopePage.VERSION ){
-            iPathName = versionRepository.findById( generalId );
-
+            Optional<Version> versionOptional = versionRepository.findById( generalId );
+            if (!versionOptional.isPresent()) {
+                throw new EntityNotFoundException(String.format("Version с id %d  не найден", generalId));
+            }
+            iPathName = versionOptional.get();
             if(mediaTypeInScopePage == MediaTypeInScopePage.ILLUSTRATION) {
                 ((Version)iPathName).getImages().add(savedFile);
             }
@@ -162,8 +186,9 @@ public class FileLocationService {
     public void delete ( Long fileId ) {
         try {
             if(fileDbRepository.existsById(fileId)) {
-                File fileDb = fileDbRepository.findById(fileId);
-                String location = fileDb.getLocation();
+                Optional<File> fileDbOptional = fileDbRepository.findById(fileId);
+
+                String location = fileDbOptional.get().getLocation();
 
                 fileDbRepository.deleteById(fileId );//удаляет в бд
                 fileSystemRepository.delete(location);//удаляет с сервера

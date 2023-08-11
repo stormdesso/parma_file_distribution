@@ -17,7 +17,6 @@ import ru.parma.filesdistr.repos.VersionRepository;
 import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -34,7 +33,7 @@ public class ViewPageService {
 
     public ViewPageDto getViewPage(Long scopeId, String versionId) throws IOException {
         Optional<Scope> scopeOpt = scopeRepository.findById(scopeId);
-        if (scopeOpt.isPresent()) {
+        if (!scopeOpt.isPresent()) {
             throw new EntityNotFoundException(String.format("Scope с id %d  не найден", scopeId));
         }
         Scope scope = scopeOpt.get();
@@ -54,11 +53,11 @@ public class ViewPageService {
             }
         } else {
             long vId = Long.parseLong(versionId);
-            Version versionById = versionRepository.findById(vId);
-            if (versionById == null) {
+            Optional<Version> versionByIdOpt = versionRepository.findById(vId);
+            if (!versionByIdOpt.isPresent()) {
                 throw new EntityNotFoundException(String.format("Version с id %s  не найден", versionId));
             }
-
+            Version versionById = versionByIdOpt.get();
             String versionNumber = versionById.getVersionNumber();
             List<Folder> folders = scope.getFolders();
             for (Folder folder : folders) {
