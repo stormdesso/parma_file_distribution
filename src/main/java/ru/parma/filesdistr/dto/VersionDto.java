@@ -3,7 +3,7 @@ package ru.parma.filesdistr.dto;
 import lombok.Builder;
 import lombok.Data;
 
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Data
@@ -11,7 +11,7 @@ import java.util.List;
 public class VersionDto {
     private Long id;
     private String versionNumber;
-    private Date dateOfPublication;
+    private Timestamp dateOfPublication;
     private String description;
     private boolean showIllustration;
     private boolean publish;

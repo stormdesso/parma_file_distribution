@@ -16,7 +16,9 @@ import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.UserRepository;
 import ru.parma.filesdistr.repos.VersionRepository;
 
+import javax.persistence.EntityNotFoundException;
 import java.nio.file.AccessDeniedException;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -34,19 +36,38 @@ public class ScopeAccessService {
 
         if(isAdminOrRoot()) return ;
 
-        User user = userRepository.getReferenceById(userId);
+        Optional<User> userOptional = userRepository.findById(userId);
 
+        if (!userOptional.isPresent()) {
+            throw new EntityNotFoundException(String.format("User с id %d  не найден", userId));
+        }
+        User user = userOptional.get();
         boolean access = false;
         if( typeInScopePage == TypeInScopePage.SCOPE ){
-            Scope scope = scopeRepository.getReferenceById(generalId);
+            Optional<Scope> scopeOptional = scopeRepository.findById(generalId);
+            if (!scopeOptional.isPresent()) {
+                throw new EntityNotFoundException(String.format("Scope с id %d  не найден", generalId));
+            }
+            Scope scope = scopeOptional.get();
+            if (scope.isPermitAll()) return;
             access = getAccess(scope, user);
         }
         else if( typeInScopePage == TypeInScopePage.FOLDER ){
-            Folder folder = folderRepository.getReferenceById(generalId);
+            Optional<Folder> folderOptional = folderRepository.findById(generalId);
+            if (!folderOptional.isPresent()) {
+                throw new EntityNotFoundException(String.format("Folder с id %d  не найден", generalId));
+            }
+            Folder folder = folderOptional.get();
+            if (folder.getScope().isPermitAll()) return;
             access = getAccess(folder.getScope(), user);
         }
         else if( typeInScopePage == TypeInScopePage.VERSION ){
-            Version version = versionRepository.getReferenceById(generalId);
+            Optional<Version> versionOptional = versionRepository.findById(generalId);
+            if (!versionOptional.isPresent()) {
+                throw new EntityNotFoundException(String.format("Version с id %d  не найден", generalId));
+            }
+            Version version = versionOptional.get();
+            if (version.getFolder().getScope().isPermitAll()) return;
             access = getAccess(version.getFolder().getScope(), user);
         }
         if(!access) {
@@ -61,5 +82,4 @@ public class ScopeAccessService {
         return authentication.getAuthorities().stream()
                 .anyMatch(r -> r.getAuthority().equals(Roles.ROOT.toString()) || r.getAuthority().equals(Roles.ADMIN.toString()));
     }
-
 }

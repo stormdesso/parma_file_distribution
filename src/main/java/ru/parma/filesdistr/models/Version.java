@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import ru.parma.filesdistr.utils.IPathName;
 
 import javax.persistence.*;
-import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 
 @Entity
@@ -31,7 +31,7 @@ public class Version implements IPathName{
     private String versionNumber;
 
     @Column(name = "date_of_publication")
-    private Date dateOfPublication;
+    private Timestamp dateOfPublication;
 
     @Column(name = "description")
     private String description;
