@@ -26,18 +26,21 @@ public class ScopeController {
     }
 
     @PutMapping("/update")
+    @ResponseBody
     public void update(@RequestBody ScopeDto scope)
     {
         scopeService.update(scope);
     }
 
     @PostMapping("/add")
+    @ResponseBody
     public void add (@RequestBody ScopeDto scope)
     {
         scopeService.add(scope);
     }
 
     @DeleteMapping("/delete/{scope_id}")
+    @ResponseBody
     public void delete( @PathVariable Long scope_id)
     {
         scopeService.delete(scope_id);

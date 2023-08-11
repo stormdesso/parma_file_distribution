@@ -12,6 +12,7 @@ import ru.parma.filesdistr.repos.ScopeRepository;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -23,27 +24,28 @@ public class FolderService {
     private final FileSystemRepository fileSystemRepository;
 
     public List<FolderDto> getAll(long scope_id) {
-        Scope scope = scopeRepository.getReferenceById(scope_id);
-        if (scope == null) {
+        Optional<Scope> scopeOptional = scopeRepository.findById(scope_id);
+        if (!scopeOptional.isPresent()) {
             throw new EntityNotFoundException(String.format("Пространства с id %d не существует", scope_id));
         }
-        return FolderMapper.INSTANCE.toFolderDtos(scope.getFolders());
+        return FolderMapper.INSTANCE.toFolderDtos(scopeOptional.get().getFolders());
     }
 
     public FolderDto get(long folder_id) {
-        Folder folder = folderRepository.getReferenceById(folder_id);
-        if (folder == null) {
+        Optional<Folder> folderOptional = folderRepository.findById(folder_id);
+        if (!folderOptional.isPresent()) {
             throw new EntityNotFoundException( String.format("Папки с id %d не существует", folder_id));
         }
-        return FolderMapper.INSTANCE.toFolderDto(folder);
+        return FolderMapper.INSTANCE.toFolderDto(folderOptional.get());
     }
 
     public void add(FolderDto folderDto, long scope_id) {
         checkDto(folderDto);
-        Scope scope = scopeRepository.getReferenceById(scope_id);
-        if (scope == null) {
+        Optional<Scope> scopeOptional = scopeRepository.findById(scope_id);
+        if (!scopeOptional.isPresent()) {
             throw new EntityNotFoundException(String.format("Пространства с id %d не существует", scope_id));
         }
+        Scope scope = scopeOptional.get();
         Folder folder = FolderMapper.INSTANCE.toFolder(folderDto);
         List<Folder> folders = scope.getFolders();
         folders.add(folder);
@@ -53,8 +55,8 @@ public class FolderService {
 
     public void update(FolderDto folderDto) {
         checkDto(folderDto);
-        Folder existedFolder = folderRepository.getReferenceById(folderDto.getId());
-        if (existedFolder == null) {
+        Optional<Folder> existedFolder = folderRepository.findById(folderDto.getId());
+        if (!existedFolder.isPresent()) {
             throw new EntityNotFoundException("Такой папки для обновления не существует");
         }
         Folder folder = FolderMapper.INSTANCE.toFolder(folderDto);
@@ -74,11 +76,11 @@ public class FolderService {
     }
 
     public void delete(Long folder_id) {
-        Folder folder = folderRepository.getReferenceById(folder_id);
-        if (folder==null) {
+        Optional<Folder> folderOptional = folderRepository.findById(folder_id);
+        if (!folderOptional.isPresent()) {
             throw new EntityNotFoundException( String.format("Папки с id %d не существует", folder_id));
         }
-        fileSystemRepository.delete(folder.getRootPath());
-        folderRepository.delete(folder);
+        fileSystemRepository.delete(folderOptional.get().getRootPath());
+        folderRepository.delete(folderOptional.get());
     }
 }

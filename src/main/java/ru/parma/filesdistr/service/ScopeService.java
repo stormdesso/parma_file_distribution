@@ -36,6 +36,31 @@ public class ScopeService {
         }
     }
 
+    public void add(ScopeDto scopeDto) {
+        checkDto(scopeDto);
+        Scope scope = ScopeMapper.INSTANCE.toScope(scopeDto);
+        scopeRepository.save(scope);
+    }
+
+    public void update(ScopeDto scopeDto) {
+        checkDto(scopeDto);
+        Optional<Scope> existedScope = scopeRepository.findById(scopeDto.getId());
+        if (!existedScope.isPresent()) {
+            throw new  EntityNotFoundException("Такого пространства для обновления не существует");
+        }
+        Scope scope = ScopeMapper.INSTANCE.toScope(scopeDto);
+        scopeRepository.save(scope);
+    }
+
+    private void checkDto(ScopeDto scopeDto) {
+        if (scopeDto == null) {
+            throw new IllegalArgumentException("Создаваемый объект не может быть null");
+        }
+        if (scopeDto.getName() == null) {
+            throw new IllegalArgumentException("Имя пространства не может быть null");
+        }
+    }
+
     public void delete(long id) {
         Optional<Scope> scope = scopeRepository.findById(id);
         if (!scope.isPresent()) {
