@@ -36,6 +36,10 @@ public class User implements UserDetails {
     @Column(name = "password")
     private String password;
 
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "profile_picture_id")//profile_picture_id(fk) user -> id(pk) file
+    private File profilePicture;
+
     @Column(name = "blocked")
     private boolean blocked;
 

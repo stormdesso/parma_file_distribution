@@ -13,6 +13,7 @@ public class UserDto {
 
     private Long id;
     private String name;
+    private FileDto profilePicture;
     private boolean blocked;
     private boolean isAdminManager;
     private boolean isAdminScopeManager;

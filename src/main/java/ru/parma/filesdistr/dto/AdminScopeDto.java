@@ -11,6 +11,7 @@ import java.util.List;
 public class AdminScopeDto {
     private Long id;
     private String name;
+    private FileDto profilePicture;
     @Nullable
     private String password;
     private boolean blocked;
