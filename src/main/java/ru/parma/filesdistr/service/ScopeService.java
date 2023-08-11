@@ -12,12 +12,14 @@ import ru.parma.filesdistr.repos.ScopeRepository;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ScopeService {
     private final ScopeRepository scopeRepository;
-    private final FileSystemRepository fileSystemRepository;
+    private final FileSystemRepository
+    fileSystemRepository;
 
     public List<ScopeDto> getAll() {
         List<Scope> scopes = scopeRepository.findAll();
@@ -25,31 +27,7 @@ public class ScopeService {
         return ScopeMapper.INSTANCE.toScopeDtos(scopes);
     }
 
-    public void add(ScopeDto scopeDto) {
-        checkDto(scopeDto);
-        Scope scope = ScopeMapper.INSTANCE.toScope(scopeDto);
-        scopeRepository.save(scope);
-    }
-
-    public void update(ScopeDto scopeDto) {
-        checkDto(scopeDto);
-        Scope existedScope = scopeRepository.getReferenceById(scopeDto.getId());
-        if (existedScope == null) {
-            throw new EntityNotFoundException("Такого пространства для обновления не существует");
-        }
-        Scope scope = ScopeMapper.INSTANCE.toScope(scopeDto);
-        scopeRepository.save(scope);
-    }
-
-    private void checkDto(ScopeDto scopeDto) {
-        if (scopeDto == null) {
-            throw new IllegalArgumentException("Создаваемое простарнство не может быть null");
-        }
-        if (scopeDto.getName() == null) {
-            throw new IllegalArgumentException("Имя пространства не может быть null");
-        }
-    }
-
+    // TODO шляпа какая-то
     private void deleteVersionFromFolder ( @NotNull List<Scope> scopes){
         for (Scope scope: scopes) {
             for (Folder folder: scope.getFolders()) {
@@ -59,15 +37,18 @@ public class ScopeService {
     }
 
     public void delete(long id) {
-        Scope scope = scopeRepository.getReferenceById(id);
-        if (scope == null) {
-            throw new EntityNotFoundException(String.format("Пространства с id %d не существует", id));
+        Optional<Scope> scope = scopeRepository.findById(id);
+        if (!scope.isPresent()) {
+            throw new EntityNotFoundException(String.format("Scope с id %d  не найден", id));
         }
-        fileSystemRepository.delete(scope.getRootPath());
-        scopeRepository.delete(scope);
+        fileSystemRepository.delete(scope.get().getRootPath());
     }
 
     public ScopeDto getScopeById(Long scopeId) {
-        return ScopeMapper.INSTANCE.toScopeDto(scopeRepository.getReferenceById(scopeId));
+        Optional<Scope> scopeOptional = scopeRepository.findById(scopeId);
+        if (!scopeOptional.isPresent()) {
+            throw new EntityNotFoundException(String.format("Scope с id %d  не найден", scopeId));
+        }
+        return ScopeMapper.INSTANCE.toScopeDto(scopeOptional.get());
     }
 }

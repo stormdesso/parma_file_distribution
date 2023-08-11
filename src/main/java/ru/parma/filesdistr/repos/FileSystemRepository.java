@@ -85,7 +85,9 @@ public class FileSystemRepository{
             if(! file.exists()) {
                 // TODO logs - no file
             }
-            file.deleteOnExit();
+            if(!file.delete()){
+                throw new RuntimeException();
+            }
         } catch (NullPointerException | SecurityException exception) {
             exception.getStackTrace();
             throw  exception;

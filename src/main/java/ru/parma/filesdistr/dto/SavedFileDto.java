@@ -12,4 +12,5 @@ public class SavedFileDto {
     private  String type;
     //private  byte[] data;
     private TagDto tag;
+    private  String comment;
 }
