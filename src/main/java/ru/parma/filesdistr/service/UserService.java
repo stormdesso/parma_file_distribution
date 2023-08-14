@@ -14,6 +14,7 @@ import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.UserRepository;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.*;
 
 @Service
@@ -24,13 +25,33 @@ public class UserService {
         BCryptPasswordEncoder tmp = new BCryptPasswordEncoder (8);
         return tmp.encode (password);
     }
-
     private final UserRepository userRepository;
     private final ScopeRepository scopeRepository;
 
-    private boolean canEditAdmin () {
+
+    private @NotNull User getAuthorizedUser(){
+
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
-        User currUser = userRepository.getReferenceById (id);
+        Optional <User> optUser = userRepository.findById(id);
+        if(!optUser.isPresent ()){
+            throw new EntityNotFoundException (String.format("User с id %d  не найден", id));
+        }
+
+        return optUser.get();
+    }
+
+    private @NotNull User getUserById(Long id){
+        Optional <User> optUser = userRepository.findById(id);
+        if(!optUser.isPresent ()){
+            throw new EntityNotFoundException (String.format("User с id %d  не найден", id));
+        }
+
+        return optUser.get();
+    }
+
+
+    private boolean canEditAdmin () {
+        User currUser = getAuthorizedUser();
         Set <Roles> rolesSet = currUser.getRoles ();
         if(rolesSet.containsAll (new HashSet <Roles> () {{
             add (Roles.ROOT);
@@ -47,8 +68,7 @@ public class UserService {
     }
 
     private boolean canEditAdminScopes () {
-        Long id = CustomUserDetailsService.getAuthorizedUserId ();
-        User currUser = userRepository.getReferenceById (id);
+        User currUser = getAuthorizedUser();
         Set <Roles> rolesSet = currUser.getRoles ();
         if(rolesSet.containsAll (new HashSet <Roles> () {{
             add (Roles.ROOT);
@@ -108,10 +128,11 @@ public class UserService {
         }
     }
 
+
     public void update (@NotNull AdminDto adminDto) {
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
-        User currUser = userRepository.getReferenceById (id);
-        User updatedUser = userRepository.getReferenceById (adminDto.getId ());
+        User currUser = getUserById(id);
+        User updatedUser = getUserById(adminDto.getId());
 
         if(currUser.getId () != updatedUser.getId () & canEditAdmin ()){
             UserMapper.INSTANCE.fromAdminDtoToUser (adminDto, updatedUser);
@@ -150,8 +171,8 @@ public class UserService {
 
     public void update (@NotNull AdminScopeDto adminScopeDto) {
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
-        User currUser = userRepository.getReferenceById (id);
-        User updatableUser = userRepository.getReferenceById (adminScopeDto.getId ());
+        User currUser = getUserById(id);
+        User updatableUser = getUserById(adminScopeDto.getId ());
 
         if(currUser.getId () != updatableUser.getId ()){
             if(canEditAdminScopes ()){
