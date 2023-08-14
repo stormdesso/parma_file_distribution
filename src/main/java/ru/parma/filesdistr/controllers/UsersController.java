@@ -37,7 +37,7 @@ public class UsersController {
     @PutMapping("/admin/update")
     @ResponseBody
     public void updateAdmin (@RequestBody @NotNull AdminDto adminDto) {
-        userService.updateAdmin(adminDto);
+        userService.update (adminDto);
     }
 
     @DeleteMapping("/admin/delete/{adminId}")
@@ -56,7 +56,7 @@ public class UsersController {
     @PutMapping("/admin_scopes/update")
     @ResponseBody
     public void updateAdminScopes (@RequestBody @NotNull AdminScopeDto adminScopeDto) {
-        userService.updateAdminScopes(adminScopeDto);
+        userService.update (adminScopeDto);
     }
 
     @DeleteMapping("/admin_scope/delete/{adminScopeId}")

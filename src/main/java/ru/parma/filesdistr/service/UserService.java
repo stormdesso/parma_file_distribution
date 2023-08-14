@@ -14,10 +14,7 @@ import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.UserRepository;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -73,7 +70,7 @@ public class UserService {
         Set <User> users = new HashSet <> ();
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
         if(canEditAdmin ()){
-            users.addAll (userRepository.getAllAdmins (id));
+            users.addAll (userRepository.findByRolesContainingAndIdNot(Roles.ADMIN, id));
         }
 
         return UserMapper.INSTANCE.toAdminDtos (users);
@@ -83,11 +80,12 @@ public class UserService {
         Set <User> users = new HashSet <> ();
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
         if(canEditAdminScopes ()){
-            users.addAll (userRepository.getAllAdminsScopes (id));
+            users.addAll (userRepository.findByRolesContainingAndIdNot(Roles.ADMIN_SCOPES, id));
         }
 
         return UserMapper.INSTANCE.toAdminScopeDtos (users);
     }
+
 
     public void add (@NotNull AdminDto adminDto) {
         if(canEditAdmin ()){
@@ -110,30 +108,22 @@ public class UserService {
         }
     }
 
-
-    public void updateAdmin (@NotNull AdminDto adminDto) {
+    public void update (@NotNull AdminDto adminDto) {
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
         User currUser = userRepository.getReferenceById (id);
-        User updatableUser = userRepository.getReferenceById (adminDto.getId ());
+        User updatedUser = userRepository.getReferenceById (adminDto.getId ());
 
-        if(currUser.getId () != updatableUser.getId () & canEditAdmin ()){
-            applyChangesForAdmin (updatableUser, adminDto);
+        if(currUser.getId () != updatedUser.getId () & canEditAdmin ()){
+            UserMapper.INSTANCE.fromAdminDtoToUser (adminDto, updatedUser);
+            userRepository.save (updatedUser);
         }
     }
-
-    private void applyChangesForAdmin (@NotNull User updatableUser, @NotNull AdminDto adminDto) {
-        updatableUser.setName (adminDto.getName ());
-        updatableUser.setBlocked (adminDto.isBlocked ());
-        updatableUser.setAdminManager (adminDto.isAdminManager ());
-        updatableUser.setAdminScopeManager (adminDto.isAdminScopeManager ());
-        userRepository.save (updatableUser);
-    }
-
 
     public void deleteAdmin (Long adminId) {
         if(canEditAdmin ())
             userRepository.deleteById (adminId);
     }
+
 
 
     public void add (@NotNull AdminScopeDto adminScopeDto) {
@@ -158,30 +148,25 @@ public class UserService {
         }
     }
 
-
-    public void updateAdminScopes (@NotNull AdminScopeDto adminScopeDto) {
+    public void update (@NotNull AdminScopeDto adminScopeDto) {
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
         User currUser = userRepository.getReferenceById (id);
         User updatableUser = userRepository.getReferenceById (adminScopeDto.getId ());
 
         if(currUser.getId () != updatableUser.getId ()){
             if(canEditAdminScopes ()){
-                applyChangesForAdminScopes (updatableUser, adminScopeDto);
+                UserMapper.INSTANCE.fromAdminScopeDtoToUser(adminScopeDto, updatableUser,
+                        covertScopePreviewDtosToScopes (adminScopeDto.getScopePreviewDtos ()));
+                userRepository.save (updatableUser);
             }
         }
     }
 
-    private void applyChangesForAdminScopes (@NotNull User updatableUser, @NotNull AdminScopeDto adminScopeDto) {
-        updatableUser.setName (adminScopeDto.getName ());
-        updatableUser.setBlocked (adminScopeDto.isBlocked ());
-        updatableUser.setCanCreateAndDeleteScope (adminScopeDto.isCanCreateAndDeleteScope ());
-        updatableUser.setMaxNumberScope (adminScopeDto.getMaxNumberScope ());
-        updatableUser.setMaxStorageSpace (adminScopeDto.getMaxStorageSpace ());
-        updatableUser.setMaxNumberFolder (adminScopeDto.getMaxNumberFolder ());
-        updatableUser.setAvailableScopes (covertScopePreviewDtosToScopes (adminScopeDto.getScopePreviewDtos ()));
-
-        userRepository.save (updatableUser);
+    public void deleteAdminScope (Long adminScopeId) {
+        if(canEditAdminScopes ())
+            userRepository.deleteById (adminScopeId);
     }
+
 
     private List <Scope> covertScopePreviewDtosToScopes (@NotNull List <ScopePreviewDto> scopePreviewDtos) {
         List <Long> list = new ArrayList <> ();
@@ -191,11 +176,5 @@ public class UserService {
         }
 
         return scopeRepository.findAllByIdIn (list);
-    }
-
-
-    public void deleteAdminScope (Long adminScopeId) {
-        if(canEditAdminScopes ())
-            userRepository.deleteById (adminScopeId);
     }
 }
