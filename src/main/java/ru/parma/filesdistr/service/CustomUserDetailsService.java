@@ -1,6 +1,9 @@
 package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -24,8 +27,19 @@ public class CustomUserDetailsService implements UserDetailsService {
         return user;
     }
 
-    public static Long getAuthorizedUserId (){
-        return ((User) SecurityContextHolder.getContext().getAuthentication().getPrincipal()).getId();
+    private static Authentication getAuthentication(){
+        return SecurityContextHolder.getContext().getAuthentication();
     }
 
+    public static boolean isAuthenticated(){
+        Authentication authentication = getAuthentication();
+        return authentication != null && ! (authentication instanceof AnonymousAuthenticationToken);
+    }
+
+    public static @Nullable Long getAuthorizedUserId (){
+        if(isAuthenticated()) {
+            return ((User) (getAuthentication().getPrincipal())).getId();
+        }
+        return null;
+    }
 }

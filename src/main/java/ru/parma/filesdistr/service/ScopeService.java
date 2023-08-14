@@ -10,7 +10,9 @@ import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.repos.FileSystemRepository;
 import ru.parma.filesdistr.repos.ScopeRepository;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -35,11 +37,18 @@ public class ScopeService {
     }
 
     public void delete(long id) {
-        Scope scope = scopeRepository.getReferenceById(id);
-        fileSystemRepository.delete(scope.getRootPath());
+        Optional<Scope> scope = scopeRepository.findById(id);
+        if (!scope.isPresent()) {
+            throw new EntityNotFoundException(String.format("Scope с id %d  не найден", id));
+        }
+        fileSystemRepository.delete(scope.get().getRootPath());
     }
 
     public ScopeDto getScopeById(Long scopeId) {
-        return ScopeMapper.INSTANCE.toScopeDto(scopeRepository.getReferenceById(scopeId));
+        Optional<Scope> scopeOptional = scopeRepository.findById(scopeId);
+        if (!scopeOptional.isPresent()) {
+            throw new EntityNotFoundException(String.format("Scope с id %d  не найден", scopeId));
+        }
+        return ScopeMapper.INSTANCE.toScopeDto(scopeOptional.get());
     }
 }
