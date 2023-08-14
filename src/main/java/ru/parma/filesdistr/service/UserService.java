@@ -6,16 +6,17 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.dto.AdminDto;
 import ru.parma.filesdistr.dto.AdminScopeDto;
-import ru.parma.filesdistr.dto.ScopePreviewDto;
 import ru.parma.filesdistr.enums.Roles;
+import ru.parma.filesdistr.mappers.ScopeMapper;
 import ru.parma.filesdistr.mappers.UserMapper;
-import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.UserRepository;
 
 import javax.persistence.EntityNotFoundException;
-import java.util.*;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -159,7 +160,7 @@ public class UserService {
                     .maxNumberScope (adminScopeDto.getMaxNumberScope ())
                     .maxStorageSpace (adminScopeDto.getMaxStorageSpace ())
                     .maxNumberFolder (adminScopeDto.getMaxNumberFolder ())
-                    .availableScopes (covertScopePreviewDtosToScopes (adminScopeDto.getScopePreviewDtos ()))
+                    .availableScopes (ScopeMapper.INSTANCE.toScope (scopeRepository, adminScopeDto.getScopePreviewDtos ()))
                     .roles (new HashSet <Roles> () {{
                         add (Roles.ADMIN_SCOPES);
                     }})
@@ -177,7 +178,7 @@ public class UserService {
         if(currUser.getId () != updatableUser.getId ()){
             if(canEditAdminScopes ()){
                 UserMapper.INSTANCE.fromAdminScopeDtoToUser(adminScopeDto, updatableUser,
-                        covertScopePreviewDtosToScopes (adminScopeDto.getScopePreviewDtos ()));
+                        ScopeMapper.INSTANCE.toScope (scopeRepository, adminScopeDto.getScopePreviewDtos ()));
                 userRepository.save (updatableUser);
             }
         }
@@ -188,14 +189,4 @@ public class UserService {
             userRepository.deleteById (adminScopeId);
     }
 
-
-    private List <Scope> covertScopePreviewDtosToScopes (@NotNull List <ScopePreviewDto> scopePreviewDtos) {
-        List <Long> list = new ArrayList <> ();
-
-        for (ScopePreviewDto scopePreviewDto : scopePreviewDtos) {
-            list.add (scopePreviewDto.getId ());
-        }
-
-        return scopeRepository.findAllByIdIn (list);
-    }
 }
