@@ -20,46 +20,49 @@ import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
-public class UserService {
+public class UserService{
 
-    private  String encryptPassword (String password){
+    private String encryptPassword(String password){
         BCryptPasswordEncoder tmp = new BCryptPasswordEncoder (8);
         return tmp.encode (password);
     }
+
     private final UserRepository userRepository;
     private final ScopeRepository scopeRepository;
+    private static final String USERNAME_REGEX = "^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$";
+    private static final String PASSWORD_REGEX = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
 
 
     private @NotNull User getAuthorizedUser(){
 
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
-        Optional <User> optUser = userRepository.findById(id);
-        if(!optUser.isPresent ()){
-            throw new EntityNotFoundException (String.format("User с id %d  не найден", id));
+        Optional <User> optUser = userRepository.findById (id);
+        if(! optUser.isPresent ()){
+            throw new EntityNotFoundException (String.format ("User с id %d  не найден", id));
         }
 
-        return optUser.get();
+        return optUser.get ();
     }
 
     private @NotNull User getUserById(Long id){
-        Optional <User> optUser = userRepository.findById(id);
-        if(!optUser.isPresent ()){
-            throw new EntityNotFoundException (String.format("User с id %d  не найден", id));
+        Optional <User> optUser = userRepository.findById (id);
+        if(! optUser.isPresent ()){
+            throw new EntityNotFoundException (String.format ("User с id %d  не найден", id));
         }
 
-        return optUser.get();
+        return optUser.get ();
     }
 
 
-    private boolean canEditAdmin () {
-        User currUser = getAuthorizedUser();
+    private boolean canEditAdmin(){
+        User currUser = getAuthorizedUser ();
         Set <Roles> rolesSet = currUser.getRoles ();
-        if(rolesSet.containsAll (new HashSet <Roles> () {{
+        if(rolesSet.containsAll (new HashSet <Roles> (){{
             add (Roles.ROOT);
         }})){
             return true;
         }
-        if(rolesSet.containsAll (new HashSet <Roles> () {{
+        if(rolesSet.containsAll (new HashSet <Roles> (){{
             add (Roles.ADMIN);
         }}) & currUser.isAdminManager ()){
             return true;
@@ -68,15 +71,15 @@ public class UserService {
         return false;
     }
 
-    private boolean canEditAdminScopes () {
-        User currUser = getAuthorizedUser();
+    private boolean canEditAdminScopes(){
+        User currUser = getAuthorizedUser ();
         Set <Roles> rolesSet = currUser.getRoles ();
-        if(rolesSet.containsAll (new HashSet <Roles> () {{
+        if(rolesSet.containsAll (new HashSet <Roles> (){{
             add (Roles.ROOT);
         }})){
             return true;
         }
-        if(rolesSet.containsAll (new HashSet <Roles> () {{
+        if(rolesSet.containsAll (new HashSet <Roles> (){{
             add (Roles.ADMIN);
         }}) & currUser.isAdminScopeManager ()){
             return true;
@@ -86,31 +89,49 @@ public class UserService {
     }
 
 
-    public Set <AdminDto> getAllAdmins () {
+    public Set <AdminDto> getAllAdmins(){
 
         Set <User> users = new HashSet <> ();
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
         if(canEditAdmin ()){
-            users.addAll (userRepository.findByRolesContainingAndIdNot(Roles.ADMIN, id));
+            users.addAll (userRepository.findByRolesContainingAndIdNot (Roles.ADMIN, id));
         }
 
         return UserMapper.INSTANCE.toAdminDtos (users);
     }
 
-    public Set <AdminScopeDto> getAllAdminsScopes () {
+    public Set <AdminScopeDto> getAllAdminsScopes(){
         Set <User> users = new HashSet <> ();
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
         if(canEditAdminScopes ()){
-            users.addAll (userRepository.findByRolesContainingAndIdNot(Roles.ADMIN_SCOPES, id));
+            users.addAll (userRepository.findByRolesContainingAndIdNot (Roles.ADMIN_SCOPES, id));
         }
 
         return UserMapper.INSTANCE.toAdminScopeDtos (users);
     }
 
 
-    public void add (@NotNull AdminDto adminDto) {
+    private void matchesRegex(@NotNull User user){
+        matchesUsername (user.getName ());
+        matchesPassword (user.getPassword ());
+    }
+
+    private void matchesUsername(@NotNull String username){
+        if(! username.matches (USERNAME_REGEX)){
+            throw new IllegalArgumentException (String.format ("Не удалось создать пользователя с name %s", username));
+        }
+    }
+
+    private void matchesPassword(@NotNull String password){
+        if(! password.matches (PASSWORD_REGEX)){
+            throw new IllegalArgumentException (String.format ("Не удалось создать пользователя с password %s", password));
+        }
+    }
+
+
+    public void add(@NotNull AdminDto adminDto){
         if(canEditAdmin ()){
-            Set<Roles> roles = new HashSet<> ();
+            Set <Roles> roles = new HashSet <> ();
             roles.add (Roles.ADMIN);
 
             User user = User.builder ()
@@ -120,35 +141,37 @@ public class UserService {
                     .isAdminManager (adminDto.isAdminManager ())
                     .isAdminScopeManager (adminDto.isAdminScopeManager ())
                     .canCreateAndDeleteScope (true)
-                    .maxNumberScope (9999L)
-                    .maxNumberFolder (9999L)
-                    .maxStorageSpace (9999L)
+                    .maxNumberScope (0L)
+                    .maxNumberFolder (0L)
+                    .maxStorageSpace (0L)
                     .roles (roles)
                     .build ();
+
+            matchesRegex (user);
             userRepository.save (user);
         }
     }
 
 
-    public void update (@NotNull AdminDto adminDto) {
+    public void update(@NotNull AdminDto adminDto){
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
-        User currUser = getUserById(id);
-        User updatedUser = getUserById(adminDto.getId());
+        User currUser = getUserById (id);
+        User updatedUser = getUserById (adminDto.getId ());
 
         if(currUser.getId () != updatedUser.getId () & canEditAdmin ()){
             UserMapper.INSTANCE.fromAdminDtoToUser (adminDto, updatedUser);
+            matchesRegex(updatedUser);
             userRepository.save (updatedUser);
         }
     }
 
-    public void deleteAdmin (Long adminId) {
+    public void deleteAdmin(Long adminId){
         if(canEditAdmin ())
             userRepository.deleteById (adminId);
     }
 
 
-
-    public void add (@NotNull AdminScopeDto adminScopeDto) {
+    public void add(@NotNull AdminScopeDto adminScopeDto){
         if(canEditAdminScopes ()){
             User user = User.builder ()
                     .name (adminScopeDto.getName ())
@@ -161,30 +184,33 @@ public class UserService {
                     .maxStorageSpace (adminScopeDto.getMaxStorageSpace ())
                     .maxNumberFolder (adminScopeDto.getMaxNumberFolder ())
                     .availableScopes (ScopeMapper.INSTANCE.toScope (scopeRepository, adminScopeDto.getScopePreviewDtos ()))
-                    .roles (new HashSet <Roles> () {{
+                    .roles (new HashSet <Roles> (){{
                         add (Roles.ADMIN_SCOPES);
                     }})
                     .build ();
 
+            matchesRegex(user);
             userRepository.save (user);
         }
     }
 
-    public void update (@NotNull AdminScopeDto adminScopeDto) {
+    public void update(@NotNull AdminScopeDto adminScopeDto){
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
-        User currUser = getUserById(id);
-        User updatableUser = getUserById(adminScopeDto.getId ());
+        User currUser = getUserById (id);
+        User updatedUser = getUserById (adminScopeDto.getId ());
 
-        if(currUser.getId () != updatableUser.getId ()){
+        if(currUser.getId () != updatedUser.getId ()){
             if(canEditAdminScopes ()){
-                UserMapper.INSTANCE.fromAdminScopeDtoToUser(adminScopeDto, updatableUser,
+                UserMapper.INSTANCE.fromAdminScopeDtoToUser (adminScopeDto, updatedUser,
                         ScopeMapper.INSTANCE.toScope (scopeRepository, adminScopeDto.getScopePreviewDtos ()));
-                userRepository.save (updatableUser);
+
+                matchesRegex(updatedUser);
+                userRepository.save (updatedUser);
             }
         }
     }
 
-    public void deleteAdminScope (Long adminScopeId) {
+    public void deleteAdminScope(Long adminScopeId){
         if(canEditAdminScopes ())
             userRepository.deleteById (adminScopeId);
     }

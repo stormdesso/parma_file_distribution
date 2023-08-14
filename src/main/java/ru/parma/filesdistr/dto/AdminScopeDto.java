@@ -2,7 +2,7 @@ package ru.parma.filesdistr.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.lang.Nullable;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
 
@@ -10,14 +10,17 @@ import java.util.List;
 @Builder
 public class AdminScopeDto {
     private Long id;
+    @NotNull
     private String name;
     private FileDto profilePicture;
-    @Nullable
     private String password;
     private boolean blocked;
     private boolean canCreateAndDeleteScope;
+    @NotNull
     private Long maxNumberScope;
+    @NotNull
     private Long maxStorageSpace;
+    @NotNull
     private Long maxNumberFolder;
     private List <ScopePreviewDto> scopePreviewDtos;
 }
