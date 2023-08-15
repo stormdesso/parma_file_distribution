@@ -40,12 +40,6 @@ public class UsersController {
         userService.update (adminDto);
     }
 
-    @DeleteMapping("/admin/delete/{adminId}")
-    @ResponseBody
-    public void deleteAdmin (@PathVariable Long adminId) {
-        userService.deleteAdmin(adminId);
-    }
-
 
     @PostMapping("/admin_scope/add")
     @ResponseBody
@@ -59,11 +53,13 @@ public class UsersController {
         userService.update (adminScopeDto);
     }
 
-    @DeleteMapping("/admin_scope/delete/{adminScopeId}")
+
+    @DeleteMapping("/delete/{id}")
     @ResponseBody
-    public void deleteAdminScope (@PathVariable Long adminScopeId) {
-        userService.deleteAdminScope(adminScopeId);
+    public void delete (@PathVariable Long id) {
+        userService.delete(id);
     }
+
 }
 
 

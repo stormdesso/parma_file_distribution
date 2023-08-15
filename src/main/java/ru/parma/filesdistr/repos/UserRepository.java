@@ -10,5 +10,6 @@ import java.util.List;
 @Repository
 public interface UserRepository extends JpaRepository<User, Long> {
     User findByName(String name);
+    Long countByName(String name );
     List<User> findByRolesContainingAndIdNot(Roles role, Long id);
 }

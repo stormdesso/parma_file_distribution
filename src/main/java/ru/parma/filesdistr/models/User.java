@@ -68,7 +68,7 @@ public class User implements UserDetails {
     @Type(type = "enum_postgressql")
     private Set<Roles> roles = new HashSet<>();
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "user_scope",
             joinColumns = {
                     @JoinColumn(name = "user_id", referencedColumnName = "id")
