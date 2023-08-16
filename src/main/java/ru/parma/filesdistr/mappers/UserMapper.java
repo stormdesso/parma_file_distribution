@@ -42,21 +42,21 @@ public interface UserMapper {
         return list;
     }
 
-    default void fromAdminDtoToUser (@NotNull AdminDto adminDto, @NotNull User updatableUser){
-        updatableUser.setName (adminDto.getName ());
-        updatableUser.setBlocked (adminDto.isBlocked ());
-        updatableUser.setAdminManager (adminDto.isAdminManager ());
-        updatableUser.setAdminScopeManager (adminDto.isAdminScopeManager ());
+    default void fromAdminDtoToUser (@NotNull AdminDto adminDto, @NotNull User updatedUser){
+        updatedUser.setName (adminDto.getName ());
+        updatedUser.setBlocked (adminDto.isBlocked ());
+        updatedUser.setAdminManager (adminDto.isAdminManager ());
+        updatedUser.setAdminScopeManager (adminDto.isAdminScopeManager ());
     }
 
-    default void fromAdminScopeDtoToUser (@NotNull AdminScopeDto adminScopeDto, @NotNull User updatableUser, List <Scope> scopeList){
-        updatableUser.setName (adminScopeDto.getName ());
-        updatableUser.setBlocked (adminScopeDto.isBlocked ());
-        updatableUser.setCanCreateAndDeleteScope (adminScopeDto.isCanCreateAndDeleteScope ());
-        updatableUser.setMaxNumberScope (adminScopeDto.getMaxNumberScope ());
-        updatableUser.setMaxStorageSpace (adminScopeDto.getMaxStorageSpace ());
-        updatableUser.setMaxNumberFolder (adminScopeDto.getMaxNumberFolder ());
-        updatableUser.setAvailableScopes (scopeList);
+    default void fromAdminScopeDtoToUser (@NotNull AdminScopeDto adminScopeDto, @NotNull User updatedUser, List <Scope> scopeList){
+        updatedUser.setName (adminScopeDto.getName ());
+        updatedUser.setBlocked (adminScopeDto.isBlocked ());
+        updatedUser.setCanCreateAndDeleteScope (adminScopeDto.isCanCreateAndDeleteScope ());
+        updatedUser.setMaxNumberScope (adminScopeDto.getMaxNumberScope ());
+        updatedUser.setMaxStorageSpace (adminScopeDto.getMaxStorageSpace ());
+        updatedUser.setMaxNumberFolder (adminScopeDto.getMaxNumberFolder ());
+        updatedUser.setAvailableScopes (scopeList);
     }
 
 

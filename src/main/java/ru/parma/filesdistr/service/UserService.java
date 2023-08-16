@@ -2,8 +2,9 @@ package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
+import org.springframework.context.ApplicationContext;
 import org.springframework.security.access.AccessDeniedException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.parma.filesdistr.dto.AdminDto;
@@ -23,6 +24,8 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class UserService{
+
+    private final ApplicationContext appContext;
     private final UserRepository userRepository;
     private final ScopeRepository scopeRepository;
     //TODO:обновить regex в соотвествии с описанием приложения
@@ -30,8 +33,8 @@ public class UserService{
     private static final String PASSWORD_REGEX = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
 
     private String encryptPassword (String password){
-        BCryptPasswordEncoder tmp = new BCryptPasswordEncoder (8);
-        return tmp.encode (password);
+        PasswordEncoder encoder = appContext.getBean (PasswordEncoder.class);
+        return encoder.encode (password);
     }
 
     private @NotNull User getAuthorizedUser (){
@@ -45,10 +48,10 @@ public class UserService{
         return optUser.get ();
     }
 
-    private @NotNull User getUserById (Long id){
-        Optional<User> optUser = userRepository.findById (id);
+    private @NotNull User getUserByIdAndRole (Long id, Roles role){
+        Optional<User> optUser = userRepository.findByIdAndRolesContaining(id, role);
         if(! optUser.isPresent ()){
-            throw new EntityNotFoundException (String.format ("User с id %d  не найден", id));
+            throw new EntityNotFoundException (String.format ("User с id: %d, role: %s  не найден", id, role.toString ()));
         }
         return optUser.get ();
     }
@@ -166,16 +169,10 @@ public class UserService{
 
     @Transactional
     public void update (@NotNull AdminDto adminDto){
-        Long id = CustomUserDetailsService.getAuthorizedUserId ();
-        User currUser = getUserById (id);
-        User updatedUser = getUserById (adminDto.getId ());
+        User currUser = getAuthorizedUser();
+        User updatedUser = getUserByIdAndRole (adminDto.getId (), Roles.ADMIN);
         String oldName = updatedUser.getName ();
 
-        if(updatedUser.getRoles ().containsAll (new HashSet<Roles> (){{
-            add (Roles.ROOT);
-        }})){
-            throw new AccessDeniedException ("Нет доступа");
-        }
         canEditAdmin ();
         if(currUser.getId () != updatedUser.getId ()){
 
@@ -223,15 +220,8 @@ public class UserService{
 
     @Transactional
     public void update (@NotNull AdminScopeDto adminScopeDto){
-
-        Long id = CustomUserDetailsService.getAuthorizedUserId ();
-        User currUser = getUserById (id);
-        User updatedUser = getUserById (adminScopeDto.getId ());
-        if(updatedUser.getRoles ().containsAll (new HashSet<Roles> (){{
-            add (Roles.ROOT);
-        }})){
-            throw new AccessDeniedException ("Нет доступа");
-        }
+        User currUser = getAuthorizedUser();
+        User updatedUser = getUserByIdAndRole (adminScopeDto.getId (), Roles.ADMIN_SCOPES);
 
         String oldName = updatedUser.getName ();
 
@@ -256,16 +246,19 @@ public class UserService{
     }
 
 
-
     @Transactional
     public void delete (Long userId){
-        User user = getUserById (userId);
+        Optional<User> optUser = userRepository.findById (userId);
+        if(! optUser.isPresent ()){
+            throw new EntityNotFoundException (String.format ("User с id: %d не найден", userId));
+        }
+        User user = optUser.get ();
         if(user.getRoles ().containsAll (new HashSet<Roles> (){{
             add (Roles.ROOT);
         }})){
             throw new AccessDeniedException ("Нет доступа");
         }
-        if(user.getRoles ().containsAll (new HashSet<Roles> (){{
+        else if(user.getRoles ().containsAll (new HashSet<Roles> (){{
             add (Roles.ADMIN);
         }})){
             canEditAdmin ();
