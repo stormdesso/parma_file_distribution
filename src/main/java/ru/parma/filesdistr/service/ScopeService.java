@@ -54,6 +54,7 @@ public class ScopeService {
             throw new EntityNotFoundException(String.format("Scope с id %d  не найден", id));
         }
         fileSystemRepository.delete(scope.get().getRootPath());
+        scopeRepository.delete(scope.get());
     }
 
     public ScopeDto getScopeById(Long scopeId) {
