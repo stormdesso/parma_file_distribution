@@ -28,6 +28,8 @@ public class UserService{
     private final ApplicationContext appContext;
     private final UserRepository userRepository;
     private final ScopeRepository scopeRepository;
+    private final AdminPageAccessService adminPageAccessService;
+
     //TODO:обновить regex в соотвествии с описанием приложения
     private static final String USERNAME_REGEX = "^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$";
     private static final String PASSWORD_REGEX = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[@#$%^&+=])(?=\\S+$).{8,}$";
@@ -37,15 +39,30 @@ public class UserService{
         return encoder.encode (password);
     }
 
-    private @NotNull User getAuthorizedUser (){
+    public @NotNull User getAuthorizedUser (){
 
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
+        if(id == null){
+            throw new AccessDeniedException ("Пользователь не авторизован");
+        }
         Optional<User> optUser = userRepository.findById (id);
         if(! optUser.isPresent ()){
             throw new EntityNotFoundException (String.format ("User с id %d  не найден", id));
         }
 
         return optUser.get ();
+    }
+
+    public @NotNull User getUserById (Long id){
+        Optional<User> optUser = userRepository.findById(id);
+        if(! optUser.isPresent ()){
+            throw new EntityNotFoundException (String.format ("User с id: %d не найден", id));
+        }
+        User user =  optUser.get ();
+        if(user.getRoles ().contains (Roles.ROOT) ){
+            throw new AccessDeniedException ("Нет доступа");
+        }
+        return user;
     }
 
     private @NotNull User getUserByIdAndRole (Long id, Roles role){
@@ -56,39 +73,7 @@ public class UserService{
         return optUser.get ();
     }
 
-    private void canEditAdmin (){
-        User currUser = getAuthorizedUser ();
-        Set<Roles> rolesSet = currUser.getRoles ();
-        if(rolesSet.containsAll (new HashSet<Roles> (){{
-            add (Roles.ROOT);
-        }})){
-            return;
-        }
-        if(rolesSet.containsAll (new HashSet<Roles> (){{
-            add (Roles.ADMIN);
-        }}) & currUser.isAdminManager ()){
-            return;
-        }
 
-        throw new AccessDeniedException ("нет доступа");
-    }
-
-    private void canEditAdminScopes (){
-        User currUser = getAuthorizedUser ();
-        Set<Roles> rolesSet = currUser.getRoles ();
-        if(rolesSet.containsAll (new HashSet<Roles> (){{
-            add (Roles.ROOT);
-        }})){
-            return;
-        }
-        if(rolesSet.containsAll (new HashSet<Roles> (){{
-            add (Roles.ADMIN);
-        }}) & currUser.isAdminScopeManager ()){
-            return;
-        }
-
-        throw new AccessDeniedException ("нет доступа");
-    }
 
     private void checkMaxNumberOfScopes (@NotNull AdminScopeDto adminScopeDto){
         if(adminScopeDto.getMaxNumberScope () < adminScopeDto.getScopePreviewDtos ().size ()){
@@ -126,7 +111,7 @@ public class UserService{
 
     public Set<AdminDto> getAllAdmins (){
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
-        canEditAdmin ();
+        adminPageAccessService.canEditAdmin ();
         Set<User> users = new HashSet<> (userRepository.findByRolesContainingAndIdNot (Roles.ADMIN, id));
 
         return UserMapper.INSTANCE.toAdminDtos (users);
@@ -134,7 +119,7 @@ public class UserService{
 
     public Set<AdminScopeDto> getAllAdminsScopes (){
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
-        canEditAdminScopes ();
+        adminPageAccessService.canEditAdminScopes ();
         Set<User> users = new HashSet<> (userRepository.findByRolesContainingAndIdNot (Roles.ADMIN_SCOPES, id));
 
         return UserMapper.INSTANCE.toAdminScopeDtos (users);
@@ -143,7 +128,7 @@ public class UserService{
 
     @Transactional
     public void add (@NotNull AdminDto adminDto){
-        canEditAdmin ();
+        adminPageAccessService.canEditAdmin ();
         Set<Roles> roles = new HashSet<> ();
         roles.add (Roles.ADMIN);
 
@@ -173,7 +158,7 @@ public class UserService{
         User updatedUser = getUserByIdAndRole (adminDto.getId (), Roles.ADMIN);
         String oldName = updatedUser.getName ();
 
-        canEditAdmin ();
+        adminPageAccessService.canEditAdmin ();
         if(currUser.getId () != updatedUser.getId ()){
 
             matchesRegex (adminDto.getName (), adminDto.getPassword ());
@@ -192,7 +177,7 @@ public class UserService{
     @Transactional
     public void add (@NotNull AdminScopeDto adminScopeDto){
 
-        canEditAdminScopes ();
+        adminPageAccessService.canEditAdminScopes ();
 
         matchesRegex (adminScopeDto.getName (), adminScopeDto.getPassword ());
         canUseThisName (adminScopeDto.getName ());
@@ -226,7 +211,7 @@ public class UserService{
         String oldName = updatedUser.getName ();
 
         if(currUser.getId () != updatedUser.getId ()){
-            canEditAdminScopes ();
+            adminPageAccessService.canEditAdminScopes ();
 
             matchesRegex (adminScopeDto.getName (), adminScopeDto.getPassword ());
 
@@ -261,13 +246,13 @@ public class UserService{
         else if(user.getRoles ().containsAll (new HashSet<Roles> (){{
             add (Roles.ADMIN);
         }})){
-            canEditAdmin ();
+            adminPageAccessService.canEditAdmin ();
             userRepository.delete (user);
 
         }else if(user.getRoles ().containsAll (new HashSet<Roles> (){{
             add (Roles.ADMIN_SCOPES);
         }})){
-            canEditAdminScopes ();
+            adminPageAccessService.canEditAdminScopes ();
             userRepository.delete (user);
 
         }

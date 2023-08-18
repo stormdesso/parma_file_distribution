@@ -4,7 +4,10 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.stereotype.Repository;
+import org.springframework.web.multipart.MultipartFile;
+import ru.parma.filesdistr.enums.MediaTypeInAdminPage;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
+import ru.parma.filesdistr.models.User;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -79,6 +82,9 @@ public class FileSystemRepository{
         return createFileLocation(path, fileName, content);
     }
 
+
+
+
     public void delete ( String location ) {
         try {
             java.io.File file = new java.io.File(location);
@@ -101,5 +107,17 @@ public class FileSystemRepository{
         } catch (Exception e) {
             throw e;
         }
+    }
+
+    public String saveInAdminPage (String fullPath, MediaTypeInAdminPage mediaTypeInAdminPage, MultipartFile multipartFile) throws IOException{
+        Files.createDirectories(Paths.get(resourcesDir));
+        String path = resourcesDir + fullPath + "//";
+
+        if(mediaTypeInAdminPage == MediaTypeInAdminPage.PROFILE_PICTURE) {
+            path += MediaTypeInAdminPage.PROFILE_PICTURE.toString().toLowerCase();
+        }
+        else throw new IllegalArgumentException("Неверные параметры");
+
+        return createFileLocation(path, multipartFile.getOriginalFilename (), multipartFile.getBytes ());
     }
 }

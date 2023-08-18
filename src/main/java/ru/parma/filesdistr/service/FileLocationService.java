@@ -7,8 +7,10 @@ import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import ru.parma.filesdistr.dto.FileDto;
+import ru.parma.filesdistr.enums.MediaTypeInAdminPage;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.FileMapper;
@@ -18,7 +20,9 @@ import ru.parma.filesdistr.utils.IPathName;
 import ru.parma.filesdistr.utils.Utils;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.IOException;
 import java.nio.file.FileSystemNotFoundException;
+import java.text.ParseException;
 import java.util.Date;
 import java.util.Optional;
 
@@ -33,6 +37,7 @@ public class FileLocationService {
     final VersionRepository versionRepository;
     final UserRepository userRepository;
     final TagRepository tagRepository;
+    private final UserService userService;
 
 
     @Transactional
@@ -180,6 +185,42 @@ public class FileLocationService {
             versionRepository.save((Version) iPathName);
         }
         else throw new IllegalArgumentException();
+    }
+
+
+    public FileDto saveOnAdminPage(Long updatedUserId, MultipartFile multipartFile, MediaTypeInAdminPage mediaTypeInAdminPage, String filetype)
+            throws ParseException, IOException{
+        Date currDate = Utils.getDateWithoutTime();
+        String location = null;
+        try {
+            User updatedUser = userService.getUserById (updatedUserId);
+            String fullpath = updatedUser.getRootPath();
+
+            location = fileSystemRepository.saveInAdminPage (fullpath, mediaTypeInAdminPage, multipartFile);
+
+            File file = File
+                    .builder()
+                    .name(multipartFile.getOriginalFilename ())
+                    .size(Utils.convertByteToMb(multipartFile.getBytes ()))
+                    .type(filetype)
+                    .dateCreated(currDate)
+                    .location(location)
+                    .build();
+
+            if(mediaTypeInAdminPage == MediaTypeInAdminPage.PROFILE_PICTURE){
+                //TODO: возможно, надо удалять передсохранением
+                updatedUser.setProfilePicture (file);
+            }
+            userRepository.save (updatedUser);
+
+            return FileMapper.INSTANCE.toFileDto(file);
+        }catch (Exception e){
+            // убираем за собой
+            if(location != null && !location.isEmpty()) {
+                fileSystemRepository.delete(location);
+            }
+            throw e;
+        }
     }
 
     @Transactional

@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.TypeDef;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import ru.parma.filesdistr.enums.EnumTypePostgreSql;
@@ -79,6 +80,20 @@ public class User implements UserDetails {
     )
     private List<Scope> availableScopes;
 
+
+    public String getRootPath(){
+
+        if (roles.contains (Roles.ADMIN))
+        {
+            return Roles.ADMIN.toString () + "//" + getName () + "//";
+        }
+        else if (roles.contains (Roles.ADMIN_SCOPES))
+        {
+            return Roles.ADMIN_SCOPES.toString () + "//" + getName () + "//";
+        }
+        else
+            throw new AccessDeniedException("Нет доступа");
+    }
 
     // security
     @Override
