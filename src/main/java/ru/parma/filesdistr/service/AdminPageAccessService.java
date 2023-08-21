@@ -1,21 +1,38 @@
 package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.enums.Roles;
 import ru.parma.filesdistr.models.User;
+import ru.parma.filesdistr.repos.UserRepository;
 
+import javax.persistence.EntityNotFoundException;
 import java.util.HashSet;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
 public class AdminPageAccessService{
-    private final UserService userService;
+    private final UserRepository userRepository;
+    private final CustomUserDetailsService customUserDetailsService;
+    public @NotNull User getUserById (Long id){
+        Optional<User> optUser = userRepository.findById(id);
+        if(! optUser.isPresent ()){
+            throw new EntityNotFoundException (String.format ("User с id: %d не найден", id));
+        }
+        User user =  optUser.get ();
+        if(user.getRoles ().contains (Roles.ROOT) ){
+            throw new AccessDeniedException ("Нет доступа");
+        }
+        return user;
+    }
+
 
     public void tryGetAccess(Long userId){
-        User user = userService.getUserById (userId);
+        User user = getUserById (userId);
 
         if(user.getRoles ().contains (Roles.ADMIN)){
             canEditAdmin ();
@@ -27,7 +44,7 @@ public class AdminPageAccessService{
     }
 
     public void canEditAdmin (){
-        User currUser = userService.getAuthorizedUser ();
+        User currUser = customUserDetailsService.getAuthorizedUser ();
         Set<Roles> rolesSet = currUser.getRoles ();
         if(rolesSet.containsAll (new HashSet<Roles> (){{
             add (Roles.ROOT);
@@ -44,7 +61,7 @@ public class AdminPageAccessService{
     }
 
     public void canEditAdminScopes (){
-        User currUser = userService.getAuthorizedUser ();
+        User currUser = customUserDetailsService.getAuthorizedUser ();
         Set<Roles> rolesSet = currUser.getRoles ();
         if(rolesSet.containsAll (new HashSet<Roles> (){{
             add (Roles.ROOT);

@@ -37,7 +37,7 @@ public class FileLocationService {
     final VersionRepository versionRepository;
     final UserRepository userRepository;
     final TagRepository tagRepository;
-    private final UserService userService;
+    private final AdminPageAccessService adminPageAccessService;
 
 
     @Transactional
@@ -193,7 +193,7 @@ public class FileLocationService {
         Date currDate = Utils.getDateWithoutTime();
         String location = null;
         try {
-            User updatedUser = userService.getUserById (updatedUserId);
+            User updatedUser = adminPageAccessService.getUserById (updatedUserId);
             String fullpath = updatedUser.getRootPath();
 
             location = fileSystemRepository.saveInAdminPage (fullpath, mediaTypeInAdminPage, multipartFile);

@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.parma.filesdistr.dto.AdminDto;
 import ru.parma.filesdistr.dto.AdminScopeDto;
 import ru.parma.filesdistr.enums.Roles;
-import ru.parma.filesdistr.mappers.ScopeMapper;
 import ru.parma.filesdistr.mappers.UserMapper;
 import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.ScopeRepository;
@@ -29,6 +28,7 @@ public class UserService{
     private final UserRepository userRepository;
     private final ScopeRepository scopeRepository;
     private final AdminPageAccessService adminPageAccessService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     //TODO:обновить regex в соотвествии с описанием приложения
     private static final String USERNAME_REGEX = "^(?=.{8,20}$)(?![_.])(?!.*[_.]{2})[a-zA-Z0-9._]+(?<![_.])$";
@@ -39,32 +39,6 @@ public class UserService{
         return encoder.encode (password);
     }
 
-    public @NotNull User getAuthorizedUser (){
-
-        Long id = CustomUserDetailsService.getAuthorizedUserId ();
-        if(id == null){
-            throw new AccessDeniedException ("Пользователь не авторизован");
-        }
-        Optional<User> optUser = userRepository.findById (id);
-        if(! optUser.isPresent ()){
-            throw new EntityNotFoundException (String.format ("User с id %d  не найден", id));
-        }
-
-        return optUser.get ();
-    }
-
-    public @NotNull User getUserById (Long id){
-        Optional<User> optUser = userRepository.findById(id);
-        if(! optUser.isPresent ()){
-            throw new EntityNotFoundException (String.format ("User с id: %d не найден", id));
-        }
-        User user =  optUser.get ();
-        if(user.getRoles ().contains (Roles.ROOT) ){
-            throw new AccessDeniedException ("Нет доступа");
-        }
-        return user;
-    }
-
     private @NotNull User getUserByIdAndRole (Long id, Roles role){
         Optional<User> optUser = userRepository.findByIdAndRolesContaining(id, role);
         if(! optUser.isPresent ()){
@@ -72,8 +46,6 @@ public class UserService{
         }
         return optUser.get ();
     }
-
-
 
     private void checkMaxNumberOfScopes (@NotNull AdminScopeDto adminScopeDto){
         if(adminScopeDto.getMaxNumberScope () < adminScopeDto.getScopePreviewDtos ().size ()){
@@ -108,7 +80,6 @@ public class UserService{
         }
     }
 
-
     public Set<AdminDto> getAllAdmins (){
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
         adminPageAccessService.canEditAdmin ();
@@ -124,7 +95,6 @@ public class UserService{
 
         return UserMapper.INSTANCE.toAdminScopeDtos (users);
     }
-
 
     @Transactional
     public void add (@NotNull AdminDto adminDto){
@@ -154,7 +124,7 @@ public class UserService{
 
     @Transactional
     public void update (@NotNull AdminDto adminDto){
-        User currUser = getAuthorizedUser();
+        User currUser = customUserDetailsService.getAuthorizedUser();
         User updatedUser = getUserByIdAndRole (adminDto.getId (), Roles.ADMIN);
         String oldName = updatedUser.getName ();
 
@@ -172,7 +142,6 @@ public class UserService{
             userRepository.save (updatedUser);
         }
     }
-
 
     @Transactional
     public void add (@NotNull AdminScopeDto adminScopeDto){
@@ -193,7 +162,7 @@ public class UserService{
                 .maxNumberScope (adminScopeDto.getMaxNumberScope ())
                 .maxStorageSpace (adminScopeDto.getMaxStorageSpace ())
                 .maxNumberFolder (adminScopeDto.getMaxNumberFolder ())
-                .availableScopes (ScopeMapper.INSTANCE.toScope (scopeRepository, adminScopeDto.getScopePreviewDtos ()))
+                .availableScopes (scopeRepository.findScopeByScopePreviewDto (adminScopeDto.getScopePreviewDtos ()))
                 .roles (new HashSet<Roles> (){{
                     add (Roles.ADMIN_SCOPES);
                 }})
@@ -205,7 +174,7 @@ public class UserService{
 
     @Transactional
     public void update (@NotNull AdminScopeDto adminScopeDto){
-        User currUser = getAuthorizedUser();
+        User currUser = customUserDetailsService.getAuthorizedUser();
         User updatedUser = getUserByIdAndRole (adminScopeDto.getId (), Roles.ADMIN_SCOPES);
 
         String oldName = updatedUser.getName ();
@@ -223,13 +192,12 @@ public class UserService{
 
 
             UserMapper.INSTANCE.fromAdminScopeDtoToUser (adminScopeDto, updatedUser,
-                    ScopeMapper.INSTANCE.toScope (scopeRepository, adminScopeDto.getScopePreviewDtos ()));
+                    scopeRepository.findScopeByScopePreviewDto (adminScopeDto.getScopePreviewDtos ()));
 
             userRepository.save (updatedUser);
 
         }
     }
-
 
     @Transactional
     public void delete (Long userId){
@@ -257,5 +225,4 @@ public class UserService{
 
         }
     }
-
 }

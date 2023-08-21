@@ -51,4 +51,5 @@ public class ScopeService {
         }
         return ScopeMapper.INSTANCE.toScopeDto(scopeOptional.get());
     }
+
 }
