@@ -83,7 +83,7 @@ public class UserService{
     public Set<AdminDto> getAllAdmins (){
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
         adminPageAccessService.canEditAdmin ();
-        Set<User> users = new HashSet<> (userRepository.findByRolesContainingAndIdNot (Roles.ADMIN, id));
+        Set<User> users = userRepository.findByRolesContainingAndIdNot (Roles.ADMIN, id);
 
         return UserMapper.INSTANCE.toAdminDtos (users);
     }
@@ -91,7 +91,7 @@ public class UserService{
     public Set<AdminScopeDto> getAllAdminsScopes (){
         Long id = CustomUserDetailsService.getAuthorizedUserId ();
         adminPageAccessService.canEditAdminScopes ();
-        Set<User> users = new HashSet<> (userRepository.findByRolesContainingAndIdNot (Roles.ADMIN_SCOPES, id));
+        Set<User> users = userRepository.findByRolesContainingAndIdNot (Roles.ADMIN_SCOPES, id);
 
         return UserMapper.INSTANCE.toAdminScopeDtos (users);
     }

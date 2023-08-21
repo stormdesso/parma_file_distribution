@@ -7,7 +7,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.web.multipart.MultipartFile;
 import ru.parma.filesdistr.enums.MediaTypeInAdminPage;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
-import ru.parma.filesdistr.models.User;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,9 +42,11 @@ public class FileSystemRepository{
             path += MediaTypeInScopePage.ILLUSTRATION.toString().toLowerCase();
         }
         else if(mediaTypeInScopePage == MediaTypeInScopePage.ICON) {
+            //TODO: удалять старый файл
             path += MediaTypeInScopePage.ICON.toString().toLowerCase();
         }
         else if( mediaTypeInScopePage == MediaTypeInScopePage.DISTRIBUTION_AGREEMENT){
+            //TODO: удалять старый файл
             path += MediaTypeInScopePage.DISTRIBUTION_AGREEMENT.toString().toLowerCase();
         }
         else throw new IllegalArgumentException();
@@ -59,6 +60,7 @@ public class FileSystemRepository{
         String path = resourcesDir + fullPath + "//";
 
         if(mediaTypeInScopePage == MediaTypeInScopePage.MANIFEST) {
+            //TODO: удалять старый файл
             path += MediaTypeInScopePage.MANIFEST.toString().toLowerCase();
         }
         else throw new IllegalArgumentException();
@@ -111,9 +113,10 @@ public class FileSystemRepository{
 
     public String saveInAdminPage (String fullPath, MediaTypeInAdminPage mediaTypeInAdminPage, MultipartFile multipartFile) throws IOException{
         Files.createDirectories(Paths.get(resourcesDir));
-        String path = resourcesDir + fullPath + "//";
+        String path = resourcesDir + fullPath;
 
         if(mediaTypeInAdminPage == MediaTypeInAdminPage.PROFILE_PICTURE) {
+            //TODO: удалять старый файл
             path += MediaTypeInAdminPage.PROFILE_PICTURE.toString().toLowerCase();
         }
         else throw new IllegalArgumentException("Неверные параметры");

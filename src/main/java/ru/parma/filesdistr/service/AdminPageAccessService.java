@@ -31,14 +31,16 @@ public class AdminPageAccessService{
     }
 
 
-    public void tryGetAccess(Long userId){
-        User user = getUserById (userId);
+    public void tryGetAccess(Long updatedUserId){
+        User updatedUser = getUserById (updatedUserId);
 
-        if(user.getRoles ().contains (Roles.ADMIN)){
+        if(updatedUser.getRoles ().contains (Roles.ADMIN)){
             canEditAdmin ();
+            return;
         }
-        else if(user.getRoles ().contains (Roles.ADMIN_SCOPES)){
+        else if(updatedUser.getRoles ().contains (Roles.ADMIN_SCOPES)){
             canEditAdminScopes ();
+            return;
         }
         throw new AccessDeniedException ("нет доступа");
     }

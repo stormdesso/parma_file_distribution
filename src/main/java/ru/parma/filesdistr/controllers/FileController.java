@@ -44,11 +44,12 @@ public class FileController {
 
         scopeAccessService.tryGetAccess(typeInScopePage, generalId, CustomUserDetailsService.getAuthorizedUserId());
 
-        return fileLocationService.save(file.getBytes(), file.getOriginalFilename(), fileType,
+        return fileLocationService.save (file.getBytes(), file.getOriginalFilename(), fileType,
                 generalId, typeInScopePage, mediaTypeInScopePage, tagId, comment);
     }
 
 
+    //TODO: root or admin with can edit
     @PostMapping(value = "/admin_page/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     FileDto uploadOnAdminPage (@RequestParam @NotNull MultipartFile file,
@@ -56,7 +57,7 @@ public class FileController {
                                @RequestParam MediaTypeInAdminPage mediaTypeInAdminPage) throws Exception {
         String fileType = FilenameUtils.getExtension(file.getOriginalFilename());
         adminPageAccessService.tryGetAccess (updatedUserId);
-        return fileLocationService.saveOnAdminPage(updatedUserId, file, mediaTypeInAdminPage, fileType);
+        return fileLocationService.save (updatedUserId, file, mediaTypeInAdminPage, fileType);
     }
 
 

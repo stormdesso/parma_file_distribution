@@ -102,7 +102,7 @@ public class FileLocationService {
 
             File savedFile = fileDbRepository.save(file);
 
-            attachFileToEntity(generalId,  typeInScopePage, mediaTypeInScopePage,  savedFile);
+            attachFileToEntity (generalId,  typeInScopePage, mediaTypeInScopePage,  savedFile);
             return FileMapper.INSTANCE.toFileDto(savedFile);
 
         } catch (Exception e) {
@@ -114,8 +114,42 @@ public class FileLocationService {
         }
     }
 
-    private void attachFileToEntity( long generalId, TypeInScopePage typeInScopePage,
-                                     MediaTypeInScopePage mediaTypeInScopePage, File savedFile){
+    @Transactional
+    public FileDto save(Long updatedUserId, MultipartFile multipartFile, MediaTypeInAdminPage mediaTypeInAdminPage, String filetype)
+            throws ParseException, IOException{
+        Date currDate = Utils.getDateWithoutTime();
+        String location = null;
+        try {
+            User updatedUser = adminPageAccessService.getUserById (updatedUserId);
+
+            location = fileSystemRepository.saveInAdminPage (updatedUser.getRootPath(), mediaTypeInAdminPage, multipartFile);
+
+            File file = File
+                    .builder()
+                    .name(multipartFile.getOriginalFilename ())
+                    .size(Utils.convertByteToMb(multipartFile.getBytes ()))
+                    .type(filetype)
+                    .dateCreated(currDate)
+                    .location(location)
+                    .build();
+
+            File savedFile = fileDbRepository.save(file);
+
+            attachFileToEntity (updatedUser, mediaTypeInAdminPage, savedFile);
+
+            return FileMapper.INSTANCE.toFileDto(savedFile);
+        }catch (Exception e){
+            // убираем за собой
+            if(location != null && !location.isEmpty()) {
+                fileSystemRepository.delete(location);
+            }
+            throw e;
+        }
+    }
+
+    @Transactional
+    protected void attachFileToEntity (long generalId, TypeInScopePage typeInScopePage,
+                             MediaTypeInScopePage mediaTypeInScopePage, File savedFile){
         IPathName iPathName;
 
         if( typeInScopePage == TypeInScopePage.SCOPE ){
@@ -131,7 +165,7 @@ public class FileLocationService {
             else if(mediaTypeInScopePage == MediaTypeInScopePage.ICON) {
                 if(((Scope)iPathName).getIcon() != null) {
                     Long oldIconId = ((Scope) iPathName).getIcon().getId();
-                    fileDbRepository.deleteById( oldIconId );
+                    delete (oldIconId);
                 }
 
                 ((Scope)iPathName).setIcon(savedFile);
@@ -139,7 +173,7 @@ public class FileLocationService {
             else if( mediaTypeInScopePage == MediaTypeInScopePage.DISTRIBUTION_AGREEMENT){
                 if(((Scope)iPathName).getDistributionAgreement() != null) {
                     Long oldDistrAgrId = ((Scope) iPathName).getDistributionAgreement().getId();
-                    fileDbRepository.deleteById( oldDistrAgrId );
+                    delete (oldDistrAgrId);
                 }
 
                 ((Scope)iPathName).setDistributionAgreement(savedFile);
@@ -159,7 +193,7 @@ public class FileLocationService {
             if(mediaTypeInScopePage == MediaTypeInScopePage.MANIFEST) {
                 if(((Folder)iPathName).getManifestForIOSFile() != null) {
                     Long oldManifestId = ((Folder) iPathName).getManifestForIOSFile().getId();
-                    fileDbRepository.deleteById( oldManifestId );
+                    delete (oldManifestId);
                 }
 
                 ((Folder)iPathName).setManifestForIOSFile(savedFile);
@@ -187,40 +221,17 @@ public class FileLocationService {
         else throw new IllegalArgumentException();
     }
 
-
-    public FileDto saveOnAdminPage(Long updatedUserId, MultipartFile multipartFile, MediaTypeInAdminPage mediaTypeInAdminPage, String filetype)
-            throws ParseException, IOException{
-        Date currDate = Utils.getDateWithoutTime();
-        String location = null;
-        try {
-            User updatedUser = adminPageAccessService.getUserById (updatedUserId);
-            String fullpath = updatedUser.getRootPath();
-
-            location = fileSystemRepository.saveInAdminPage (fullpath, mediaTypeInAdminPage, multipartFile);
-
-            File file = File
-                    .builder()
-                    .name(multipartFile.getOriginalFilename ())
-                    .size(Utils.convertByteToMb(multipartFile.getBytes ()))
-                    .type(filetype)
-                    .dateCreated(currDate)
-                    .location(location)
-                    .build();
-
-            if(mediaTypeInAdminPage == MediaTypeInAdminPage.PROFILE_PICTURE){
-                //TODO: возможно, надо удалять передсохранением
-                updatedUser.setProfilePicture (file);
-            }
-            userRepository.save (updatedUser);
-
-            return FileMapper.INSTANCE.toFileDto(file);
-        }catch (Exception e){
-            // убираем за собой
-            if(location != null && !location.isEmpty()) {
-                fileSystemRepository.delete(location);
-            }
-            throw e;
+    @Transactional
+    protected void attachFileToEntity (User user, MediaTypeInAdminPage mediaTypeInAdminPage, File savedFile){
+        if( mediaTypeInAdminPage == MediaTypeInAdminPage.PROFILE_PICTURE ){
+                if(user.getProfilePicture () != null) {
+                    Long oldIconId = user.getProfilePicture ().getId ();
+                    delete ( oldIconId );
+                }
+                user.setProfilePicture (savedFile);
+            userRepository.save(user);
         }
+        else throw new IllegalArgumentException();
     }
 
     @Transactional
