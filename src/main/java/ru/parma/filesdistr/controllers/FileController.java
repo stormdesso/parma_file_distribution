@@ -49,7 +49,6 @@ public class FileController {
     }
 
 
-    //TODO: root or admin with can edit
     @PostMapping(value = "/admin_page/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     FileDto uploadOnAdminPage (@RequestParam @NotNull MultipartFile file,
