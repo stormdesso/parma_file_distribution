@@ -38,6 +38,7 @@ public class Folder implements IPathName{
     @Column(name = "identifier")
     private String identifier;
 
+
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "manifest_ios_id")//manifest_ios_id(fk) folder -> id(pk) file
     private File manifestForIOSFile;

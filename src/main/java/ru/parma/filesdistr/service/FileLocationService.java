@@ -37,8 +37,6 @@ public class FileLocationService {
     final VersionRepository versionRepository;
     final UserRepository userRepository;
     final TagRepository tagRepository;
-    private final AdminPageAccessService adminPageAccessService;
-
 
     @Transactional
     public FileDto save (byte[] bytes, String fileName, String filetype,
@@ -120,7 +118,7 @@ public class FileLocationService {
         Date currDate = Utils.getDateWithoutTime();
         String location = null;
         try {
-            User updatedUser = adminPageAccessService.getUserById (updatedUserId);
+            User updatedUser = userRepository.findUserWithoutRoot (updatedUserId);
 
             location = fileSystemRepository.saveInAdminPage (updatedUser.getRootPath(), mediaTypeInAdminPage, multipartFile);
 

@@ -31,7 +31,7 @@ public class FileController {
     private final AdminPageAccessService adminPageAccessService;
 
     //TODO: async подгрузка и загрузка
-
+    //TODO: return byte[], download .zip
     @PostMapping(value = "/scopes_page/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     FileDto uploadOnScopesPage (@RequestParam @NotNull MultipartFile file,
@@ -65,6 +65,12 @@ public class FileController {
     FileSystemResource download (@PathVariable Long fileId,
                                  @RequestParam Long generalId,   //указывает id пространства, папки, версии
                                  @RequestParam TypeInScopePage typeInScopePage) throws AccessDeniedException {
+
+        Long userId =  CustomUserDetailsService.getAuthorizedUserId();
+        if(userId == null){
+            throw new AccessDeniedException("нет доступа");
+        }
+
         scopeAccessService.tryGetAccess(typeInScopePage, generalId, CustomUserDetailsService.getAuthorizedUserId());
         return fileLocationService.get(fileId);
     }
@@ -78,8 +84,3 @@ public class FileController {
         fileLocationService.delete(fileId);
     }
 }
-
-
-
-
-

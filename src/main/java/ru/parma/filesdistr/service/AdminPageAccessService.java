@@ -8,9 +8,6 @@ import ru.parma.filesdistr.enums.Roles;
 import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.UserRepository;
 
-import javax.persistence.EntityNotFoundException;
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -18,23 +15,11 @@ import java.util.Set;
 public class AdminPageAccessService{
     private final UserRepository userRepository;
     private final CustomUserDetailsService customUserDetailsService;
-    public @NotNull User getUserById (Long id){
-        Optional<User> optUser = userRepository.findById(id);
-        if(! optUser.isPresent ()){
-            throw new EntityNotFoundException (String.format ("User с id: %d не найден", id));
-        }
-        User user =  optUser.get ();
-        if(user.getRoles ().contains (Roles.ROOT) ){
-            throw new AccessDeniedException ("Нет доступа");
-        }
-        return user;
-    }
-
 
     public void tryGetAccess(Long updatedUserId){
-        User updatedUser = getUserById (updatedUserId);
+        User updatedUser = userRepository.findUserWithoutRoot(updatedUserId);
 
-        if(updatedUser.getRoles ().contains (Roles.ADMIN)){
+        if(isAdmin(updatedUser)){
             canEditAdmin ();
             return;
         }
@@ -47,15 +32,10 @@ public class AdminPageAccessService{
 
     public void canEditAdmin (){
         User currUser = customUserDetailsService.getAuthorizedUser ();
-        Set<Roles> rolesSet = currUser.getRoles ();
-        if(rolesSet.containsAll (new HashSet<Roles> (){{
-            add (Roles.ROOT);
-        }})){
+        if(isRoot(currUser)){
             return;
         }
-        if(rolesSet.containsAll (new HashSet<Roles> (){{
-            add (Roles.ADMIN);
-        }}) & currUser.isAdminManager ()){
+        if(isAdmin(currUser) & currUser.isAdminManager ()){
             return;
         }
 
@@ -64,19 +44,23 @@ public class AdminPageAccessService{
 
     public void canEditAdminScopes (){
         User currUser = customUserDetailsService.getAuthorizedUser ();
-        Set<Roles> rolesSet = currUser.getRoles ();
-        if(rolesSet.containsAll (new HashSet<Roles> (){{
-            add (Roles.ROOT);
-        }})){
+        if(isRoot(currUser)){
             return;
         }
-        if(rolesSet.containsAll (new HashSet<Roles> (){{
-            add (Roles.ADMIN);
-        }}) & currUser.isAdminScopeManager ()){
+        if(isAdmin(currUser) & currUser.isAdminScopeManager ()){
             return;
         }
 
         throw new AccessDeniedException ("нет доступа");
     }
 
+    public boolean isRoot (@NotNull User currUser){
+        Set<Roles> rolesSet = currUser.getRoles ();
+        return rolesSet.contains(Roles.ROOT);
+    }
+
+    public boolean isAdmin (@NotNull User currUser){
+        Set<Roles> rolesSet = currUser.getRoles ();
+        return rolesSet.contains(Roles.ADMIN);
+    }
 }
