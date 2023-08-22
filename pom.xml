@@ -96,13 +96,6 @@
         </dependency>
         <!--Mapping-->
 
-        <!-- https://mvnrepository.com/artifact/org.apache.maven/maven-model -->
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>maven-model</artifactId>
-            <version>3.9.4</version>
-        </dependency>
-
     </dependencies>
 
     <build>
@@ -139,6 +132,12 @@
             </plugin>
 
         </plugins>
+        <resources>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>true</filtering>
+            </resource>
+        </resources>
     </build>
 
 
