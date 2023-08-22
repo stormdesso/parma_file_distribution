@@ -66,10 +66,7 @@ public class FileController {
                                  @RequestParam Long generalId,   //указывает id пространства, папки, версии
                                  @RequestParam TypeInScopePage typeInScopePage) throws AccessDeniedException {
 
-        Long userId =  CustomUserDetailsService.getAuthorizedUserId();
-        if(userId == null){
-            throw new AccessDeniedException("нет доступа");
-        }
+        adminPageAccessService.idNotNullCheck (CustomUserDetailsService.getAuthorizedUserId());
 
         scopeAccessService.tryGetAccess(typeInScopePage, generalId, CustomUserDetailsService.getAuthorizedUserId());
         return fileLocationService.get(fileId);
