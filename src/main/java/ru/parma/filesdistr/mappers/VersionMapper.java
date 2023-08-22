@@ -12,4 +12,6 @@ public interface VersionMapper {
     VersionMapper INSTANCE = Mappers.getMapper(VersionMapper.class);
     VersionDto toVersionDto(Version version);
     List<VersionDto> toVersionDtos( List<Version> scope);
+
+    Version toVersion(VersionDto versionDto);
 }
