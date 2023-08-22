@@ -1,81 +1,65 @@
 package ru.parma.filesdistr.controllers;
 
+
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.AdminDto;
 import ru.parma.filesdistr.dto.AdminScopeDto;
 import ru.parma.filesdistr.service.UserService;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
 
 @Controller
 @RequiredArgsConstructor
-@RequestMapping("/")
+@RequestMapping("/users")
 public class UsersController {
     private final UserService userService;
-    @GetMapping("/admin/all")
+    @GetMapping("/get_all_admins")
     @ResponseBody
-    public List<AdminDto> getAllAdmins() {
-        return new ArrayList<>();
+    public Set<AdminDto> getAllAdmins () {
+        return userService.getAllAdmins ();
     }
 
-    @GetMapping("/admin_scope/all")
+    @GetMapping("/get_all_admins_scopes")
     @ResponseBody
-    public AdminScopeDto getAllAdminsScopes() {
-        return new AdminScopeDto();
-    }
-
-    @GetMapping("/admin/{admin_id}")
-    @ResponseBody
-    public AdminDto get(@PathVariable String admin_id) {
-        return new AdminDto();
-    }
-
-    @GetMapping("/admin_scope/{admin_scope_id}")
-    @ResponseBody
-    public AdminScopeDto getAdminScope( @PathVariable Long admin_scope_id) {
-        return new AdminScopeDto();
-    }
-
-    @PutMapping("/admin/update")
-    public void update(@RequestBody AdminDto adminDto)
-    {
-        //System.out.println("Изменения сохранены");
+    public Set<AdminScopeDto> getAllAdminsScopes () {
+        return userService.getAllAdminsScopes();
     }
 
     @PostMapping("/admin/add")
-    public void add (@RequestBody AdminDto adminDto)
-    {
-        //System.out.println("Пространство добавлено");
-
+    @ResponseBody
+    public void add (@RequestBody @NotNull AdminDto adminDto) {
+        userService.add(adminDto);
     }
 
-    @DeleteMapping("/admin/delete/{admin_id}")
-    public void deleteAdmin( @PathVariable Long admin_id)
-    {
-        //System.out.println("Пространство удалено");
+    @PutMapping("/admin/update")
+    @ResponseBody
+    public void updateAdmin (@RequestBody @NotNull AdminDto adminDto) {
+        userService.update (adminDto);
     }
 
-    @PutMapping("/admin_scope/update")
-    public void update(@RequestBody AdminScopeDto adminScopeDto)
-    {
-        //System.out.println("Изменения сохранены");
-    }
 
     @PostMapping("/admin_scope/add")
-    public void add (@RequestBody AdminScopeDto adminScopeDto)
-    {
-        //System.out.println("Пространство добавлено");
-
+    @ResponseBody
+    public void add (@RequestBody @NotNull AdminScopeDto adminScopeDto) {
+        userService.add(adminScopeDto);
     }
 
-    @DeleteMapping("/admin_scope/delete/{admin_scope_id}")
-    public void deleteAdminScope( @PathVariable Long admin_scope_id)
-    {
-        //System.out.println("Пространство удалено");
+    @PutMapping("/admin_scopes/update")
+    @ResponseBody
+    public void updateAdminScopes (@RequestBody @NotNull AdminScopeDto adminScopeDto) {
+        userService.update (adminScopeDto);
     }
+
+
+    @DeleteMapping("/delete/{id}")
+    @ResponseBody
+    public void delete (@PathVariable Long id) {
+        userService.delete(id);
+    }
+
 }
 
 

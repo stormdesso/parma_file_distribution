@@ -64,4 +64,5 @@ public class ScopeService {
         }
         return ScopeMapper.INSTANCE.mapWithoutVersion(scopeOptional.get());
     }
+
 }

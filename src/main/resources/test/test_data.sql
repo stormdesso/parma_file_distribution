@@ -51,3 +51,41 @@ VALUES ('D', 'green', 'white');
 INSERT INTO public.tag(
     letter, bkg_color, letter_color)
 VALUES ('P', 'purple', 'white');
+
+
+
+
+
+
+INSERT INTO public.users(
+    name, password, can_create_and_delete_scope )
+VALUES ('testAdminScopes2',
+        '$2a$08$PflYrzWwtpFAJWIBh0F3n.2vBt5EJiWzLrDClw8CwAO990JzCwFCC', true);-- password: pass
+
+
+INSERT INTO public.role(
+    user_id, role_name)
+VALUES ( (SELECT id FROM users AS u WHERE u.name = 'testAdminScopes2'), 'ADMIN_SCOPES');
+
+
+
+INSERT INTO public.users(
+    name, password, is_admin_manager, is_admin_scope_manager, can_create_and_delete_scope )
+VALUES ('testAdmin2',
+        '$2a$08$PflYrzWwtpFAJWIBh0F3n.2vBt5EJiWzLrDClw8CwAO990JzCwFCC', false, false, true);-- password: pass
+
+INSERT INTO public.role(
+    user_id, role_name)
+VALUES ( (SELECT id FROM users AS u WHERE u.name = 'testAdmin2'), 'ADMIN');
+
+
+
+
+INSERT INTO public.users(
+    name, password, is_admin_manager, is_admin_scope_manager, can_create_and_delete_scope )
+VALUES ('testRoot',
+        '$2a$08$PflYrzWwtpFAJWIBh0F3n.2vBt5EJiWzLrDClw8CwAO990JzCwFCC', true, true, true);-- password: pass
+
+INSERT INTO public.role(
+    user_id, role_name)
+VALUES ( (SELECT id FROM users AS u WHERE u.name = 'testRoot'), 'ROOT');
