@@ -84,6 +84,7 @@ public class WebSecurityConfig{
                 .authorizeRequests()
                 .expressionHandler(defaultWebSecurityExpressionHandler())
                 .antMatchers("/file/download/{file_id:\\d+}").permitAll()
+                .antMatchers("/file/admin_page/upload").hasAnyRole(Roles.ROOT.getAuthority(), Roles.ADMIN.getAuthority())
                 .antMatchers("/file/**").hasAnyRole(Roles.ROOT.getAuthority(), Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
 
                 //test api

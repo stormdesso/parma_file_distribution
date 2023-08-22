@@ -2,13 +2,20 @@ package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.parma.filesdistr.dto.ScopeDto;
+import ru.parma.filesdistr.dto.ScopePreviewDto;
+import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.ScopeMapper;
 import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.repos.FileSystemRepository;
 import ru.parma.filesdistr.repos.ScopeRepository;
 
 import javax.persistence.EntityNotFoundException;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,9 +25,33 @@ public class ScopeService {
     private final ScopeRepository scopeRepository;
     private final FileSystemRepository fileSystemRepository;
 
+    private final ScopeAccessService scopeAccessService;
+
     public List<ScopeDto> getAll() {
         List<Scope> scopes = scopeRepository.findAll();
         return ScopeMapper.INSTANCE.toScopeDtosWithoutVersion(scopes);
+    }
+
+    public List<ScopePreviewDto> getAvailableScopes() {
+        List<Scope> scopes = scopeRepository.findAll();
+        List<ScopePreviewDto> scopePreviewDtos = new ArrayList<>();
+        try {
+            for (Scope scope: scopes) {
+                if (!scope.isPermitAll()) {
+                    if (CustomUserDetailsService.isAuthenticated()) {
+                        scopeAccessService.tryGetAccess(TypeInScopePage.SCOPE, scope.getId(), CustomUserDetailsService.getAuthorizedUserId());
+                        scopePreviewDtos.add(ScopeMapper.INSTANCE.toScopePreviewDto(scope));
+                    }
+                    else {
+                        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+                        response.sendRedirect("/login");
+                    }
+                }
+            }
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return scopePreviewDtos;
     }
 
     public void add(ScopeDto scopeDto) {
@@ -64,4 +95,5 @@ public class ScopeService {
         }
         return ScopeMapper.INSTANCE.mapWithoutVersion(scopeOptional.get());
     }
+
 }
