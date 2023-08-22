@@ -27,5 +27,7 @@ logging:
         web=INFO:
 files:
   baseDir: "resources_dir//"
+api:
+  version: @project.version@
 
 

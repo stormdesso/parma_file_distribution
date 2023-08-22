@@ -26,22 +26,24 @@ public class ScopeController {
     }
 
     @PutMapping("/update")
+    @ResponseBody
     public void update(@RequestBody ScopeDto scope)
     {
-        //System.out.println("Изменения сохранены");
+        scopeService.update(scope);
     }
 
     @PostMapping("/add")
+    @ResponseBody
     public void add (@RequestBody ScopeDto scope)
     {
-        //System.out.println("Пространство добавлено");
-
+        scopeService.add(scope);
     }
 
     @DeleteMapping("/delete/{scope_id}")
+    @ResponseBody
     public void delete( @PathVariable Long scope_id)
     {
-        //System.out.println("Пространство удалено");
+        scopeService.delete(scope_id);
     }
 }
 

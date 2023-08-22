@@ -27,7 +27,7 @@ public class CustomUserDetailsService implements UserDetailsService {
         return user;
     }
 
-    private static Authentication getAuthentication(){
+    public static Authentication getAuthentication(){
         return SecurityContextHolder.getContext().getAuthentication();
     }
 
