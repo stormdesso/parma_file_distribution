@@ -23,16 +23,18 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class ScopeAccessService {
-    final ScopeRepository scopeRepository;
-    final FolderRepository folderRepository;
-    final VersionRepository versionRepository;
-    final UserRepository userRepository;
+    private final ScopeRepository scopeRepository;
+    private final FolderRepository folderRepository;
+    private final VersionRepository versionRepository;
+    private final UserRepository userRepository;
+    private final ScopeService scopeService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     private boolean getAccess ( Scope scope, @NotNull User user){
         return user.getAvailableScopes().contains(scope);
     }
 
-    public void tryGetAccess ( TypeInScopePage typeInScopePage, Long generalId, @NotNull Long userId) throws AccessDeniedException {
+    public void tryGetAccessByUserId (TypeInScopePage typeInScopePage, Long generalId, @NotNull Long userId) throws AccessDeniedException {
 
         if(isAdminOrRoot()) return ;
 
@@ -75,11 +77,21 @@ public class ScopeAccessService {
         }
     }
 
-
     private boolean isAdminOrRoot(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         return authentication.getAuthorities().stream()
                 .anyMatch(r -> r.getAuthority().equals(Roles.ROOT.toString()) || r.getAuthority().equals(Roles.ADMIN.toString()));
     }
+
+    public void tryGetAccessToScope(TypeInScopePage typeInScopePage, Long generalId) throws AccessDeniedException{
+        Scope scope = scopeService.getScopeBy(typeInScopePage, generalId);
+
+        if(!scope.isPermitAll ()){
+            tryGetAccessByUserId (typeInScopePage, generalId,
+                    customUserDetailsService.getAuthorizedUser().getId ());//кидает ошибку,
+            // если нет доступа
+        }
+    }
+
 }

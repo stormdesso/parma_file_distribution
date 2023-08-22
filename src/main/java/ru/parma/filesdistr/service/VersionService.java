@@ -32,12 +32,16 @@ public class VersionService {
         return VersionMapper.INSTANCE.toVersionDtos(folderOptional.get().getVersions());
     }
 
-    public VersionDto get(long version_id) {
-        Optional<Version> versionOptional = versionRepository.findById(version_id);
+    public VersionDto getDto (long versionId) {
+        return VersionMapper.INSTANCE.toVersionDto(get(versionId));
+    }
+
+    public Version get (long versionId) {
+        Optional<Version> versionOptional = versionRepository.findById(versionId);
         if (!versionOptional.isPresent()) {
-            throw new EntityNotFoundException( String.format("Версии с id %d не существует", version_id));
+            throw new EntityNotFoundException( String.format("Версии с id %d не существует", versionId));
         }
-        return VersionMapper.INSTANCE.toVersionDto(versionOptional.get());
+        return versionOptional.get();
     }
 
     public void add(VersionDto versionDto, Long folder_id) {

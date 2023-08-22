@@ -31,12 +31,16 @@ public class FolderService {
         return FolderMapper.INSTANCE.toFolderDtos(scopeOptional.get().getFolders());
     }
 
-    public FolderDto get(long folder_id) {
-        Optional<Folder> folderOptional = folderRepository.findById(folder_id);
+    public FolderDto getDto (long folderId) {
+        return FolderMapper.INSTANCE.toFolderDto(get(folderId));
+    }
+
+    public Folder get (long folderId) {
+        Optional<Folder> folderOptional = folderRepository.findById(folderId);
         if (!folderOptional.isPresent()) {
-            throw new EntityNotFoundException( String.format("Папки с id %d не существует", folder_id));
+            throw new EntityNotFoundException( String.format("Папки с id %d не существует", folderId));
         }
-        return FolderMapper.INSTANCE.toFolderDto(folderOptional.get());
+        return folderOptional.get();
     }
 
     public void add(FolderDto folderDto, long scope_id) {
