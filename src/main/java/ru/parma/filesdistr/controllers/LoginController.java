@@ -12,7 +12,7 @@ import java.util.Set;
 
 
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/")
 @RequiredArgsConstructor
 public class LoginController {
     @GetMapping("/get_roles")
