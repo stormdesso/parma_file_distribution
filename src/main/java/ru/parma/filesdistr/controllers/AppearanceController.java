@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.TagDto;
 import ru.parma.filesdistr.service.AppearanceService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -19,21 +18,23 @@ public class AppearanceController {
     @GetMapping("/all")
     @ResponseBody
     public List<TagDto> getAll() {
-        return new ArrayList<>();
+        return appearanceService.getAll();
     }
 
 
     @PostMapping("/add")
+    @ResponseBody
     public void add (@RequestBody TagDto tagDto)
     {
-        //System.out.println("Пространство добавлено");
+        appearanceService.add (tagDto);
     }
 
     //TODO: вылетает 405
-    @DeleteMapping("/delete/{tag_id}")
-    public void delete(@PathVariable Integer tag_id)
+    @DeleteMapping("/delete/{tagId}")
+    @ResponseBody
+    public void delete(@PathVariable Long tagId)
     {
-        //System.out.println("Пространство удалено");
+        appearanceService.delete (tagId);
     }
 }
 
