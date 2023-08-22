@@ -75,7 +75,6 @@ public class ScopeAccessService {
         }
     }
 
-
     private boolean isAdminOrRoot(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
