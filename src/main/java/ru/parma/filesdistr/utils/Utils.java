@@ -16,4 +16,5 @@ public class Utils {
     public static Double convertByteToMb(byte @NotNull [] bytes){
         return ((double)bytes.length/(double) ONE_MB_SIZE_IN_BYTES);
     }
+
 }

@@ -2,6 +2,8 @@ package ru.parma.filesdistr.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
@@ -20,23 +22,30 @@ import ru.parma.filesdistr.utils.IPathName;
 import ru.parma.filesdistr.utils.Utils;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.FileSystemNotFoundException;
 import java.text.ParseException;
-import java.util.Date;
-import java.util.Optional;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 @Service
 @RequiredArgsConstructor
 public class FileLocationService {
-    final FileSystemRepository fileSystemRepository;
-    final FileRepository fileDbRepository;
-    final ScopeRepository scopeRepository;
-    final FolderRepository folderRepository;
-    final VersionRepository versionRepository;
-    final UserRepository userRepository;
-    final TagRepository tagRepository;
+    private final FileSystemRepository fileSystemRepository;
+    private final FileRepository fileDbRepository;
+    private final ScopeRepository scopeRepository;
+    private final FolderRepository folderRepository;
+    private final VersionRepository versionRepository;
+    private final UserRepository userRepository;
+    private final TagRepository tagRepository;
+
+
+    private final VersionService versionService;
+
 
     @Transactional
     public FileDto save (byte[] bytes, String fileName, String filetype,
@@ -259,4 +268,30 @@ public class FileLocationService {
         return fileSystemRepository.findInFileSystem(file.getLocation());
     }
 
+    private @NotNull List<java.io.File> getFiles (@NotNull List<File> fileList) {
+        List<java.io.File> files = new ArrayList<> ();
+        for (File file: fileList) {
+            files.add (fileSystemRepository.findInFileSystem(file.getLocation()).getFile ());
+        }
+        return files;
+    }
+
+    public List<java.io.File> getFiles (Long versionId ) {
+        Version version = versionService.get (versionId);
+        return getFiles (version.getFiles ());
+    }
+    public byte[] getZipArchive(@NotNull List<java.io.File> files) throws IOException{
+        ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+        ZipOutputStream zipOutputStream = new ZipOutputStream(byteOutputStream);
+
+        for(java.io.File file: files) {
+            zipOutputStream.putNextEntry(new ZipEntry (file.getName ()));
+            FileInputStream fileInputStream = new FileInputStream(file);
+            IOUtils.copy(fileInputStream, zipOutputStream);
+            fileInputStream.close();
+            zipOutputStream.closeEntry();
+        }
+        zipOutputStream.close();
+        return byteOutputStream.toByteArray();
+    }
 }
