@@ -79,7 +79,7 @@ public class ViewPageService {
     private void checkAccessToScope(@NotNull Scope scope) throws IOException {
         if (!scope.isPermitAll()) {
             if (CustomUserDetailsService.isAuthenticated()) {
-                scopeAccessService.tryGetAccess(TypeInScopePage.SCOPE, scope.getId(), CustomUserDetailsService.getAuthorizedUserId());
+                scopeAccessService.tryGetAccess (TypeInScopePage.SCOPE, scope.getId(), CustomUserDetailsService.getAuthorizedUserId());
             }
             else {
                 HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
