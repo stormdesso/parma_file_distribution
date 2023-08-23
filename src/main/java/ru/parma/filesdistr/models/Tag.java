@@ -2,10 +2,7 @@ package ru.parma.filesdistr.models;
 
 import lombok.*;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Table(name = "tag")
 @Entity
@@ -17,6 +14,7 @@ import javax.persistence.Table;
 @NoArgsConstructor
 public class Tag {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
