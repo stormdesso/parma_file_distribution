@@ -2,8 +2,6 @@ package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import ru.parma.filesdistr.dto.ScopeDto;
 import ru.parma.filesdistr.dto.ScopePreviewDto;
 import ru.parma.filesdistr.enums.TypeInScopePage;
@@ -13,7 +11,6 @@ import ru.parma.filesdistr.repos.FileSystemRepository;
 import ru.parma.filesdistr.repos.ScopeRepository;
 
 import javax.persistence.EntityNotFoundException;
-import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -37,20 +34,13 @@ public class ScopeService {
         List<ScopePreviewDto> scopePreviewDtos = new ArrayList<>();
         try {
             for (Scope scope: scopes) {
-                if (!scope.isPermitAll()) {
-                    if (CustomUserDetailsService.isAuthenticated()) {
-                        scopeAccessService.tryGetAccess(TypeInScopePage.SCOPE, scope.getId(), CustomUserDetailsService.getAuthorizedUserId());
-                        scopePreviewDtos.add(ScopeMapper.INSTANCE.toScopePreviewDto(scope));
-                    }
-                    else {
-                        HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
-                        response.sendRedirect("/login");
-                    }
-                }
+                scopeAccessService.tryGetAccess(TypeInScopePage.SCOPE, scope.getId(),
+                        CustomUserDetailsService.getAuthorizedUserId());
+                scopePreviewDtos.add(ScopeMapper.INSTANCE.toScopePreviewDto(scope));
             }
         } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+            //todo:log:"нет доступа к scope с id %d"
+         }
         return scopePreviewDtos;
     }
 
