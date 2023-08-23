@@ -47,11 +47,32 @@ public class UserService{
         return optUser.get ();
     }
 
-    private void checkMaxNumberOfScopes (@NotNull AdminScopeDto adminScopeDto){
+    //TODO: проверять, при добавлении нового scope от admin_scope
+    public void checkMaxNumberOfScopes (@NotNull AdminScopeDto adminScopeDto){
         if(adminScopeDto.getMaxNumberScope () < adminScopeDto.getScopePreviewDtos ().size ()){
             throw new IllegalArgumentException (String.format ("Превышено допустимое число пространств, доступно" +
                             " %d, выбрано: %d", adminScopeDto.getMaxNumberScope (),
                     adminScopeDto.getScopePreviewDtos ().size ()));
+        }
+    }
+
+    //TODO: проверять, при добавлении нового folder от admin_scope
+    public void checkMaxNumberOfFolders ( Long maxNumberOfFolder, Long currentNumberOfFolder){
+        if(maxNumberOfFolder < currentNumberOfFolder){
+            throw new IllegalArgumentException (String.format ("Превышено допустимое число разделов, доступно" +
+                            " %d, выбрано: %d", maxNumberOfFolder,
+                    currentNumberOfFolder));
+        }
+    }
+
+    //TODO: проверять, при добавлении нового file от admin_scope
+    public void checkMaxStorageSpace (Long fileSize){
+        Long maxStorageSpace = customUserDetailsService.getAuthorizedUser ().getMaxStorageSpace();
+        Long currentStorageSpace = 0L + fileSize; //todo:заменить 0L на объём опубликованных данных
+        if(maxStorageSpace < currentStorageSpace){
+            throw new IllegalArgumentException (String.format ("Превышен допустимый объём публикуемых данных," +
+                            " ограничение %d(Гб), загружено: %d(Гб)", maxStorageSpace,
+                    currentStorageSpace));
         }
     }
 
