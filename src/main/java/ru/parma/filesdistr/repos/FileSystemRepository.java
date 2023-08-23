@@ -17,7 +17,7 @@ import java.nio.file.Paths;
 @Repository
 public class FileSystemRepository{
 
-    //WARN: файлы перезаписывается, если такое имя уже занято!!!
+    //TODO: bug: файлы перезаписывается, если такое имя уже занято
     @Value("${files.baseDir}")
     private String resourcesDir;
 
@@ -42,11 +42,9 @@ public class FileSystemRepository{
             path += MediaTypeInScopePage.ILLUSTRATION.toString().toLowerCase();
         }
         else if(mediaTypeInScopePage == MediaTypeInScopePage.ICON) {
-            //TODO: удалять старый файл
             path += MediaTypeInScopePage.ICON.toString().toLowerCase();
         }
         else if( mediaTypeInScopePage == MediaTypeInScopePage.DISTRIBUTION_AGREEMENT){
-            //TODO: удалять старый файл
             path += MediaTypeInScopePage.DISTRIBUTION_AGREEMENT.toString().toLowerCase();
         }
         else throw new IllegalArgumentException();
@@ -60,7 +58,6 @@ public class FileSystemRepository{
         String path = resourcesDir + fullPath + "//";
 
         if(mediaTypeInScopePage == MediaTypeInScopePage.MANIFEST) {
-            //TODO: удалять старый файл
             path += MediaTypeInScopePage.MANIFEST.toString().toLowerCase();
         }
         else throw new IllegalArgumentException();
@@ -116,7 +113,6 @@ public class FileSystemRepository{
         String path = resourcesDir + fullPath;
 
         if(mediaTypeInAdminPage == MediaTypeInAdminPage.PROFILE_PICTURE) {
-            //TODO: удалять старый файл
             path += MediaTypeInAdminPage.PROFILE_PICTURE.toString().toLowerCase();
         }
         else throw new IllegalArgumentException("Неверные параметры");
