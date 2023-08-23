@@ -8,6 +8,7 @@ import ru.parma.filesdistr.dto.ScopePreviewDto;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.ScopeMapper;
 import ru.parma.filesdistr.models.Scope;
+import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.FileSystemRepository;
 import ru.parma.filesdistr.repos.ScopeRepository;
 
@@ -24,8 +25,9 @@ public class ScopeService {
     private final FileSystemRepository fileSystemRepository;
     private final FolderService folderService;
     private final VersionService versionService;
-
+    private final AdminPageAccessService adminPageAccessService;
     private final ScopeAccessService scopeAccessService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     public List<ScopeDto> getAll() {
         List<Scope> scopes = scopeRepository.findAll();
@@ -36,10 +38,17 @@ public class ScopeService {
         List<Scope> scopes = scopeRepository.findAll();
         List<ScopePreviewDto> scopePreviewDtos = new ArrayList<>();
         try {
-            for (Scope scope: scopes) {
-                scopeAccessService.tryGetAccess(TypeInScopePage.SCOPE, scope.getId(),
-                        CustomUserDetailsService.getAuthorizedUserId());
-                scopePreviewDtos.add(ScopeMapper.INSTANCE.toScopePreviewDto(scope));
+            User currentUser = customUserDetailsService.getAuthorizedUser();
+            if (adminPageAccessService.isAdmin(currentUser)||
+                adminPageAccessService.isRoot(currentUser)) {
+                return ScopeMapper.INSTANCE.toScopePreviewDtos(scopes);
+            }
+            else {
+                long userId = CustomUserDetailsService.getAuthorizedUserId();
+                for (Scope scope: scopes) {
+                    scopeAccessService.tryGetAccessByUserId(TypeInScopePage.SCOPE, scope.getId(), userId);
+                    scopePreviewDtos.add(ScopeMapper.INSTANCE.toScopePreviewDto(scope));
+                }
             }
         } catch (IOException e) {
             //todo:log:"нет доступа к scope с id %d"
