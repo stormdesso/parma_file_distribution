@@ -1,7 +1,6 @@
 package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
-import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.dto.ScopeDto;
 import ru.parma.filesdistr.dto.ScopePreviewDto;
@@ -25,8 +24,6 @@ import java.util.Optional;
 public class ScopeService {
     private final ScopeRepository scopeRepository;
     private final FileSystemRepository fileSystemRepository;
-    private final FolderService folderService;
-    private final VersionService versionService;
     private final AdminPageAccessService adminPageAccessService;
     private final ScopeAccessService scopeAccessService;
     private final CustomUserDetailsService customUserDetailsService;
@@ -124,20 +121,5 @@ public class ScopeService {
         return scopeOptional.get();
     }
 
-    public Scope getScopeBy (@NotNull TypeInScopePage typeInScopePage, @NotNull Long generalId)  {
-
-        Scope scope = null;
-
-        if(typeInScopePage == TypeInScopePage.SCOPE){
-            scope = get(generalId);
-        }else if(typeInScopePage == TypeInScopePage.FOLDER){
-            scope = folderService.get(generalId).getScope ();
-        }
-        else if(typeInScopePage == TypeInScopePage.VERSION){
-            scope = versionService.get(generalId).getFolder ().getScope ();
-        }
-
-        return scope;
-    }
 
 }
