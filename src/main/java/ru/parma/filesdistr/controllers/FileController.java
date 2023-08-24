@@ -13,8 +13,11 @@ import ru.parma.filesdistr.dto.FileDto;
 import ru.parma.filesdistr.enums.MediaTypeInAdminPage;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
+import ru.parma.filesdistr.models.Version;
 import ru.parma.filesdistr.service.*;
 
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 
 //если не работает запись файлов -> включить админские права для IDEA
@@ -23,12 +26,15 @@ import java.nio.file.AccessDeniedException;
 @RequiredArgsConstructor
 @RequestMapping("file")
 public class FileController {
+    private final HttpServletResponse response;
+
     private final FileLocationService fileLocationService;
     private final ScopeAccessService scopeAccessService;
     private final AdminPageAccessService adminPageAccessService;
+    private final VersionService versionService;
 
     //TODO: async подгрузка и загрузка
-    //TODO: return byte[], download .zip
+    //TODO: return byte[]
     @PostMapping(value = "/scopes_page/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     FileDto uploadOnScopesPage (@RequestParam @NotNull MultipartFile file,
@@ -66,6 +72,20 @@ public class FileController {
         scopeAccessService.tryGetAccessToScope ( typeInScopePage,  generalId);
         return fileLocationService.get(fileId);
     }
+
+
+    @GetMapping(value="/download/{versionId}/zip", produces = "application/zip")
+    @ResponseBody
+    public byte[] downloadZIP(@PathVariable Long versionId) throws IOException{
+        scopeAccessService.tryGetAccessToScope ( TypeInScopePage.VERSION,  versionId);
+
+        Version version = versionService.get (versionId);
+        response.addHeader("Content-Disposition",
+                "attachment; filename=\""+version.getVersionNumber()+".zip\"");
+
+        return fileLocationService.getZipArchive (fileLocationService.getFiles(versionId));
+    }
+
 
     @DeleteMapping(value = "/delete/{fileId}")
     @ResponseBody
