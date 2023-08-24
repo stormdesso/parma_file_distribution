@@ -1,9 +1,5 @@
-alter table scope
-    add icon_id integer;
+alter table file
+    add comment varchar(255);
 
-alter table scope
-    add constraint icon_id_fk
-        foreign key (icon_id) references file;
-
-alter table version
-    add id serial;
+alter table users
+    add profile_picture_id integer default null;

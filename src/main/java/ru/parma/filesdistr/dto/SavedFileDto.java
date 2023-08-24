@@ -1,17 +1,16 @@
 package ru.parma.filesdistr.dto;
 
+import lombok.Builder;
 import lombok.Data;
-import ru.parma.filesdistr.models.Tag;
-
-import java.util.List;
 
 
 @Data
+@Builder
 public class SavedFileDto {
-    private  Integer id;
+    private  Long id;
     private  String name;
     private  String type;
-
-    private  byte[] data;
-    private List<Tag> tags;
+    //private  byte[] data;
+    private TagDto tag;
+    private  String comment;
 }

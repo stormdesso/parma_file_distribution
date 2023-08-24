@@ -43,6 +43,14 @@ public class WebSecurityConfig{
                 .failureUrl("/login?error=true")
                 .and()
                 .logout().permitAll()
+
+                //ViewPage
+                .and()
+                    .authorizeRequests()
+                    .expressionHandler(defaultWebSecurityExpressionHandler())
+                    .antMatchers("/scope/{scope_id:\\d+}/version/{version_id:\\d+|latest}").permitAll()
+                // -ViewPage
+
                 //пространства
                 .and()
                 .authorizeRequests()
@@ -76,8 +84,7 @@ public class WebSecurityConfig{
                 .authorizeRequests()
                 .expressionHandler(defaultWebSecurityExpressionHandler())
                 .antMatchers("/file/download/{file_id:\\d+}").permitAll()
-//                .antMatchers("/file/upload").permitAll()
-//                .antMatchers("/file/delete/{file_id:\\d+}").permitAll()
+                .antMatchers("/file/admin_page/upload").hasAnyRole(Roles.ROOT.getAuthority(), Roles.ADMIN.getAuthority())
                 .antMatchers("/file/**").hasAnyRole(Roles.ROOT.getAuthority(), Roles.ADMIN.getAuthority(), Roles.ADMIN_SCOPES.getAuthority())
 
                 //test api
@@ -85,7 +92,6 @@ public class WebSecurityConfig{
                 .antMatchers("/test/hello", "/test/jpa").permitAll()
                 .antMatchers("/test/user").hasAnyRole(Roles.USER.getAuthority(), Roles.ADMIN.getAuthority())
                 .antMatchers("/test/admin").hasAuthority(Roles.ADMIN.getAuthority())
-
 
                 .and()
                 .userDetailsService(customUserDetailsService)
@@ -99,5 +105,6 @@ public class WebSecurityConfig{
     public PasswordEncoder encoder () {
         return new BCryptPasswordEncoder(8); //NoOpPasswordEncoder.getInstance();
     }
+
 
 }

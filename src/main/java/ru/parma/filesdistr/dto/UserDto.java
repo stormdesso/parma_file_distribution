@@ -1,17 +1,19 @@
 package ru.parma.filesdistr.dto;
 
+import lombok.Builder;
 import lombok.Data;
 import ru.parma.filesdistr.enums.Roles;
 
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Data
+@Builder
 public class UserDto {
 
     private Long id;
     private String name;
-    private String password;
+    private FileDto profilePicture;
     private boolean blocked;
     private boolean isAdminManager;
     private boolean isAdminScopeManager;
@@ -19,5 +21,6 @@ public class UserDto {
     private Long maxNumberScope;
     private Long maxStorageSpace;
     private Long maxNumberFolder;
-    private Set<Roles> roles = new HashSet<>();
+    private Set<Roles> roles;
+    private List<ScopeDto> availableScopes;
 }

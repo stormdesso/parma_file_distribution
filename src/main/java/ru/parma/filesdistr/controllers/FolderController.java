@@ -6,7 +6,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.FolderDto;
 import ru.parma.filesdistr.service.FolderService;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Controller
@@ -18,33 +17,34 @@ public class FolderController {
     @GetMapping("/all/{scope_id}")
     @ResponseBody
     public List<FolderDto> getAll(@PathVariable Long scope_id) {
-
-        return new ArrayList<>();
+        return folderService.getAll(scope_id);
     }
 
     @GetMapping("/{folder_id}")
     @ResponseBody
     public FolderDto get(@PathVariable Long folder_id) {
-        return new FolderDto();
+        return folderService.getDto (folder_id);
     }
 
     @PutMapping("/update")
+    @ResponseBody
     public void update(@RequestBody FolderDto folderDto)
     {
-        //System.out.println("Изменения сохранены");
+        folderService.update(folderDto);
     }
 
-    @PostMapping("/add")
-    public void add (@RequestBody FolderDto folderDto)
+    @PostMapping("/add/{scope_id}")
+    @ResponseBody
+    public void add (@RequestBody FolderDto folderDto, @PathVariable long scope_id)
     {
-        //System.out.println("Пространство добавлено");
-
+        folderService.add(folderDto, scope_id);
     }
 
     @DeleteMapping("/delete/{folder_id}")
+    @ResponseBody
     public void delete(@PathVariable Long folder_id)
     {
-        //System.out.println("Пространство удалено");
+        folderService.delete(folder_id);
     }
 }
 
