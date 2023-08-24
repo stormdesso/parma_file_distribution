@@ -14,6 +14,7 @@ import ru.parma.filesdistr.repos.ScopeRepository;
 
 import javax.persistence.EntityNotFoundException;
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -28,6 +29,7 @@ public class ScopeService {
     private final AdminPageAccessService adminPageAccessService;
     private final ScopeAccessService scopeAccessService;
     private final CustomUserDetailsService customUserDetailsService;
+    private final UserService userService;
 
     public List<ScopeDto> getAll() {
         List<Scope> scopes = scopeRepository.findAll();
@@ -56,18 +58,22 @@ public class ScopeService {
         return scopePreviewDtos;
     }
 
-    public void add(ScopeDto scopeDto) {
+    public void add(ScopeDto scopeDto) throws AccessDeniedException{
         checkDto(scopeDto);
+        scopeAccessService.canCreateAndDeleteScopes(true);
+
         Scope scope = ScopeMapper.INSTANCE.toScope(scopeDto);
         scopeRepository.save(scope);
     }
 
-    public void update(ScopeDto scopeDto) {
+    public void update(ScopeDto scopeDto) throws AccessDeniedException{
         checkDto(scopeDto);
         Optional<Scope> existedScope = scopeRepository.findById(scopeDto.getId());
         if (!existedScope.isPresent()) {
             throw new  EntityNotFoundException("Такого пространства для обновления не существует");
         }
+        scopeAccessService.canCreateAndDeleteScopes(false);
+
         Scope scope = ScopeMapper.INSTANCE.toScope(scopeDto);
         scopeRepository.save(scope);
     }
@@ -81,11 +87,13 @@ public class ScopeService {
         }
     }
 
-    public void delete(long id) {
+    public void delete(long id) throws AccessDeniedException{
         Optional<Scope> scope = scopeRepository.findById(id);
         if (!scope.isPresent()) {
             throw new EntityNotFoundException(String.format("Scope с id %d  не найден", id));
         }
+        scopeAccessService.canCreateAndDeleteScopes(false);
+
         fileSystemRepository.delete(scope.get().getRootPath());
         scopeRepository.delete(scope.get());
     }

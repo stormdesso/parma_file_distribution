@@ -47,7 +47,6 @@ public class UserService{
         return optUser.get ();
     }
 
-    //TODO: проверять, при добавлении нового scope от admin_scope
     public void checkMaxNumberOfScopes (@NotNull AdminScopeDto adminScopeDto){
         if(adminScopeDto.getMaxNumberScope () < adminScopeDto.getScopePreviewDtos ().size ()){
             throw new IllegalArgumentException (String.format ("Превышено допустимое число пространств, доступно" +

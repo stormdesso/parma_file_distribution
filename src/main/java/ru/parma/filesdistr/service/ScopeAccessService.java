@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.enums.Roles;
 import ru.parma.filesdistr.enums.TypeInScopePage;
+import ru.parma.filesdistr.mappers.UserMapper;
 import ru.parma.filesdistr.models.Folder;
 import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.models.User;
@@ -29,6 +30,7 @@ public class ScopeAccessService {
     private final UserRepository userRepository;
     private final ScopeService scopeService;
     private final CustomUserDetailsService customUserDetailsService;
+    private final UserService userService;
 
     private boolean getAccess ( Scope scope, @NotNull User user){
         return user.getAvailableScopes().contains(scope);
@@ -92,6 +94,44 @@ public class ScopeAccessService {
                     customUserDetailsService.getAuthorizedUser().getId ());//кидает ошибку,
             // если нет доступа
         }
+    }
+    private boolean isAdminScopes(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(r -> r.getAuthority().equals(Roles.ADMIN_SCOPES.toString()));
+    }
+
+    public void canCreateAndDeleteScopes (boolean createNewScope) throws AccessDeniedException{
+        if(isAdminOrRoot()){
+            return;
+        }
+        if(isAdminScopes()){
+            User user = customUserDetailsService.getAuthorizedUser();
+            if (user.isCanCreateAndDeleteScope ()){
+                if(createNewScope){
+                    userService.checkMaxNumberOfScopes (UserMapper.INSTANCE.toAdminScopeDto(user));
+                }
+                return;
+            }
+        }
+        throw new AccessDeniedException ("нет доступа");
+    }
+
+    public void canCreateAndDeleteFolders (boolean createNewScope) throws AccessDeniedException{
+        if(isAdminOrRoot()){
+            return;
+        }
+        if(isAdminScopes()){
+            User user = customUserDetailsService.getAuthorizedUser();
+            if (user.isCanCreateAndDeleteScope ()){
+                if(createNewScope){
+                    userService.checkMaxNumberOfScopes (UserMapper.INSTANCE.toAdminScopeDto(user));
+                }
+                return;
+            }
+        }
+        throw new AccessDeniedException ("нет доступа");
     }
 
 }

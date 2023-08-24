@@ -7,6 +7,7 @@ import ru.parma.filesdistr.dto.ScopeDto;
 import ru.parma.filesdistr.dto.ScopePreviewDto;
 import ru.parma.filesdistr.service.ScopeService;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @Controller
@@ -34,22 +35,19 @@ public class ScopeController {
 
     @PutMapping("/update")
     @ResponseBody
-    public void update(@RequestBody ScopeDto scope)
-    {
+    public void update(@RequestBody ScopeDto scope) throws AccessDeniedException{
         scopeService.update(scope);
     }
 
     @PostMapping("/add")
     @ResponseBody
-    public void add (@RequestBody ScopeDto scope)
-    {
+    public void add (@RequestBody ScopeDto scope) throws AccessDeniedException{
         scopeService.add(scope);
     }
 
     @DeleteMapping("/delete/{scope_id}")
     @ResponseBody
-    public void delete( @PathVariable Long scope_id)
-    {
+    public void delete( @PathVariable Long scope_id) throws AccessDeniedException{
         scopeService.delete(scope_id);
     }
 }
