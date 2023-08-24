@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.ScopeDto;
+import ru.parma.filesdistr.dto.ScopePreviewDto;
 import ru.parma.filesdistr.service.ScopeService;
 
 import java.util.List;
@@ -18,6 +19,12 @@ public class ScopeController {
     @ResponseBody
     public List<ScopeDto> getAll() {
         return scopeService.getAll();
+    }
+
+    @GetMapping("/availableScopes")
+    @ResponseBody
+    public List<ScopePreviewDto> getAvailableScopes() {
+        return scopeService.getAvailableScopes();
     }
     @GetMapping("/{scope_id}")
     @ResponseBody

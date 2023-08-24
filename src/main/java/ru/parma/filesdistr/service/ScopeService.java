@@ -4,13 +4,17 @@ import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.dto.ScopeDto;
+import ru.parma.filesdistr.dto.ScopePreviewDto;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.ScopeMapper;
 import ru.parma.filesdistr.models.Scope;
+import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.FileSystemRepository;
 import ru.parma.filesdistr.repos.ScopeRepository;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,10 +25,35 @@ public class ScopeService {
     private final FileSystemRepository fileSystemRepository;
     private final FolderService folderService;
     private final VersionService versionService;
+    private final AdminPageAccessService adminPageAccessService;
+    private final ScopeAccessService scopeAccessService;
+    private final CustomUserDetailsService customUserDetailsService;
 
     public List<ScopeDto> getAll() {
         List<Scope> scopes = scopeRepository.findAll();
         return ScopeMapper.INSTANCE.toScopeDtosWithoutVersion(scopes);
+    }
+
+    public List<ScopePreviewDto> getAvailableScopes() {
+        List<Scope> scopes = scopeRepository.findAll();
+        List<ScopePreviewDto> scopePreviewDtos = new ArrayList<>();
+        try {
+            User currentUser = customUserDetailsService.getAuthorizedUser();
+            if (adminPageAccessService.isAdmin(currentUser)||
+                adminPageAccessService.isRoot(currentUser)) {
+                return ScopeMapper.INSTANCE.toScopePreviewDtos(scopes);
+            }
+            else {
+                long userId = CustomUserDetailsService.getAuthorizedUserId();
+                for (Scope scope: scopes) {
+                    scopeAccessService.tryGetAccessByUserId(TypeInScopePage.SCOPE, scope.getId(), userId);
+                    scopePreviewDtos.add(ScopeMapper.INSTANCE.toScopePreviewDto(scope));
+                }
+            }
+        } catch (IOException e) {
+            //todo:log:"нет доступа к scope с id %d"
+         }
+        return scopePreviewDtos;
     }
 
     public void add(ScopeDto scopeDto) {
@@ -72,7 +101,7 @@ public class ScopeService {
         }
         return scopeOptional.get();
     }
-    
+
     public Scope getScopeBy (@NotNull TypeInScopePage typeInScopePage, @NotNull Long generalId){
 
         Scope scope = null;
