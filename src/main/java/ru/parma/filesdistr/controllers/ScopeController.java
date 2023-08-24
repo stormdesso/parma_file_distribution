@@ -5,6 +5,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.ScopeDto;
 import ru.parma.filesdistr.dto.ScopePreviewDto;
+import ru.parma.filesdistr.dto.UserCredentialsDto;
 import ru.parma.filesdistr.service.ScopeService;
 
 import java.nio.file.AccessDeniedException;
@@ -35,14 +36,14 @@ public class ScopeController {
 
     @PutMapping("/update")
     @ResponseBody
-    public void update(@RequestBody ScopeDto scope) throws AccessDeniedException{
-        scopeService.update(scope);
+    public void update(@RequestBody ScopeDto scope, UserCredentialsDto userCredentialsDto) throws AccessDeniedException{
+        scopeService.update(scope, userCredentialsDto);
     }
 
     @PostMapping("/add")
     @ResponseBody
-    public void add (@RequestBody ScopeDto scope) throws AccessDeniedException{
-        scopeService.add(scope);
+    public void add (@RequestBody ScopeDto scope, UserCredentialsDto userCredentialsDto) throws AccessDeniedException{
+        scopeService.add(scope, userCredentialsDto);
     }
 
     @DeleteMapping("/delete/{scope_id}")

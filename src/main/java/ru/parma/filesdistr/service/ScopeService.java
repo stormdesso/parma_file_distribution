@@ -5,6 +5,7 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.dto.ScopeDto;
 import ru.parma.filesdistr.dto.ScopePreviewDto;
+import ru.parma.filesdistr.dto.UserCredentialsDto;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.ScopeMapper;
 import ru.parma.filesdistr.models.Scope;
@@ -29,6 +30,8 @@ public class ScopeService {
     private final AdminPageAccessService adminPageAccessService;
     private final ScopeAccessService scopeAccessService;
     private final CustomUserDetailsService customUserDetailsService;
+
+    private final UserService userService;
 
     public List<ScopeDto> getAll() {
         List<Scope> scopes = scopeRepository.findAll();
@@ -57,16 +60,19 @@ public class ScopeService {
         return scopePreviewDtos;
     }
 
-    public void add(ScopeDto scopeDto) throws AccessDeniedException{
+    public void add(ScopeDto scopeDto, UserCredentialsDto userCredentialsDto) throws AccessDeniedException{
         checkDto(scopeDto);
 
         scopeAccessService.canCreateAndDeleteScopes(true);
 
         Scope scope = ScopeMapper.INSTANCE.toScope(scopeDto);
+        List<Scope> availableScopes = new ArrayList<>();
+        availableScopes.add(scope);
+        userService.add(userCredentialsDto, availableScopes);
         scopeRepository.save(scope);
     }
 
-    public void update(ScopeDto scopeDto) throws AccessDeniedException{
+    public void update(ScopeDto scopeDto, UserCredentialsDto userCredentialsDto) throws AccessDeniedException{
         checkDto(scopeDto);
         Optional<Scope> existedScope = scopeRepository.findById(scopeDto.getId());
         if (!existedScope.isPresent()) {
@@ -74,8 +80,11 @@ public class ScopeService {
         }
         scopeAccessService.tryGetAccessByUserId (TypeInScopePage.SCOPE, scopeDto.getId (),
                 CustomUserDetailsService.getAuthorizedUserId());
-        Scope scope = ScopeMapper.INSTANCE.toScope(scopeDto);
 
+        Scope scope = ScopeMapper.INSTANCE.toScope(scopeDto);
+        List<Scope> availableScopes = new ArrayList<>();
+        availableScopes.add(scope);
+        userService.update(userCredentialsDto, availableScopes);
         scopeRepository.save(scope);
     }
 

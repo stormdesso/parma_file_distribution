@@ -9,14 +9,17 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.parma.filesdistr.dto.AdminDto;
 import ru.parma.filesdistr.dto.AdminScopeDto;
+import ru.parma.filesdistr.dto.UserCredentialsDto;
 import ru.parma.filesdistr.enums.Roles;
 import ru.parma.filesdistr.mappers.UserMapper;
+import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.UserRepository;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -213,6 +216,41 @@ public class UserService{
             UserMapper.INSTANCE.fromAdminScopeDtoToUser (adminScopeDto, updatedUser,
                     scopeRepository.findScopeByScopePreviewDto (adminScopeDto.getScopePreviewDtos ()));
 
+            userRepository.save (updatedUser);
+
+        }
+    }
+
+    @Transactional
+    public void add (@NotNull UserCredentialsDto userCredentialsDto, List<Scope> availableScopes) {
+        Set<Roles> roles = new HashSet<> ();
+        roles.add (Roles.USER);
+
+        matchesRegex (userCredentialsDto.getName (), userCredentialsDto.getPassword ());
+        canUseThisName (userCredentialsDto.getName ());
+
+        User user = UserMapper.INSTANCE.toUser(userCredentialsDto);
+        user.setAvailableScopes(availableScopes);
+        userRepository.save (user);
+    }
+
+    @Transactional
+    public void update (@NotNull UserCredentialsDto userCredentialsDto, List<Scope> availableScopes){
+        User currUser = customUserDetailsService.getAuthorizedUser();
+        User updatedUser = getUserByIdAndRole (userCredentialsDto.getId (), Roles.USER);
+
+        String oldName = updatedUser.getName();
+
+        if(currUser.getId () != updatedUser.getId ()){
+
+            matchesRegex (userCredentialsDto.getName (), userCredentialsDto.getPassword ());
+
+            if(! userCredentialsDto.getName ().equals (oldName))//username обновился
+            {
+                canUseThisName (userCredentialsDto.getName ());
+            }
+
+            UserMapper.INSTANCE.fromUserCredentialsDtoToUser(userCredentialsDto, updatedUser, availableScopes);
             userRepository.save (updatedUser);
 
         }
