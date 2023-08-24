@@ -3,6 +3,7 @@ package ru.parma.filesdistr.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.dto.FolderDto;
+import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.FolderMapper;
 import ru.parma.filesdistr.models.Folder;
 import ru.parma.filesdistr.models.Scope;
@@ -11,6 +12,7 @@ import ru.parma.filesdistr.repos.FolderRepository;
 import ru.parma.filesdistr.repos.ScopeRepository;
 
 import javax.persistence.EntityNotFoundException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +24,8 @@ public class FolderService {
     private final ScopeRepository scopeRepository;
 
     private final FileSystemRepository fileSystemRepository;
+    private final ScopeAccessService scopeAccessService;
+
 
     public List<FolderDto> getAll(long scope_id) {
         Optional<Scope> scopeOptional = scopeRepository.findById(scope_id);
@@ -43,13 +47,16 @@ public class FolderService {
         return folderOptional.get();
     }
 
-    public void add(FolderDto folderDto, long scope_id) {
+    public void add(FolderDto folderDto, long scopeId) throws AccessDeniedException{
         checkDto(folderDto);
-        Optional<Scope> scopeOptional = scopeRepository.findById(scope_id);
+        Optional<Scope> scopeOptional = scopeRepository.findById(scopeId);
         if (!scopeOptional.isPresent()) {
-            throw new EntityNotFoundException(String.format("Пространства с id %d не существует", scope_id));
+            throw new EntityNotFoundException(String.format("Пространства с id %d не существует", scopeId));
         }
         Scope scope = scopeOptional.get();
+
+        scopeAccessService.canCreateFolderIn (scope);
+
         Folder folder = FolderMapper.INSTANCE.toFolder(folderDto);
         List<Folder> folders = scope.getFolders();
         folders.add(folder);
@@ -57,12 +64,14 @@ public class FolderService {
         folderRepository.save(folder);
     }
 
-    public void update(FolderDto folderDto) {
+    public void update(FolderDto folderDto) throws AccessDeniedException{
         checkDto(folderDto);
         Optional<Folder> existedFolder = folderRepository.findById(folderDto.getId());
         if (!existedFolder.isPresent()) {
             throw new EntityNotFoundException("Такой папки для обновления не существует");
         }
+        scopeAccessService.tryGetAccessByUserId (TypeInScopePage.SCOPE, folderDto.getId (),
+                CustomUserDetailsService.getAuthorizedUserId ());
         Folder folder = FolderMapper.INSTANCE.toFolder(folderDto);
         folderRepository.save(folder);
     }

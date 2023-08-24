@@ -55,7 +55,6 @@ public class UserService{
         }
     }
 
-    //TODO: проверять, при добавлении нового folder от admin_scope
     public void checkMaxNumberOfFolders ( Long maxNumberOfFolder, Long currentNumberOfFolder){
         if(maxNumberOfFolder < currentNumberOfFolder){
             throw new IllegalArgumentException (String.format ("Превышено допустимое число разделов, доступно" +

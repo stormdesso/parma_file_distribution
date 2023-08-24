@@ -86,7 +86,7 @@ public class ScopeAccessService {
                 .anyMatch(r -> r.getAuthority().equals(Roles.ROOT.toString()) || r.getAuthority().equals(Roles.ADMIN.toString()));
     }
 
-    public void tryGetAccessToScope(TypeInScopePage typeInScopePage, Long generalId) throws AccessDeniedException{
+    public void tryGetAccessToScopeForUser(TypeInScopePage typeInScopePage, Long generalId) throws AccessDeniedException{
         Scope scope = scopeService.getScopeBy(typeInScopePage, generalId);
 
         if(!scope.isPermitAll ()){
@@ -118,20 +118,12 @@ public class ScopeAccessService {
         throw new AccessDeniedException ("нет доступа");
     }
 
-    public void canCreateAndDeleteFolders (boolean createNewScope) throws AccessDeniedException{
-        if(isAdminOrRoot()){
-            return;
-        }
-        if(isAdminScopes()){
-            User user = customUserDetailsService.getAuthorizedUser();
-            if (user.isCanCreateAndDeleteScope ()){
-                if(createNewScope){
-                    userService.checkMaxNumberOfScopes (UserMapper.INSTANCE.toAdminScopeDto(user));
-                }
-                return;
-            }
-        }
-        throw new AccessDeniedException ("нет доступа");
+    public void canCreateFolderIn (@NotNull Scope scope) throws AccessDeniedException{
+        tryGetAccessByUserId (TypeInScopePage.SCOPE, scope.getId (),
+                CustomUserDetailsService.getAuthorizedUserId ());
+
+        User user = customUserDetailsService.getAuthorizedUser ();
+        userService.checkMaxNumberOfFolders (user.getMaxNumberFolder (), (long) scope.getFolders ().size ());
     }
 
 }

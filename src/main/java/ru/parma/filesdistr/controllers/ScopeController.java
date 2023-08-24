@@ -29,7 +29,7 @@ public class ScopeController {
     }
     @GetMapping("/{scope_id}")
     @ResponseBody
-    public ScopeDto get(@PathVariable Long scope_id) {
+    public ScopeDto get(@PathVariable Long scope_id) throws AccessDeniedException{
         return scopeService.getDto (scope_id);
     }
 

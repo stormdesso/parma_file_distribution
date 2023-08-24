@@ -29,7 +29,6 @@ public class ScopeService {
     private final AdminPageAccessService adminPageAccessService;
     private final ScopeAccessService scopeAccessService;
     private final CustomUserDetailsService customUserDetailsService;
-    private final UserService userService;
 
     public List<ScopeDto> getAll() {
         List<Scope> scopes = scopeRepository.findAll();
@@ -60,6 +59,7 @@ public class ScopeService {
 
     public void add(ScopeDto scopeDto) throws AccessDeniedException{
         checkDto(scopeDto);
+
         scopeAccessService.canCreateAndDeleteScopes(true);
 
         Scope scope = ScopeMapper.INSTANCE.toScope(scopeDto);
@@ -72,9 +72,10 @@ public class ScopeService {
         if (!existedScope.isPresent()) {
             throw new  EntityNotFoundException("Такого пространства для обновления не существует");
         }
-        scopeAccessService.canCreateAndDeleteScopes(false);
-
+        scopeAccessService.tryGetAccessByUserId (TypeInScopePage.SCOPE, scopeDto.getId (),
+                CustomUserDetailsService.getAuthorizedUserId());
         Scope scope = ScopeMapper.INSTANCE.toScope(scopeDto);
+
         scopeRepository.save(scope);
     }
 
@@ -93,12 +94,16 @@ public class ScopeService {
             throw new EntityNotFoundException(String.format("Scope с id %d  не найден", id));
         }
         scopeAccessService.canCreateAndDeleteScopes(false);
+        scopeAccessService.tryGetAccessByUserId (TypeInScopePage.SCOPE, id,
+                CustomUserDetailsService.getAuthorizedUserId());
 
         fileSystemRepository.delete(scope.get().getRootPath());
         scopeRepository.delete(scope.get());
     }
 
-    public ScopeDto getDto (Long scopeId) {
+    public ScopeDto getDto (Long scopeId) throws AccessDeniedException{
+        scopeAccessService.tryGetAccessByUserId (TypeInScopePage.SCOPE, scopeId,
+                CustomUserDetailsService.getAuthorizedUserId ());
         return ScopeMapper.INSTANCE.toScopeDto (get(scopeId));
     }
 
@@ -110,7 +115,7 @@ public class ScopeService {
         return scopeOptional.get();
     }
 
-    public Scope getScopeBy (@NotNull TypeInScopePage typeInScopePage, @NotNull Long generalId){
+    public Scope getScopeBy (@NotNull TypeInScopePage typeInScopePage, @NotNull Long generalId)  {
 
         Scope scope = null;
 

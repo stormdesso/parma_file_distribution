@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.FolderDto;
 import ru.parma.filesdistr.service.FolderService;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @Controller
@@ -28,15 +29,13 @@ public class FolderController {
 
     @PutMapping("/update")
     @ResponseBody
-    public void update(@RequestBody FolderDto folderDto)
-    {
+    public void update(@RequestBody FolderDto folderDto) throws AccessDeniedException{
         folderService.update(folderDto);
     }
 
     @PostMapping("/add/{scope_id}")
     @ResponseBody
-    public void add (@RequestBody FolderDto folderDto, @PathVariable long scope_id)
-    {
+    public void add (@RequestBody FolderDto folderDto, @PathVariable long scope_id) throws AccessDeniedException{
         folderService.add(folderDto, scope_id);
     }
 

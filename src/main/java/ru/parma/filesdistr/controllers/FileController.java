@@ -69,7 +69,7 @@ public class FileController {
                                  @RequestParam Long generalId,   //указывает id пространства, папки, версии
                                  @RequestParam TypeInScopePage typeInScopePage) throws AccessDeniedException {
 
-        scopeAccessService.tryGetAccessToScope ( typeInScopePage,  generalId);
+        scopeAccessService.tryGetAccessToScopeForUser ( typeInScopePage,  generalId);
         return fileLocationService.get(fileId);
     }
 
@@ -77,7 +77,7 @@ public class FileController {
     @GetMapping(value="/download/{versionId}/zip", produces = "application/zip")
     @ResponseBody
     public byte[] downloadZIP(@PathVariable Long versionId) throws IOException{
-        scopeAccessService.tryGetAccessToScope ( TypeInScopePage.VERSION,  versionId);
+        scopeAccessService.tryGetAccessToScopeForUser ( TypeInScopePage.VERSION,  versionId);
 
         Version version = versionService.get (versionId);
         response.addHeader("Content-Disposition",
