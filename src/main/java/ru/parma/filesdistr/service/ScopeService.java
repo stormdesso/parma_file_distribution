@@ -1,8 +1,10 @@
 package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.dto.ScopeDto;
+import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.ScopeMapper;
 import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.repos.FileSystemRepository;
@@ -17,6 +19,8 @@ import java.util.Optional;
 public class ScopeService {
     private final ScopeRepository scopeRepository;
     private final FileSystemRepository fileSystemRepository;
+    private final FolderService folderService;
+    private final VersionService versionService;
 
     public List<ScopeDto> getAll() {
         List<Scope> scopes = scopeRepository.findAll();
@@ -57,11 +61,32 @@ public class ScopeService {
         scopeRepository.delete(scope.get());
     }
 
-    public ScopeDto getScopeById(Long scopeId) {
+    public ScopeDto getDto (Long scopeId) {
+        return ScopeMapper.INSTANCE.toScopeDto (get(scopeId));
+    }
+
+    public Scope get(Long scopeId) {
         Optional<Scope> scopeOptional = scopeRepository.findById(scopeId);
         if (!scopeOptional.isPresent()) {
             throw new EntityNotFoundException(String.format("Scope с id %d  не найден", scopeId));
         }
-        return ScopeMapper.INSTANCE.mapWithoutVersion(scopeOptional.get());
+        return scopeOptional.get();
     }
+    
+    public Scope getScopeBy (@NotNull TypeInScopePage typeInScopePage, @NotNull Long generalId){
+
+        Scope scope = null;
+
+        if(typeInScopePage == TypeInScopePage.SCOPE){
+            scope = get(generalId);
+        }else if(typeInScopePage == TypeInScopePage.FOLDER){
+            scope = folderService.get(generalId).getScope ();
+        }
+        else if(typeInScopePage == TypeInScopePage.VERSION){
+            scope = versionService.get(generalId).getFolder ().getScope ();
+        }
+
+        return scope;
+    }
+
 }

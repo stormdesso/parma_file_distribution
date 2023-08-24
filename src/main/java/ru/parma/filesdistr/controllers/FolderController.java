@@ -23,7 +23,7 @@ public class FolderController {
     @GetMapping("/{folder_id}")
     @ResponseBody
     public FolderDto get(@PathVariable Long folder_id) {
-        return folderService.get(folder_id);
+        return folderService.getDto (folder_id);
     }
 
     @PutMapping("/update")

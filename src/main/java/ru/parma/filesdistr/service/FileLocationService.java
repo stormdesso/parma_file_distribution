@@ -2,13 +2,17 @@ package ru.parma.filesdistr.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.IOUtils;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import ru.parma.filesdistr.dto.FileDto;
+import ru.parma.filesdistr.enums.MediaTypeInAdminPage;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.FileMapper;
@@ -18,21 +22,29 @@ import ru.parma.filesdistr.utils.IPathName;
 import ru.parma.filesdistr.utils.Utils;
 
 import javax.persistence.EntityNotFoundException;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.nio.file.FileSystemNotFoundException;
-import java.util.Date;
-import java.util.Optional;
+import java.text.ParseException;
+import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 
 @Service
 @RequiredArgsConstructor
 public class FileLocationService {
-    final FileSystemRepository fileSystemRepository;
-    final FileRepository fileDbRepository;
-    final ScopeRepository scopeRepository;
-    final FolderRepository folderRepository;
-    final VersionRepository versionRepository;
-    final UserRepository userRepository;
-    final TagRepository tagRepository;
+    private final FileSystemRepository fileSystemRepository;
+    private final FileRepository fileDbRepository;
+    private final ScopeRepository scopeRepository;
+    private final FolderRepository folderRepository;
+    private final VersionRepository versionRepository;
+    private final UserRepository userRepository;
+    private final TagRepository tagRepository;
+
+
+    private final VersionService versionService;
 
 
     @Transactional
@@ -97,7 +109,7 @@ public class FileLocationService {
 
             File savedFile = fileDbRepository.save(file);
 
-            attachFileToEntity(generalId,  typeInScopePage, mediaTypeInScopePage,  savedFile);
+            attachFileToEntity (generalId,  typeInScopePage, mediaTypeInScopePage,  savedFile);
             return FileMapper.INSTANCE.toFileDto(savedFile);
 
         } catch (Exception e) {
@@ -109,8 +121,42 @@ public class FileLocationService {
         }
     }
 
-    private void attachFileToEntity( long generalId, TypeInScopePage typeInScopePage,
-                                     MediaTypeInScopePage mediaTypeInScopePage, File savedFile){
+    @Transactional
+    public FileDto save(Long updatedUserId, MultipartFile multipartFile, MediaTypeInAdminPage mediaTypeInAdminPage, String filetype)
+            throws ParseException, IOException{
+        Date currDate = Utils.getDateWithoutTime();
+        String location = null;
+        try {
+            User updatedUser = userRepository.findUserWithoutRoot (updatedUserId);
+
+            location = fileSystemRepository.saveInAdminPage (updatedUser.getRootPath(), mediaTypeInAdminPage, multipartFile);
+
+            File file = File
+                    .builder()
+                    .name(multipartFile.getOriginalFilename ())
+                    .size(Utils.convertByteToMb(multipartFile.getBytes ()))
+                    .type(filetype)
+                    .dateCreated(currDate)
+                    .location(location)
+                    .build();
+
+            File savedFile = fileDbRepository.save(file);
+
+            attachFileToEntity (updatedUser, mediaTypeInAdminPage, savedFile);
+
+            return FileMapper.INSTANCE.toFileDto(savedFile);
+        }catch (Exception e){
+            // убираем за собой
+            if(location != null && !location.isEmpty()) {
+                fileSystemRepository.delete(location);
+            }
+            throw e;
+        }
+    }
+
+    @Transactional
+    protected void attachFileToEntity (long generalId, TypeInScopePage typeInScopePage,
+                             MediaTypeInScopePage mediaTypeInScopePage, File savedFile){
         IPathName iPathName;
 
         if( typeInScopePage == TypeInScopePage.SCOPE ){
@@ -126,7 +172,7 @@ public class FileLocationService {
             else if(mediaTypeInScopePage == MediaTypeInScopePage.ICON) {
                 if(((Scope)iPathName).getIcon() != null) {
                     Long oldIconId = ((Scope) iPathName).getIcon().getId();
-                    fileDbRepository.deleteById( oldIconId );
+                    delete (oldIconId);
                 }
 
                 ((Scope)iPathName).setIcon(savedFile);
@@ -134,7 +180,7 @@ public class FileLocationService {
             else if( mediaTypeInScopePage == MediaTypeInScopePage.DISTRIBUTION_AGREEMENT){
                 if(((Scope)iPathName).getDistributionAgreement() != null) {
                     Long oldDistrAgrId = ((Scope) iPathName).getDistributionAgreement().getId();
-                    fileDbRepository.deleteById( oldDistrAgrId );
+                    delete (oldDistrAgrId);
                 }
 
                 ((Scope)iPathName).setDistributionAgreement(savedFile);
@@ -154,7 +200,7 @@ public class FileLocationService {
             if(mediaTypeInScopePage == MediaTypeInScopePage.MANIFEST) {
                 if(((Folder)iPathName).getManifestForIOSFile() != null) {
                     Long oldManifestId = ((Folder) iPathName).getManifestForIOSFile().getId();
-                    fileDbRepository.deleteById( oldManifestId );
+                    delete (oldManifestId);
                 }
 
                 ((Folder)iPathName).setManifestForIOSFile(savedFile);
@@ -178,6 +224,19 @@ public class FileLocationService {
             else throw new IllegalArgumentException();
 
             versionRepository.save((Version) iPathName);
+        }
+        else throw new IllegalArgumentException();
+    }
+
+    @Transactional
+    protected void attachFileToEntity (User user, MediaTypeInAdminPage mediaTypeInAdminPage, File savedFile){
+        if( mediaTypeInAdminPage == MediaTypeInAdminPage.PROFILE_PICTURE ){
+                if(user.getProfilePicture () != null) {
+                    Long oldIconId = user.getProfilePicture ().getId ();
+                    delete ( oldIconId );
+                }
+                user.setProfilePicture (savedFile);
+            userRepository.save(user);
         }
         else throw new IllegalArgumentException();
     }
@@ -209,4 +268,30 @@ public class FileLocationService {
         return fileSystemRepository.findInFileSystem(file.getLocation());
     }
 
+    private @NotNull List<java.io.File> getFiles (@NotNull List<File> fileList) {
+        List<java.io.File> files = new ArrayList<> ();
+        for (File file: fileList) {
+            files.add (fileSystemRepository.findInFileSystem(file.getLocation()).getFile ());
+        }
+        return files;
+    }
+
+    public List<java.io.File> getFiles (Long versionId ) {
+        Version version = versionService.get (versionId);
+        return getFiles (version.getFiles ());
+    }
+    public byte[] getZipArchive(@NotNull List<java.io.File> files) throws IOException{
+        ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
+        ZipOutputStream zipOutputStream = new ZipOutputStream(byteOutputStream);
+
+        for(java.io.File file: files) {
+            zipOutputStream.putNextEntry(new ZipEntry (file.getName ()));
+            FileInputStream fileInputStream = new FileInputStream(file);
+            IOUtils.copy(fileInputStream, zipOutputStream);
+            fileInputStream.close();
+            zipOutputStream.closeEntry();
+        }
+        zipOutputStream.close();
+        return byteOutputStream.toByteArray();
+    }
 }
