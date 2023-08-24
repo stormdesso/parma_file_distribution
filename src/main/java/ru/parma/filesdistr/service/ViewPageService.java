@@ -5,6 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.stereotype.Service;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
+import ru.parma.filesdistr.aop.annotations.LoggableMethod;
+import ru.parma.filesdistr.aop.exceptions.BaseException;
+import ru.parma.filesdistr.aop.exceptions.EntityNotFoundException;
 import ru.parma.filesdistr.dto.ViewPageDto;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.ScopeMapper;
@@ -14,7 +17,6 @@ import ru.parma.filesdistr.models.Version;
 import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.VersionRepository;
 
-import javax.persistence.EntityNotFoundException;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Comparator;
@@ -31,6 +33,7 @@ public class ViewPageService {
 
     private final ScopeAccessService scopeAccessService;
 
+    @LoggableMethod
     public ViewPageDto getViewPage(Long scopeId, String versionId) throws IOException {
         Optional<Scope> scopeOpt = scopeRepository.findById(scopeId);
         if (!scopeOpt.isPresent()) {
@@ -76,18 +79,25 @@ public class ViewPageService {
         return convertEntityToDto(scope);
     }
 
-    private void checkAccessToScope(@NotNull Scope scope) throws IOException {
-        if (!scope.isPermitAll()) {
-            if (CustomUserDetailsService.isAuthenticated()) {
-                scopeAccessService.tryGetAccessByUserId(TypeInScopePage.SCOPE, scope.getId(), CustomUserDetailsService.getAuthorizedUserId());
+    @LoggableMethod
+    private void checkAccessToScope(@NotNull Scope scope) {
+        try {
+            if (!scope.isPermitAll()) {
+                if (CustomUserDetailsService.isAuthenticated()) {
+                    scopeAccessService.tryGetAccessByUserId(TypeInScopePage.SCOPE, scope.getId(), CustomUserDetailsService.getAuthorizedUserId());
+                }
+                else {
+                    HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
+                    response.sendRedirect("/login");
+                }
             }
-            else {
-                HttpServletResponse response = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getResponse();
-                response.sendRedirect("/login");
-            }
+        } catch (Exception e) {
+            throw new BaseException(e.getMessage());
         }
+
     }
 
+    @LoggableMethod
     private @NotNull ViewPageDto convertEntityToDto(Scope scope) {
         ViewPageDto viewPageDto = new ViewPageDto();
 

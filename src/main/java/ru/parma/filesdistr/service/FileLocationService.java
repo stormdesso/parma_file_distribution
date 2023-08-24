@@ -10,7 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
+import ru.parma.filesdistr.aop.annotations.LoggableMethod;
+import ru.parma.filesdistr.aop.exceptions.EntityIllegalArgumentException;
+import ru.parma.filesdistr.aop.exceptions.EntityNotFoundException;
+import ru.parma.filesdistr.aop.exceptions.FileSystemException;
 import ru.parma.filesdistr.dto.FileDto;
 import ru.parma.filesdistr.enums.MediaTypeInAdminPage;
 import ru.parma.filesdistr.enums.MediaTypeInScopePage;
@@ -20,17 +23,12 @@ import ru.parma.filesdistr.models.*;
 import ru.parma.filesdistr.repos.*;
 import ru.parma.filesdistr.utils.IPathName;
 import ru.parma.filesdistr.utils.Utils;
-
-import javax.persistence.EntityNotFoundException;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.nio.file.FileSystemNotFoundException;
-import java.text.ParseException;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-
+import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +46,7 @@ public class FileLocationService {
 
 
     @Transactional
+    @LoggableMethod
     public FileDto save (byte[] bytes, String fileName, String filetype,
                          Long generalId, TypeInScopePage typeInScopePage,
                          MediaTypeInScopePage mediaTypeInScopePage,
@@ -81,7 +80,7 @@ public class FileLocationService {
                 String fullpath = versionOptional.get().getRootPath();
                 location = fileSystemRepository.saveInVersion(bytes, fileName, mediaTypeInScopePage, fullpath);
             }
-            else throw new IllegalArgumentException();
+            else throw new EntityIllegalArgumentException(String.format("Wrong TypeInScopePage: %s", typeInScopePage.toString()));
 
             File file = File
                     .builder()
@@ -122,11 +121,11 @@ public class FileLocationService {
     }
 
     @Transactional
-    public FileDto save(Long updatedUserId, MultipartFile multipartFile, MediaTypeInAdminPage mediaTypeInAdminPage, String filetype)
-            throws ParseException, IOException{
-        Date currDate = Utils.getDateWithoutTime();
+    @LoggableMethod
+    public FileDto save(Long updatedUserId, MultipartFile multipartFile, MediaTypeInAdminPage mediaTypeInAdminPage, String filetype) {
         String location = null;
         try {
+            Date currDate = Utils.getDateWithoutTime();
             User updatedUser = userRepository.findUserWithoutRoot (updatedUserId);
 
             location = fileSystemRepository.saveInAdminPage (updatedUser.getRootPath(), mediaTypeInAdminPage, multipartFile);
@@ -145,16 +144,17 @@ public class FileLocationService {
             attachFileToEntity (updatedUser, mediaTypeInAdminPage, savedFile);
 
             return FileMapper.INSTANCE.toFileDto(savedFile);
-        }catch (Exception e){
+        } catch (Exception e){
             // убираем за собой
             if(location != null && !location.isEmpty()) {
                 fileSystemRepository.delete(location);
             }
-            throw e;
+            throw new FileSystemException(e.getMessage());
         }
     }
 
     @Transactional
+    @LoggableMethod
     protected void attachFileToEntity (long generalId, TypeInScopePage typeInScopePage,
                              MediaTypeInScopePage mediaTypeInScopePage, File savedFile){
         IPathName iPathName;
@@ -185,7 +185,7 @@ public class FileLocationService {
 
                 ((Scope)iPathName).setDistributionAgreement(savedFile);
             }
-            else throw new IllegalArgumentException();
+            else throw new EntityIllegalArgumentException(String.format("Wrong MediaTypeInScopePage: %s", mediaTypeInScopePage.toString()));
 
             scopeRepository.save((Scope)iPathName);
 
@@ -205,7 +205,7 @@ public class FileLocationService {
 
                 ((Folder)iPathName).setManifestForIOSFile(savedFile);
             }
-            else throw new IllegalArgumentException();
+            else throw new EntityIllegalArgumentException(String.format("Wrong MediaTypeInScopePage: %s", mediaTypeInScopePage.toString()));
 
             folderRepository.save((Folder)iPathName);
         }
@@ -221,14 +221,15 @@ public class FileLocationService {
             else if(mediaTypeInScopePage == MediaTypeInScopePage.FILE) {
                 ((Version)iPathName).getFiles().add(savedFile);
             }
-            else throw new IllegalArgumentException();
+            else throw new EntityIllegalArgumentException(String.format("Wrong MediaTypeInScopePage: %s", mediaTypeInScopePage.toString()));
 
             versionRepository.save((Version) iPathName);
         }
-        else throw new IllegalArgumentException();
+        else throw new EntityIllegalArgumentException(String.format("Wrong TypeInScopePage: %s", typeInScopePage.toString()));
     }
 
     @Transactional
+    @LoggableMethod
     protected void attachFileToEntity (User user, MediaTypeInAdminPage mediaTypeInAdminPage, File savedFile){
         if( mediaTypeInAdminPage == MediaTypeInAdminPage.PROFILE_PICTURE ){
                 if(user.getProfilePicture () != null) {
@@ -238,10 +239,12 @@ public class FileLocationService {
                 user.setProfilePicture (savedFile);
             userRepository.save(user);
         }
-        else throw new IllegalArgumentException();
+        else throw new EntityIllegalArgumentException(String.format
+                ("Wrong MediaTypeInAdminPage: %s", mediaTypeInAdminPage.toString()));
     }
 
     @Transactional
+    @LoggableMethod
     public void delete ( Long fileId ) {
         try {
             if(fileDbRepository.existsById(fileId)) {
@@ -253,18 +256,20 @@ public class FileLocationService {
                 fileSystemRepository.delete(location);//удаляет с сервера
             }
             else {
-                throw new FileSystemNotFoundException("Файл не найден в БД");
+                throw new FileSystemException("Файл не найден в БД");
             }
         }
-        catch (IllegalArgumentException | FileSystemNotFoundException e){
-            throw e;
+        catch (Exception e){
+            //?
+            throw new FileSystemException(e.getMessage());
         }
 
     }
 
+    @LoggableMethod
     public FileSystemResource get ( Long fileId ) {
         File file = fileDbRepository.findById( fileId )// parma.File
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new EntityNotFoundException("File", fileId));
         return fileSystemRepository.findInFileSystem(file.getLocation());
     }
 
@@ -280,18 +285,23 @@ public class FileLocationService {
         Version version = versionService.get (versionId);
         return getFiles (version.getFiles ());
     }
-    public byte[] getZipArchive(@NotNull List<java.io.File> files) throws IOException{
+
+    @LoggableMethod
+    public byte[] getZipArchive(@NotNull List<java.io.File> files) {
         ByteArrayOutputStream byteOutputStream = new ByteArrayOutputStream();
         ZipOutputStream zipOutputStream = new ZipOutputStream(byteOutputStream);
-
-        for(java.io.File file: files) {
-            zipOutputStream.putNextEntry(new ZipEntry (file.getName ()));
-            FileInputStream fileInputStream = new FileInputStream(file);
-            IOUtils.copy(fileInputStream, zipOutputStream);
-            fileInputStream.close();
-            zipOutputStream.closeEntry();
+        try {
+            for(java.io.File file: files) {
+                zipOutputStream.putNextEntry(new ZipEntry (file.getName ()));
+                FileInputStream fileInputStream = new FileInputStream(file);
+                IOUtils.copy(fileInputStream, zipOutputStream);
+                fileInputStream.close();
+                zipOutputStream.closeEntry();
+            }
+            zipOutputStream.close();
+        } catch (IOException e) {
+            throw new FileSystemException(e.getMessage());
         }
-        zipOutputStream.close();
         return byteOutputStream.toByteArray();
     }
 }

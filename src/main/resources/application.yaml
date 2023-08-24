@@ -10,10 +10,15 @@ springdoc:
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5438/parma_db
-    username: admin
-    password: admin
-
+    url: jdbc:postgresql://localhost:5432/parma_db
+    username: postgres
+    password: root
+  flyway:
+    baseline-on-migrate: true
+    enabled: true
+    baseline-description: "init"
+    user: postgres
+    password: root
   jpa:
     show-sql: true
     properties:
@@ -29,5 +34,6 @@ files:
   baseDir: "resources_dir//"
 api:
   version: @project.version@
+
 
 

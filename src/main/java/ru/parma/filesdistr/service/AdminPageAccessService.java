@@ -2,8 +2,9 @@ package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
+import ru.parma.filesdistr.aop.annotations.LoggableMethod;
+import ru.parma.filesdistr.aop.exceptions.AccessDeniedException;
 import ru.parma.filesdistr.enums.Roles;
 import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.UserRepository;
@@ -16,6 +17,7 @@ public class AdminPageAccessService{
     private final UserRepository userRepository;
     private final CustomUserDetailsService customUserDetailsService;
 
+    @LoggableMethod
     public void tryGetAccess(Long updatedUserId){
         User updatedUser = userRepository.findUserWithoutRoot(updatedUserId);
 
@@ -27,9 +29,10 @@ public class AdminPageAccessService{
             canEditAdminScopes ();
             return;
         }
-        throw new AccessDeniedException ("нет доступа");
+        throw new AccessDeniedException("нет доступа");
     }
 
+    @LoggableMethod
     public void canEditAdmin (){
         User currUser = customUserDetailsService.getAuthorizedUser ();
         if(isRoot(currUser)){
@@ -42,6 +45,7 @@ public class AdminPageAccessService{
         throw new AccessDeniedException ("нет доступа");
     }
 
+    @LoggableMethod
     public void canEditAdminScopes (){
         User currUser = customUserDetailsService.getAuthorizedUser ();
         if(isRoot(currUser)){

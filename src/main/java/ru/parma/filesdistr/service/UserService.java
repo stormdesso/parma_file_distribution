@@ -3,10 +3,13 @@ package ru.parma.filesdistr.service;
 import lombok.RequiredArgsConstructor;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.context.ApplicationContext;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.parma.filesdistr.aop.annotations.LoggableMethod;
+import ru.parma.filesdistr.aop.exceptions.AccessDeniedException;
+import ru.parma.filesdistr.aop.exceptions.EntityIllegalArgumentException;
+import ru.parma.filesdistr.aop.exceptions.EntityNotFoundException;
 import ru.parma.filesdistr.dto.AdminDto;
 import ru.parma.filesdistr.dto.AdminScopeDto;
 import ru.parma.filesdistr.enums.Roles;
@@ -15,7 +18,6 @@ import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.UserRepository;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
@@ -39,17 +41,19 @@ public class UserService{
         return encoder.encode (password);
     }
 
+    @LoggableMethod
     private @NotNull User getUserByIdAndRole (Long id, Roles role){
         Optional<User> optUser = userRepository.findByIdAndRolesContaining(id, role);
         if(! optUser.isPresent ()){
-            throw new EntityNotFoundException (String.format ("User с id: %d, role: %s  не найден", id, role.toString ()));
+            throw new EntityNotFoundException(String.format ("User с id: %d, role: %s  не найден", id, role.toString ()));
         }
         return optUser.get ();
     }
 
+    @LoggableMethod
     private void checkMaxNumberOfScopes (@NotNull AdminScopeDto adminScopeDto){
         if(adminScopeDto.getMaxNumberScope () < adminScopeDto.getScopePreviewDtos ().size ()){
-            throw new IllegalArgumentException (String.format ("Превышено допустимое число пространств, доступно" +
+            throw new EntityIllegalArgumentException(String.format ("Превышено допустимое число пространств, доступно" +
                             " %d, выбрано: %d", adminScopeDto.getMaxNumberScope (),
                     adminScopeDto.getScopePreviewDtos ().size ()));
         }
@@ -60,23 +64,26 @@ public class UserService{
         matchesPassword (password);
     }
 
+    @LoggableMethod
     private void matchesUsername (@NotNull String username){
         if(! username.matches (USERNAME_REGEX)){
-            throw new IllegalArgumentException (String.format ("Не удалось создать пользователя с name %s, т.к" +
+            throw new EntityIllegalArgumentException (String.format ("Не удалось создать пользователя с name %s, т.к" +
                     " name не соответствует требованиям имени", username));
         }
     }
 
+    @LoggableMethod
     private void matchesPassword (@NotNull String password){
         if(! password.matches (PASSWORD_REGEX)){
-            throw new IllegalArgumentException (String.format ("Не удалось создать пользователя с password %s, т.к" +
+            throw new EntityIllegalArgumentException (String.format ("Не удалось создать пользователя с password %s, т.к" +
                     " password не соответствует требованиям пароля", password));
         }
     }
 
+    @LoggableMethod
     private void canUseThisName (String name){
         if(userRepository.countByName (name) > 0){
-            throw new IllegalArgumentException (String.format ("Пользователь с name %s уже существует", name));
+            throw new EntityIllegalArgumentException (String.format ("Пользователь с name %s уже существует", name));
         }
     }
 
@@ -200,6 +207,7 @@ public class UserService{
     }
 
     @Transactional
+    @LoggableMethod
     public void delete (Long userId){
         Optional<User> optUser = userRepository.findById (userId);
         if(! optUser.isPresent ()){
@@ -209,7 +217,7 @@ public class UserService{
         if(user.getRoles ().containsAll (new HashSet<Roles> (){{
             add (Roles.ROOT);
         }})){
-            throw new AccessDeniedException ("Нет доступа");
+            throw new AccessDeniedException("Нет доступа");
         }
         else if(user.getRoles ().containsAll (new HashSet<Roles> (){{
             add (Roles.ADMIN);

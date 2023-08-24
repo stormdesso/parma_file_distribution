@@ -2,6 +2,9 @@ package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.parma.filesdistr.aop.annotations.LoggableMethod;
+import ru.parma.filesdistr.aop.exceptions.EntityIllegalArgumentException;
+import ru.parma.filesdistr.aop.exceptions.EntityNotFoundException;
 import ru.parma.filesdistr.dto.VersionDto;
 import ru.parma.filesdistr.mappers.VersionMapper;
 import ru.parma.filesdistr.models.Folder;
@@ -10,7 +13,6 @@ import ru.parma.filesdistr.repos.FileSystemRepository;
 import ru.parma.filesdistr.repos.FolderRepository;
 import ru.parma.filesdistr.repos.VersionRepository;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,6 +26,7 @@ public class VersionService {
 
     private final FileSystemRepository fileSystemRepository;
 
+    @LoggableMethod
     public List<VersionDto> getAll(long folder_id) {
         Optional<Folder> folderOptional = folderRepository.findById(folder_id);
         if (!folderOptional.isPresent()) {
@@ -36,6 +39,7 @@ public class VersionService {
         return VersionMapper.INSTANCE.toVersionDto(get(versionId));
     }
 
+    @LoggableMethod
     public Version get (long versionId) {
         Optional<Version> versionOptional = versionRepository.findById(versionId);
         if (!versionOptional.isPresent()) {
@@ -44,6 +48,7 @@ public class VersionService {
         return versionOptional.get();
     }
 
+    @LoggableMethod
     public void add(VersionDto versionDto, Long folder_id) {
         checkDto(versionDto);
         Optional<Folder> folderOptional = folderRepository.findById(folder_id);
@@ -59,6 +64,7 @@ public class VersionService {
 
     }
 
+    @LoggableMethod
     public void update(VersionDto versionDto) {
         checkDto(versionDto);
         Optional<Version> existedVersion = versionRepository.findById(versionDto.getId());
@@ -69,18 +75,20 @@ public class VersionService {
         versionRepository.save(version);
     }
 
+    @LoggableMethod
     private void checkDto(VersionDto versionDto) {
         if (versionDto == null) {
-            throw new IllegalArgumentException("Создаваемый объект не может быть null");
+            throw new EntityIllegalArgumentException("Создаваемый объект не может быть null");
         }
         if (versionDto.getVersionNumber() == null) {
-            throw new IllegalArgumentException("Номер версии не может быть null");
+            throw new EntityIllegalArgumentException("Номер версии не может быть null");
         }
         if (versionDto.getDateOfPublication() == null) {
-            throw new IllegalArgumentException("Дата публикации не может быть null");
+            throw new EntityIllegalArgumentException("Дата публикации не может быть null");
         }
     }
 
+    @LoggableMethod
     public void delete(Long version_id) {
         Optional<Version> versionOptional = versionRepository.findById(version_id);
         if (!versionOptional.isPresent()) {

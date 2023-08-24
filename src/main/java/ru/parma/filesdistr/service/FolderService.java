@@ -2,6 +2,9 @@ package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import ru.parma.filesdistr.aop.annotations.LoggableMethod;
+import ru.parma.filesdistr.aop.exceptions.EntityIllegalArgumentException;
+import ru.parma.filesdistr.aop.exceptions.EntityNotFoundException;
 import ru.parma.filesdistr.dto.FolderDto;
 import ru.parma.filesdistr.mappers.FolderMapper;
 import ru.parma.filesdistr.models.Folder;
@@ -10,7 +13,6 @@ import ru.parma.filesdistr.repos.FileSystemRepository;
 import ru.parma.filesdistr.repos.FolderRepository;
 import ru.parma.filesdistr.repos.ScopeRepository;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.List;
 import java.util.Optional;
 
@@ -23,6 +25,7 @@ public class FolderService {
 
     private final FileSystemRepository fileSystemRepository;
 
+    @LoggableMethod
     public List<FolderDto> getAll(long scope_id) {
         Optional<Scope> scopeOptional = scopeRepository.findById(scope_id);
         if (!scopeOptional.isPresent()) {
@@ -35,6 +38,7 @@ public class FolderService {
         return FolderMapper.INSTANCE.toFolderDto(get(folderId));
     }
 
+    @LoggableMethod
     public Folder get (long folderId) {
         Optional<Folder> folderOptional = folderRepository.findById(folderId);
         if (!folderOptional.isPresent()) {
@@ -43,6 +47,7 @@ public class FolderService {
         return folderOptional.get();
     }
 
+    @LoggableMethod
     public void add(FolderDto folderDto, long scope_id) {
         checkDto(folderDto);
         Optional<Scope> scopeOptional = scopeRepository.findById(scope_id);
@@ -57,6 +62,7 @@ public class FolderService {
         folderRepository.save(folder);
     }
 
+    @LoggableMethod
     public void update(FolderDto folderDto) {
         checkDto(folderDto);
         Optional<Folder> existedFolder = folderRepository.findById(folderDto.getId());
@@ -67,18 +73,20 @@ public class FolderService {
         folderRepository.save(folder);
     }
 
+    @LoggableMethod
     private void checkDto(FolderDto folderDto) {
         if (folderDto == null) {
-            throw new IllegalArgumentException("Создаваемый объект не может быть null");
+            throw new EntityIllegalArgumentException("Создаваемый объект не может быть null");
         }
         if (folderDto.getIdentifier() == null) {
-            throw new IllegalArgumentException("Идентификатор не может быть null");
+            throw new EntityIllegalArgumentException("Идентификатор не может быть null");
         }
         if (folderDto.getName() == null) {
-            throw new IllegalArgumentException("Имя папки не может быть null");
+            throw new EntityIllegalArgumentException("Имя папки не может быть null");
         }
     }
 
+    @LoggableMethod
     public void delete(Long folder_id) {
         Optional<Folder> folderOptional = folderRepository.findById(folder_id);
         if (!folderOptional.isPresent()) {

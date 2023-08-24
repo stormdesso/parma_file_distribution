@@ -5,6 +5,9 @@ import org.jetbrains.annotations.NotNull;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import ru.parma.filesdistr.aop.annotations.LoggableMethod;
+import ru.parma.filesdistr.aop.exceptions.AccessDeniedException;
+import ru.parma.filesdistr.aop.exceptions.EntityNotFoundException;
 import ru.parma.filesdistr.enums.Roles;
 import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.models.Folder;
@@ -15,9 +18,6 @@ import ru.parma.filesdistr.repos.FolderRepository;
 import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.UserRepository;
 import ru.parma.filesdistr.repos.VersionRepository;
-
-import javax.persistence.EntityNotFoundException;
-import java.nio.file.AccessDeniedException;
 import java.util.Optional;
 
 @Service
@@ -34,6 +34,7 @@ public class ScopeAccessService {
         return user.getAvailableScopes().contains(scope);
     }
 
+    @LoggableMethod
     public void tryGetAccessByUserId (TypeInScopePage typeInScopePage, Long generalId, @NotNull Long userId) throws AccessDeniedException {
 
         if(isAdminOrRoot()) return ;
@@ -77,13 +78,14 @@ public class ScopeAccessService {
         }
     }
 
-    private boolean isAdminOrRoot(){
+    private boolean isAdminOrRoot() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
         return authentication.getAuthorities().stream()
                 .anyMatch(r -> r.getAuthority().equals(Roles.ROOT.toString()) || r.getAuthority().equals(Roles.ADMIN.toString()));
     }
 
+    @LoggableMethod
     public void tryGetAccessToScope(TypeInScopePage typeInScopePage, Long generalId) throws AccessDeniedException{
         Scope scope = scopeService.getScopeBy(typeInScopePage, generalId);
 
