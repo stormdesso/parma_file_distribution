@@ -1,6 +1,7 @@
 package ru.parma.filesdistr.service;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.dto.ScopeDto;
 import ru.parma.filesdistr.dto.ScopePreviewDto;
@@ -57,7 +58,7 @@ public class ScopeService {
         return scopePreviewDtos;
     }
 
-    public void add(ScopeDto scopeDto, UserCredentialsDto userCredentialsDto) throws AccessDeniedException{
+    public void add(ScopeDto scopeDto, @Nullable UserCredentialsDto userCredentialsDto) throws AccessDeniedException{
         checkDto(scopeDto);
 
         scopeAccessService.canCreateAndDeleteScopes(true);
@@ -65,7 +66,9 @@ public class ScopeService {
         Scope scope = ScopeMapper.INSTANCE.toScope(scopeDto);
         List<Scope> availableScopes = new ArrayList<>();
         availableScopes.add(scope);
-        userService.add(userCredentialsDto, availableScopes);
+        if(userCredentialsDto != null){
+            userService.add(userCredentialsDto, availableScopes);
+        }
         scopeRepository.save(scope);
     }
 

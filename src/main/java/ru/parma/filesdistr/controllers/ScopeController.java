@@ -43,7 +43,7 @@ public class ScopeController {
 
     @PostMapping("/add")
     @ResponseBody
-    public void add (@RequestBody ScopeDto scope,@Nullable UserCredentialsDto userCredentialsDto) throws AccessDeniedException{
+    public void add (@RequestBody ScopeDto scope, @Nullable UserCredentialsDto userCredentialsDto) throws AccessDeniedException{
         scopeService.add(scope, userCredentialsDto);
     }
 

@@ -23,7 +23,7 @@ public class FolderController {
 
     @GetMapping("/{folder_id}")
     @ResponseBody
-    public FolderDto get(@PathVariable Long folder_id) {
+    public FolderDto get(@PathVariable Long folder_id) throws AccessDeniedException{
         return folderService.getDto (folder_id);
     }
 
@@ -41,8 +41,7 @@ public class FolderController {
 
     @DeleteMapping("/delete/{folder_id}")
     @ResponseBody
-    public void delete(@PathVariable Long folder_id)
-    {
+    public void delete(@PathVariable Long folder_id) throws AccessDeniedException{
         folderService.delete(folder_id);
     }
 }

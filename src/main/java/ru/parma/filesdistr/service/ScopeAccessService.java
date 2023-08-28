@@ -137,4 +137,10 @@ public class ScopeAccessService {
         throw new AccessDeniedException ("нет доступа");
     }
 
+    public void canCreateFolderIn (@NotNull Scope scope){
+        User user = customUserDetailsService.getAuthorizedUser ();
+
+        userService.checkMaxNumberOfFolders (user.getMaxNumberFolder (),
+                (long) scope.getFolders ().size ());
+    }
 }

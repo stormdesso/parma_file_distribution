@@ -3,6 +3,7 @@ package ru.parma.filesdistr.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.dto.FolderDto;
+import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.FolderMapper;
 import ru.parma.filesdistr.models.Folder;
 import ru.parma.filesdistr.models.Scope;
@@ -21,7 +22,7 @@ public class FolderService {
     private final FolderRepository folderRepository;
     private final ScopeRepository scopeRepository;
     private final FileSystemRepository fileSystemRepository;
-    private final FolderAccessService folderAccessService;
+    private final ScopeAccessService scopeAccessService;
 
 
     public List<FolderDto> getAll(long scope_id) {
@@ -32,7 +33,10 @@ public class FolderService {
         return FolderMapper.INSTANCE.toFolderDtos(scopeOptional.get().getFolders());
     }
 
-    public FolderDto getDto (long folderId) {
+    public FolderDto getDto (long folderId) throws AccessDeniedException{
+        scopeAccessService.tryGetAccessByUserId (TypeInScopePage.FOLDER, folderId,
+                CustomUserDetailsService.getAuthorizedUserId ());
+
         return FolderMapper.INSTANCE.toFolderDto(get(folderId));
     }
 
@@ -52,7 +56,7 @@ public class FolderService {
         }
         Scope scope = scopeOptional.get();
 
-        folderAccessService.canCreateFolderIn (scope);
+        scopeAccessService.canCreateFolderIn (scope);
 
         Folder folder = FolderMapper.INSTANCE.toFolder(folderDto);
         List<Folder> folders = scope.getFolders();
@@ -67,7 +71,7 @@ public class FolderService {
         if (!existedFolder.isPresent()) {
             throw new EntityNotFoundException("Такой папки для обновления не существует");
         }
-        folderAccessService.tryGetAccessByUserId (folderDto.getId (),
+        scopeAccessService.tryGetAccessByUserId (TypeInScopePage.FOLDER,folderDto.getId (),
                 CustomUserDetailsService.getAuthorizedUserId ());
         Folder folder = FolderMapper.INSTANCE.toFolder(folderDto);
         folderRepository.save(folder);
@@ -85,11 +89,14 @@ public class FolderService {
         }
     }
 
-    public void delete(Long folder_id) {
+    public void delete(Long folder_id) throws AccessDeniedException{
         Optional<Folder> folderOptional = folderRepository.findById(folder_id);
         if (!folderOptional.isPresent()) {
             throw new EntityNotFoundException( String.format("Папки с id %d не существует", folder_id));
         }
+        scopeAccessService.tryGetAccessByUserId (TypeInScopePage.FOLDER, folder_id,
+                CustomUserDetailsService.getAuthorizedUserId ());
+
         fileSystemRepository.delete(folderOptional.get().getRootPath());
         folderRepository.delete(folderOptional.get());
     }
