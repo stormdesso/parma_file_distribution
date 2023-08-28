@@ -3,7 +3,6 @@ package ru.parma.filesdistr.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.dto.FolderDto;
-import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.FolderMapper;
 import ru.parma.filesdistr.models.Folder;
 import ru.parma.filesdistr.models.Scope;
@@ -20,11 +19,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class FolderService {
     private final FolderRepository folderRepository;
-
     private final ScopeRepository scopeRepository;
-
     private final FileSystemRepository fileSystemRepository;
-    private final ScopeAccessService scopeAccessService;
+    private final FolderAccessService folderAccessService;
 
 
     public List<FolderDto> getAll(long scope_id) {
@@ -55,7 +52,7 @@ public class FolderService {
         }
         Scope scope = scopeOptional.get();
 
-        scopeAccessService.canCreateFolderIn (scope);
+        folderAccessService.canCreateFolderIn (scope);
 
         Folder folder = FolderMapper.INSTANCE.toFolder(folderDto);
         List<Folder> folders = scope.getFolders();
@@ -70,7 +67,7 @@ public class FolderService {
         if (!existedFolder.isPresent()) {
             throw new EntityNotFoundException("Такой папки для обновления не существует");
         }
-        scopeAccessService.tryGetAccessByUserId (TypeInScopePage.SCOPE, folderDto.getId (),
+        folderAccessService.tryGetAccessByUserId (folderDto.getId (),
                 CustomUserDetailsService.getAuthorizedUserId ());
         Folder folder = FolderMapper.INSTANCE.toFolder(folderDto);
         folderRepository.save(folder);

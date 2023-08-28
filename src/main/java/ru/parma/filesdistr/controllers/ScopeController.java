@@ -1,6 +1,7 @@
 package ru.parma.filesdistr.controllers;
 
 import lombok.RequiredArgsConstructor;
+import org.jetbrains.annotations.Nullable;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.ScopeDto;
@@ -36,13 +37,13 @@ public class ScopeController {
 
     @PutMapping("/update")
     @ResponseBody
-    public void update(@RequestBody ScopeDto scope, UserCredentialsDto userCredentialsDto) throws AccessDeniedException{
+    public void update(@RequestBody ScopeDto scope, @Nullable  UserCredentialsDto userCredentialsDto) throws AccessDeniedException{
         scopeService.update(scope, userCredentialsDto);
     }
 
     @PostMapping("/add")
     @ResponseBody
-    public void add (@RequestBody ScopeDto scope, UserCredentialsDto userCredentialsDto) throws AccessDeniedException{
+    public void add (@RequestBody ScopeDto scope,@Nullable UserCredentialsDto userCredentialsDto) throws AccessDeniedException{
         scopeService.add(scope, userCredentialsDto);
     }
 
