@@ -16,6 +16,7 @@ import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.UserRepository;
+import ru.parma.filesdistr.utils.Utils;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.HashSet;
@@ -67,13 +68,18 @@ public class UserService{
     }
 
     //TODO: проверять, при добавлении нового file от admin_scope
-    public void checkMaxStorageSpace (Long fileSize){
-        Long maxStorageSpace = customUserDetailsService.getAuthorizedUser ().getMaxStorageSpace();
-        Long currentStorageSpace = 0L + fileSize; //todo:заменить 0L на объём опубликованных данных
-        if(maxStorageSpace < currentStorageSpace){
+    public void checkMaxDataSize (Long fileSizeInLong){
+        if(customUserDetailsService.getAuthorizedUser ().getRoles ().contains (Roles.ADMIN) ||
+                customUserDetailsService.getAuthorizedUser ().getRoles ().contains (Roles.ROOT)){
+            return;
+        }
+        double fileSize = Utils.convertFileSizeToGb (fileSizeInLong);
+
+        double maxDataSize = customUserDetailsService.getAuthorizedUser ().getMaxStorageSpace();
+        if(maxDataSize < fileSize){
             throw new IllegalArgumentException (String.format ("Превышен допустимый объём публикуемых данных," +
-                            " ограничение %d(Гб), загружено: %d(Гб)", maxStorageSpace,
-                    currentStorageSpace));
+                            " ограничение %s(Гб), загружено: %s(Гб)", maxDataSize,
+                    fileSize));
         }
     }
 

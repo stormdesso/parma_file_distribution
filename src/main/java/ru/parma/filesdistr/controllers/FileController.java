@@ -32,9 +32,8 @@ public class FileController {
     private final ScopeAccessService scopeAccessService;
     private final AdminPageAccessService adminPageAccessService;
     private final VersionService versionService;
+    private final UserService userService;
 
-    //TODO: async подгрузка и загрузка
-    //TODO: return byte[]
     @PostMapping(value = "/scopes_page/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     FileDto uploadOnScopesPage (@RequestParam @NotNull MultipartFile file,
@@ -45,7 +44,10 @@ public class FileController {
                                 @RequestParam(required = false) @Nullable String comment) throws Exception {
         String fileType = FilenameUtils.getExtension(file.getOriginalFilename());
 
-        scopeAccessService.tryGetAccessByUserId (typeInScopePage, generalId, CustomUserDetailsService.getAuthorizedUserId());
+        scopeAccessService.tryGetAccessByUserId (typeInScopePage, generalId,
+                CustomUserDetailsService.getAuthorizedUserId());
+
+        userService.checkMaxDataSize (file.getSize ());
 
         return fileLocationService.save (file.getBytes(), file.getOriginalFilename(), fileType,
                 generalId, typeInScopePage, mediaTypeInScopePage, tagId, comment);
