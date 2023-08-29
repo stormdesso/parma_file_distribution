@@ -2,7 +2,6 @@ package ru.parma.filesdistr.service;
 
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -26,9 +25,14 @@ import javax.persistence.EntityNotFoundException;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.Files;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -269,11 +273,8 @@ public class FileLocationService {
         return fileSystemRepository.findInFileSystem(file.getLocation());
     }
 
-    public byte[] getAsByteArray ( Long fileId ) throws IOException {
-        File file = fileDbRepository.findById( fileId )// parma.File
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
-        FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(file.getLocation());
-        return FileUtils.readFileToByteArray(fileSystemResource.getFile());
+    public InputStream getAsByteArray (Long fileId ) throws IOException {
+        return Files.newInputStream (get (fileId).getFile ().toPath ());
     }
 
     private @NotNull List<java.io.File> getFiles (@NotNull List<File> fileList) {

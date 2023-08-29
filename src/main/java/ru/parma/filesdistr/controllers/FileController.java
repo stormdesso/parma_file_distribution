@@ -33,8 +33,6 @@ public class FileController {
     private final AdminPageAccessService adminPageAccessService;
     private final VersionService versionService;
 
-    //TODO: async подгрузка и загрузка
-    //TODO: return byte[]
     @PostMapping(value = "/scopes_page/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     FileDto uploadOnScopesPage (@RequestParam @NotNull MultipartFile file,
@@ -87,15 +85,15 @@ public class FileController {
     }
 
 
-    @GetMapping(value = "/download/byte/{fileId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @GetMapping(value = "/download/byte/{fileId}")
     @ResponseBody
-    byte[] downloadAsByte (@PathVariable Long fileId,
+    public void downloadAsByte (@PathVariable Long fileId,
                            @RequestParam Long generalId,   //указывает id пространства, папки, версии
-                           @RequestParam TypeInScopePage typeInScopePage) throws IOException {
-
-        scopeAccessService.tryGetAccessToScope ( typeInScopePage,  generalId);
-        return fileLocationService.getAsByteArray(fileId);
-
+                           @RequestParam TypeInScopePage typeInScopePage) throws IOException{
+            scopeAccessService.tryGetAccessToScope ( typeInScopePage,  generalId);
+            org.apache.commons.io.IOUtils.copy(fileLocationService.getAsByteArray (fileId),
+                    response.getOutputStream());
+            response.flushBuffer();
     }
 
     @DeleteMapping(value = "/delete/{fileId}")
