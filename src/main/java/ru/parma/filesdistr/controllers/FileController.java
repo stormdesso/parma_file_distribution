@@ -87,6 +87,17 @@ public class FileController {
     }
 
 
+    @GetMapping(value = "/download/byte/{fileId}", produces = MediaType.APPLICATION_OCTET_STREAM_VALUE)
+    @ResponseBody
+    byte[] downloadAsByte (@PathVariable Long fileId,
+                           @RequestParam Long generalId,   //указывает id пространства, папки, версии
+                           @RequestParam TypeInScopePage typeInScopePage) throws IOException {
+
+        scopeAccessService.tryGetAccessToScope ( typeInScopePage,  generalId);
+        return fileLocationService.getAsByteArray(fileId);
+
+    }
+
     @DeleteMapping(value = "/delete/{fileId}")
     @ResponseBody
     void delete (@PathVariable Long fileId,

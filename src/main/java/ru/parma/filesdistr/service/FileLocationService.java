@@ -2,6 +2,7 @@ package ru.parma.filesdistr.service;
 
 
 import lombok.RequiredArgsConstructor;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -266,6 +267,13 @@ public class FileLocationService {
         File file = fileDbRepository.findById( fileId )// parma.File
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return fileSystemRepository.findInFileSystem(file.getLocation());
+    }
+
+    public byte[] getAsByteArray ( Long fileId ) throws IOException {
+        File file = fileDbRepository.findById( fileId )// parma.File
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+        FileSystemResource fileSystemResource = fileSystemRepository.findInFileSystem(file.getLocation());
+        return FileUtils.readFileToByteArray(fileSystemResource.getFile());
     }
 
     private @NotNull List<java.io.File> getFiles (@NotNull List<File> fileList) {
