@@ -9,14 +9,18 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.parma.filesdistr.dto.AdminDto;
 import ru.parma.filesdistr.dto.AdminScopeDto;
+import ru.parma.filesdistr.dto.UserCredentialsDto;
 import ru.parma.filesdistr.enums.Roles;
 import ru.parma.filesdistr.mappers.UserMapper;
+import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.UserRepository;
+import ru.parma.filesdistr.utils.Utils;
 
 import javax.persistence.EntityNotFoundException;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
@@ -47,11 +51,35 @@ public class UserService{
         return optUser.get ();
     }
 
-    private void checkMaxNumberOfScopes (@NotNull AdminScopeDto adminScopeDto){
+    public void checkMaxNumberOfScopes (@NotNull AdminScopeDto adminScopeDto){
         if(adminScopeDto.getMaxNumberScope () < adminScopeDto.getScopePreviewDtos ().size ()){
             throw new IllegalArgumentException (String.format ("Превышено допустимое число пространств, доступно" +
                             " %d, выбрано: %d", adminScopeDto.getMaxNumberScope (),
                     adminScopeDto.getScopePreviewDtos ().size ()));
+        }
+    }
+
+    public void checkMaxNumberOfFolders ( Long maxNumberOfFolder, Long currentNumberOfFolder){
+        if(maxNumberOfFolder < currentNumberOfFolder){
+            throw new IllegalArgumentException (String.format ("Превышено допустимое число разделов, доступно" +
+                            " %d, выбрано: %d", maxNumberOfFolder,
+                    currentNumberOfFolder));
+        }
+    }
+
+    //TODO: проверять, при добавлении нового file от admin_scope
+    public void checkMaxDataSize (Long fileSizeInLong){
+        if(customUserDetailsService.getAuthorizedUser ().getRoles ().contains (Roles.ADMIN) ||
+                customUserDetailsService.getAuthorizedUser ().getRoles ().contains (Roles.ROOT)){
+            return;
+        }
+        double fileSize = Utils.convertFileSizeToGb (fileSizeInLong);
+
+        double maxDataSize = customUserDetailsService.getAuthorizedUser ().getMaxStorageSpace();
+        if(maxDataSize < fileSize){
+            throw new IllegalArgumentException (String.format ("Превышен допустимый объём публикуемых данных," +
+                            " ограничение %s(Гб), загружено: %s(Гб)", maxDataSize,
+                    fileSize));
         }
     }
 
@@ -194,6 +222,41 @@ public class UserService{
             UserMapper.INSTANCE.fromAdminScopeDtoToUser (adminScopeDto, updatedUser,
                     scopeRepository.findScopeByScopePreviewDto (adminScopeDto.getScopePreviewDtos ()));
 
+            userRepository.save (updatedUser);
+
+        }
+    }
+
+    @Transactional
+    public void add (@NotNull UserCredentialsDto userCredentialsDto, List<Scope> availableScopes) {
+        Set<Roles> roles = new HashSet<> ();
+        roles.add (Roles.USER);
+
+        matchesRegex (userCredentialsDto.getName (), userCredentialsDto.getPassword ());
+        canUseThisName (userCredentialsDto.getName ());
+
+        User user = UserMapper.INSTANCE.toUser(userCredentialsDto);
+        user.setAvailableScopes(availableScopes);
+        userRepository.save (user);
+    }
+
+    @Transactional
+    public void update (@NotNull UserCredentialsDto userCredentialsDto, List<Scope> availableScopes){
+        User currUser = customUserDetailsService.getAuthorizedUser();
+        User updatedUser = getUserByIdAndRole (userCredentialsDto.getId (), Roles.USER);
+
+        String oldName = updatedUser.getName();
+
+        if(currUser.getId () != updatedUser.getId ()){
+
+            matchesRegex (userCredentialsDto.getName (), userCredentialsDto.getPassword ());
+
+            if(! userCredentialsDto.getName ().equals (oldName))//username обновился
+            {
+                canUseThisName (userCredentialsDto.getName ());
+            }
+
+            UserMapper.INSTANCE.fromUserCredentialsDtoToUser(userCredentialsDto, updatedUser, availableScopes);
             userRepository.save (updatedUser);
 
         }

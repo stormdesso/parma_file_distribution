@@ -8,6 +8,7 @@ import java.util.Date;
 
 public class Utils {
     static final int ONE_MB_SIZE_IN_BYTES = 1048576;
+    static final int ONE_GB_SIZE_IN_BYTES = 1073741824;
     static final SimpleDateFormat formatter = new SimpleDateFormat("dd/MM/yyyy");
     public static Date getDateWithoutTime() throws ParseException {
         return formatter.parse(formatter.format(new Date()));
@@ -15,6 +16,9 @@ public class Utils {
 
     public static Double convertByteToMb(byte @NotNull [] bytes){
         return ((double)bytes.length/(double) ONE_MB_SIZE_IN_BYTES);
+    }
+    public static @NotNull Double convertFileSizeToGb(Long size){
+       return (double)size / ONE_GB_SIZE_IN_BYTES;
     }
 
 }

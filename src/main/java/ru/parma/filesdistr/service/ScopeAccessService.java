@@ -7,6 +7,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.enums.Roles;
 import ru.parma.filesdistr.enums.TypeInScopePage;
+import ru.parma.filesdistr.mappers.UserMapper;
 import ru.parma.filesdistr.models.Folder;
 import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.models.User;
@@ -27,51 +28,71 @@ public class ScopeAccessService {
     private final FolderRepository folderRepository;
     private final VersionRepository versionRepository;
     private final UserRepository userRepository;
-    private final ScopeService scopeService;
     private final CustomUserDetailsService customUserDetailsService;
+    private final UserService userService;
 
     private boolean getAccess ( Scope scope, @NotNull User user){
         return user.getAvailableScopes().contains(scope);
     }
 
-    public void tryGetAccessByUserId (TypeInScopePage typeInScopePage, Long generalId, @NotNull Long userId) throws AccessDeniedException {
-
-        if(isAdminOrRoot()) return ;
-
-        Optional<User> userOptional = userRepository.findById(userId);
-
-        if (!userOptional.isPresent()) {
-            throw new EntityNotFoundException(String.format("User с id %d  не найден", userId));
-        }
-        User user = userOptional.get();
-        boolean access = false;
-        if( typeInScopePage == TypeInScopePage.SCOPE ){
+    private void tryGetAccessWithoutAuthorization(TypeInScopePage typeInScopePage, Long generalId) throws AccessDeniedException{
+        Scope scope = null;
+        if(typeInScopePage == TypeInScopePage.SCOPE){
             Optional<Scope> scopeOptional = scopeRepository.findById(generalId);
             if (!scopeOptional.isPresent()) {
                 throw new EntityNotFoundException(String.format("Scope с id %d  не найден", generalId));
             }
-            Scope scope = scopeOptional.get();
-            if (scope.isPermitAll()) return;
-            access = getAccess(scope, user);
-        }
-        else if( typeInScopePage == TypeInScopePage.FOLDER ){
+            scope = scopeOptional.get();
+        }else if(typeInScopePage == TypeInScopePage.FOLDER){
             Optional<Folder> folderOptional = folderRepository.findById(generalId);
             if (!folderOptional.isPresent()) {
                 throw new EntityNotFoundException(String.format("Folder с id %d  не найден", generalId));
             }
-            Folder folder = folderOptional.get();
-            if (folder.getScope().isPermitAll()) return;
-            access = getAccess(folder.getScope(), user);
+            scope = folderOptional.get().getScope();
         }
-        else if( typeInScopePage == TypeInScopePage.VERSION ){
+        else if(typeInScopePage == TypeInScopePage.VERSION){
             Optional<Version> versionOptional = versionRepository.findById(generalId);
             if (!versionOptional.isPresent()) {
                 throw new EntityNotFoundException(String.format("Version с id %d  не найден", generalId));
             }
-            Version version = versionOptional.get();
-            if (version.getFolder().getScope().isPermitAll()) return;
-            access = getAccess(version.getFolder().getScope(), user);
+            scope = versionOptional.get().getFolder().getScope();
         }
+        if (!scope.isPermitAll()){
+            throw new AccessDeniedException("Access denied");
+        }
+    }
+
+    public void tryGetAccessByUserId (TypeInScopePage typeInScopePage, Long generalId, @NotNull Long userId) throws AccessDeniedException {
+        Scope scope = null;
+        if(typeInScopePage == TypeInScopePage.SCOPE){
+            Optional<Scope> scopeOptional = scopeRepository.findById(generalId);
+            if (!scopeOptional.isPresent()) {
+                throw new EntityNotFoundException(String.format("Scope с id %d  не найден", generalId));
+            }
+            scope = scopeOptional.get();
+        }else if(typeInScopePage == TypeInScopePage.FOLDER){
+            Optional<Folder> folderOptional = folderRepository.findById(generalId);
+            if (!folderOptional.isPresent()) {
+                throw new EntityNotFoundException(String.format("Folder с id %d  не найден", generalId));
+            }
+            scope = folderOptional.get().getScope();
+        }
+        else if(typeInScopePage == TypeInScopePage.VERSION){
+            Optional<Version> versionOptional = versionRepository.findById(generalId);
+            if (!versionOptional.isPresent()) {
+                throw new EntityNotFoundException(String.format("Version с id %d  не найден", generalId));
+            }
+            scope = versionOptional.get().getFolder().getScope();
+        }
+        if (scope.isPermitAll()) return;
+
+        if(isAdminOrRoot()) return ;
+        Optional<User> userOptional = userRepository.findById(userId);
+        if (!userOptional.isPresent()) {
+            throw new EntityNotFoundException(String.format("User с id %d  не найден", userId));
+        }
+        User user = userOptional.get();
+        boolean access = getAccess(scope, user);
         if(!access) {
             throw new AccessDeniedException("Access denied");
         }
@@ -84,14 +105,42 @@ public class ScopeAccessService {
                 .anyMatch(r -> r.getAuthority().equals(Roles.ROOT.toString()) || r.getAuthority().equals(Roles.ADMIN.toString()));
     }
 
-    public void tryGetAccessToScope(TypeInScopePage typeInScopePage, Long generalId) throws AccessDeniedException{
-        Scope scope = scopeService.getScopeBy(typeInScopePage, generalId);
-
-        if(!scope.isPermitAll ()){
-            tryGetAccessByUserId (typeInScopePage, generalId,
-                    customUserDetailsService.getAuthorizedUser().getId ());//кидает ошибку,
-            // если нет доступа
+    public void tryGetAccessToScopeForGuestOrUser (TypeInScopePage typeInScopePage, Long generalId) throws AccessDeniedException{
+        if(CustomUserDetailsService.isAuthenticated ()){
+            tryGetAccessByUserId (typeInScopePage, generalId, customUserDetailsService.getAuthorizedUser ().getId ());
+        }
+        else{
+            tryGetAccessWithoutAuthorization(typeInScopePage, generalId);
         }
     }
 
+    private boolean isAdminScopes(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        return authentication.getAuthorities().stream()
+                .anyMatch(r -> r.getAuthority().equals(Roles.ADMIN_SCOPES.toString()));
+    }
+
+    public void canCreateAndDeleteScopes (boolean createNewScope) throws AccessDeniedException{
+        if(isAdminOrRoot()){
+            return;
+        }
+        if(isAdminScopes()){
+            User user = customUserDetailsService.getAuthorizedUser();
+            if (user.isCanCreateAndDeleteScope ()){
+                if(createNewScope){
+                    userService.checkMaxNumberOfScopes (UserMapper.INSTANCE.toAdminScopeDto(user));
+                }
+                return;
+            }
+        }
+        throw new AccessDeniedException ("нет доступа");
+    }
+
+    public void canCreateFolderIn (@NotNull Scope scope){
+        User user = customUserDetailsService.getAuthorizedUser ();
+
+        userService.checkMaxNumberOfFolders (user.getMaxNumberFolder (),
+                (long) scope.getFolders ().size ());
+    }
 }
