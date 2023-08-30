@@ -94,7 +94,7 @@ public class FileController {
     public void downloadAsByte (@PathVariable Long fileId,
                            @RequestParam Long generalId,   //указывает id пространства, папки, версии
                            @RequestParam TypeInScopePage typeInScopePage) throws IOException{
-            scopeAccessService.tryGetAccessToScope ( typeInScopePage,  generalId);
+            scopeAccessService.tryGetAccessToScopeForGuestOrUser ( typeInScopePage,  generalId);
             org.apache.commons.io.IOUtils.copy(fileLocationService.getAsByteArray (fileId),
                     response.getOutputStream());
             response.flushBuffer();
