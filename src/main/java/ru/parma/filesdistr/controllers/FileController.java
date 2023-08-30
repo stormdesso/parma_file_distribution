@@ -33,8 +33,6 @@ public class FileController {
     private final AdminPageAccessService adminPageAccessService;
     private final VersionService versionService;
 
-    //TODO: async подгрузка и загрузка
-    //TODO: return byte[]
     @PostMapping(value = "/scopes_page/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     FileDto uploadOnScopesPage (@RequestParam @NotNull MultipartFile file,
@@ -86,6 +84,17 @@ public class FileController {
         return fileLocationService.getZipArchive (fileLocationService.getFiles(versionId));
     }
 
+
+    @GetMapping(value = "/download/byte/{fileId}")
+    @ResponseBody
+    public void downloadAsByte (@PathVariable Long fileId,
+                           @RequestParam Long generalId,   //указывает id пространства, папки, версии
+                           @RequestParam TypeInScopePage typeInScopePage) throws IOException{
+            scopeAccessService.tryGetAccessToScope ( typeInScopePage,  generalId);
+            org.apache.commons.io.IOUtils.copy(fileLocationService.getAsByteArray (fileId),
+                    response.getOutputStream());
+            response.flushBuffer();
+    }
 
     @DeleteMapping(value = "/delete/{fileId}")
     @ResponseBody

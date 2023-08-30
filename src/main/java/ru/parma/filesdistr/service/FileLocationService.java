@@ -25,9 +25,14 @@ import javax.persistence.EntityNotFoundException;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.Files;
 import java.text.ParseException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -266,6 +271,10 @@ public class FileLocationService {
         File file = fileDbRepository.findById( fileId )// parma.File
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
         return fileSystemRepository.findInFileSystem(file.getLocation());
+    }
+
+    public InputStream getAsByteArray (Long fileId ) throws IOException {
+        return Files.newInputStream (get (fileId).getFile ().toPath ());
     }
 
     private @NotNull List<java.io.File> getFiles (@NotNull List<File> fileList) {
