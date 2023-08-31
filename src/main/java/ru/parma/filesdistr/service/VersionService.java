@@ -6,6 +6,7 @@ import ru.parma.filesdistr.aop.annotations.LoggableMethod;
 import ru.parma.filesdistr.aop.exceptions.EntityIllegalArgumentException;
 import ru.parma.filesdistr.aop.exceptions.EntityNotFoundException;
 import ru.parma.filesdistr.dto.VersionDto;
+import ru.parma.filesdistr.enums.TypeInScopePage;
 import ru.parma.filesdistr.mappers.VersionMapper;
 import ru.parma.filesdistr.models.Folder;
 import ru.parma.filesdistr.models.Version;
@@ -13,6 +14,8 @@ import ru.parma.filesdistr.repos.FileSystemRepository;
 import ru.parma.filesdistr.repos.FolderRepository;
 import ru.parma.filesdistr.repos.VersionRepository;
 
+import javax.persistence.EntityNotFoundException;
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,6 +28,7 @@ public class VersionService {
     private final FolderRepository folderRepository;
 
     private final FileSystemRepository fileSystemRepository;
+    private final ScopeAccessService scopeAccessService;
 
     @LoggableMethod
     public List<VersionDto> getAll(long folder_id) {
@@ -35,7 +39,10 @@ public class VersionService {
         return VersionMapper.INSTANCE.toVersionDtos(folderOptional.get().getVersions());
     }
 
-    public VersionDto getDto (long versionId) {
+    public VersionDto getDto (long versionId) throws AccessDeniedException{
+        scopeAccessService.tryGetAccessByUserId (TypeInScopePage.VERSION,versionId,
+                CustomUserDetailsService.getAuthorizedUserId ());
+
         return VersionMapper.INSTANCE.toVersionDto(get(versionId));
     }
 
@@ -71,6 +78,10 @@ public class VersionService {
         if (!existedVersion.isPresent()) {
             throw new  EntityNotFoundException("Такой версии для обновления не существует");
         }
+
+        scopeAccessService.tryGetAccessByUserId (TypeInScopePage.VERSION,versionDto.getId (),
+                CustomUserDetailsService.getAuthorizedUserId ());
+
         Version version = VersionMapper.INSTANCE.toVersion(versionDto);
         versionRepository.save(version);
     }
@@ -78,13 +89,13 @@ public class VersionService {
     @LoggableMethod
     private void checkDto(VersionDto versionDto) {
         if (versionDto == null) {
-            throw new EntityIllegalArgumentException("Создаваемый объект не может быть null");
+            throw new IllegalArgumentException("Создаваемый объект не может быть null");
         }
         if (versionDto.getVersionNumber() == null) {
-            throw new EntityIllegalArgumentException("Номер версии не может быть null");
+            throw new IllegalArgumentException("Номер версии не может быть null");
         }
         if (versionDto.getDateOfPublication() == null) {
-            throw new EntityIllegalArgumentException("Дата публикации не может быть null");
+            throw new IllegalArgumentException("Дата публикации не может быть null");
         }
     }
 
@@ -94,6 +105,9 @@ public class VersionService {
         if (!versionOptional.isPresent()) {
             throw new EntityNotFoundException( String.format("Версии с id %d не существует", version_id));
         }
+        scopeAccessService.tryGetAccessByUserId (TypeInScopePage.VERSION, versionId,
+                CustomUserDetailsService.getAuthorizedUserId ());
+
         Version version = versionOptional.get();
         fileSystemRepository.delete(version.getRootPath());
         versionRepository.delete(version);

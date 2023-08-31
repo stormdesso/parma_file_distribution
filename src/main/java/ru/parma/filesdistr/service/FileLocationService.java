@@ -23,9 +23,19 @@ import ru.parma.filesdistr.models.*;
 import ru.parma.filesdistr.repos.*;
 import ru.parma.filesdistr.utils.IPathName;
 import ru.parma.filesdistr.utils.Utils;
+
+import javax.persistence.EntityNotFoundException;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
-import java.util.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.nio.file.FileSystemNotFoundException;
+import java.nio.file.Files;
+import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import java.io.IOException;
@@ -271,6 +281,10 @@ public class FileLocationService {
         File file = fileDbRepository.findById( fileId )// parma.File
                 .orElseThrow(() -> new EntityNotFoundException("File", fileId));
         return fileSystemRepository.findInFileSystem(file.getLocation());
+    }
+
+    public InputStream getAsByteArray (Long fileId ) throws IOException {
+        return Files.newInputStream (get (fileId).getFile ().toPath ());
     }
 
     private @NotNull List<java.io.File> getFiles (@NotNull List<File> fileList) {

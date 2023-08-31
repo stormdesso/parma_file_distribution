@@ -6,6 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import ru.parma.filesdistr.dto.VersionDto;
 import ru.parma.filesdistr.service.VersionService;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @Controller
@@ -21,14 +22,13 @@ public class VersionController {
 
     @GetMapping("/{version_id}")
     @ResponseBody
-    public VersionDto get(@PathVariable Long version_id) {
+    public VersionDto get(@PathVariable Long version_id) throws AccessDeniedException{
         return versionService.getDto (version_id);
     }
 
     @PutMapping("/update")
     @ResponseBody
-    public void update(@RequestBody VersionDto versionDto)
-    {
+    public void update(@RequestBody VersionDto versionDto) throws AccessDeniedException{
         versionService.update(versionDto);
     }
 
@@ -42,8 +42,7 @@ public class VersionController {
 
     @DeleteMapping("/delete/{version_id}")
     @ResponseBody
-    public void delete(@PathVariable Long version_id)
-    {
+    public void delete(@PathVariable Long version_id) throws AccessDeniedException{
         versionService.delete(version_id);
     }
 }

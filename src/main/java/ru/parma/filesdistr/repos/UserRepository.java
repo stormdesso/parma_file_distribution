@@ -15,7 +15,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByIdAndRolesContaining(Long id, Roles role);
     Long countByName(String name );
     Set<User> findByRolesContainingAndIdNot(Roles role, Long id);
-    //TODO:getUserById без root
 
     Optional<User> findByIdAndRolesNotContains(Long id, Roles role);
 

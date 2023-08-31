@@ -7,8 +7,8 @@ import java.util.List;
 
 @Data
 @Builder
-public class ScopePreviewDto {
-    private Long id;
+public class ViewFolderDto {
+    private long id;
     private String name;
-    private List<ViewFolderDto> viewFolders;
+    private List<ViewVersionDto> viewVersions;
 }

@@ -8,6 +8,7 @@ import org.mapstruct.factory.Mappers;
 import ru.parma.filesdistr.dto.AdminDto;
 import ru.parma.filesdistr.dto.AdminScopeDto;
 import ru.parma.filesdistr.dto.ScopePreviewDto;
+import ru.parma.filesdistr.dto.UserCredentialsDto;
 import ru.parma.filesdistr.models.Scope;
 import ru.parma.filesdistr.models.User;
 
@@ -24,6 +25,8 @@ public interface UserMapper {
 
     @Mapping(source = "availableScopes", target = "scopePreviewDtos", qualifiedByName = "scopePreviewToScope")
     AdminScopeDto toAdminScopeDto(User user);
+
+    User toUser(UserCredentialsDto userCredentialsDto);
 
     Set<AdminDto> toAdminDtos (Set<User> users);
     Set<AdminScopeDto> toAdminScopeDtos (Set<User> users);
@@ -59,5 +62,9 @@ public interface UserMapper {
         updatedUser.setAvailableScopes (scopeList);
     }
 
-
+    default void fromUserCredentialsDtoToUser (@NotNull UserCredentialsDto userCredentialsDto, @NotNull User updatedUser, List <Scope> scopeList){
+        updatedUser.setName (userCredentialsDto.getName ());
+        updatedUser.setPassword(userCredentialsDto.getPassword());
+        updatedUser.setAvailableScopes (scopeList);
+    }
 }

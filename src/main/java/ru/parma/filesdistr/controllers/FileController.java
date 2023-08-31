@@ -32,9 +32,8 @@ public class FileController {
     private final ScopeAccessService scopeAccessService;
     private final AdminPageAccessService adminPageAccessService;
     private final VersionService versionService;
+    private final UserService userService;
 
-    //TODO: async подгрузка и загрузка
-    //TODO: return byte[]
     @PostMapping(value = "/scopes_page/upload", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     FileDto uploadOnScopesPage (@RequestParam @NotNull MultipartFile file,
@@ -45,7 +44,10 @@ public class FileController {
                                 @RequestParam(required = false) @Nullable String comment) throws Exception {
         String fileType = FilenameUtils.getExtension(file.getOriginalFilename());
 
-        scopeAccessService.tryGetAccessByUserId (typeInScopePage, generalId, CustomUserDetailsService.getAuthorizedUserId());
+        scopeAccessService.tryGetAccessByUserId (typeInScopePage, generalId,
+                CustomUserDetailsService.getAuthorizedUserId());
+
+        userService.checkMaxDataSize (file.getSize ());
 
         return fileLocationService.save (file.getBytes(), file.getOriginalFilename(), fileType,
                 generalId, typeInScopePage, mediaTypeInScopePage, tagId, comment);
@@ -69,7 +71,7 @@ public class FileController {
                                  @RequestParam Long generalId,   //указывает id пространства, папки, версии
                                  @RequestParam TypeInScopePage typeInScopePage) throws AccessDeniedException {
 
-        scopeAccessService.tryGetAccessToScope ( typeInScopePage,  generalId);
+        scopeAccessService.tryGetAccessToScopeForGuestOrUser ( typeInScopePage,  generalId);
         return fileLocationService.get(fileId);
     }
 
@@ -77,7 +79,7 @@ public class FileController {
     @GetMapping(value="/download/{versionId}/zip", produces = "application/zip")
     @ResponseBody
     public byte[] downloadZIP(@PathVariable Long versionId) throws IOException{
-        scopeAccessService.tryGetAccessToScope ( TypeInScopePage.VERSION,  versionId);
+        scopeAccessService.tryGetAccessToScopeForGuestOrUser ( TypeInScopePage.VERSION,  versionId);
 
         Version version = versionService.get (versionId);
         response.addHeader("Content-Disposition",
@@ -86,6 +88,17 @@ public class FileController {
         return fileLocationService.getZipArchive (fileLocationService.getFiles(versionId));
     }
 
+
+    @GetMapping(value = "/download/byte/{fileId}")
+    @ResponseBody
+    public void downloadAsByte (@PathVariable Long fileId,
+                           @RequestParam Long generalId,   //указывает id пространства, папки, версии
+                           @RequestParam TypeInScopePage typeInScopePage) throws IOException{
+            scopeAccessService.tryGetAccessToScopeForGuestOrUser ( typeInScopePage,  generalId);
+            org.apache.commons.io.IOUtils.copy(fileLocationService.getAsByteArray (fileId),
+                    response.getOutputStream());
+            response.flushBuffer();
+    }
 
     @DeleteMapping(value = "/delete/{fileId}")
     @ResponseBody
