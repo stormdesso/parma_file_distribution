@@ -16,8 +16,6 @@ import ru.parma.filesdistr.models.User;
 import ru.parma.filesdistr.repos.FileSystemRepository;
 import ru.parma.filesdistr.repos.ScopeRepository;
 
-import javax.persistence.EntityNotFoundException;
-import java.io.IOException;
 import java.nio.file.AccessDeniedException;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,7 +53,7 @@ public class ScopeService {
                     scopePreviewDtos.add(ScopeMapper.INSTANCE.toScopePreviewDto(scope));
                 }
             }
-        } catch (IOException e) {
+        } catch (Exception e) {
             //todo:log:"нет доступа к scope с id %d"
          }
         return scopePreviewDtos;
@@ -130,21 +128,6 @@ public class ScopeService {
         }
         return scopeOptional.get();
     }
-    
-    public Scope getScopeBy (@NotNull TypeInScopePage typeInScopePage, @NotNull Long generalId){
 
-        Scope scope = null;
-
-        if(typeInScopePage == TypeInScopePage.SCOPE){
-            scope = get(generalId);
-        }else if(typeInScopePage == TypeInScopePage.FOLDER){
-            scope = folderService.get(generalId).getScope ();
-        }
-        else if(typeInScopePage == TypeInScopePage.VERSION){
-            scope = versionService.get(generalId).getFolder ().getScope ();
-        }
-
-        return scope;
-    }
 
 }

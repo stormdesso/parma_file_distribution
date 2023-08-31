@@ -6,7 +6,6 @@ import org.apache.commons.io.IOUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.springframework.core.io.FileSystemResource;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,21 +23,17 @@ import ru.parma.filesdistr.repos.*;
 import ru.parma.filesdistr.utils.IPathName;
 import ru.parma.filesdistr.utils.Utils;
 
-import javax.persistence.EntityNotFoundException;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.FileSystemNotFoundException;
 import java.nio.file.Files;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import java.io.IOException;
 
 @Service
 @RequiredArgsConstructor
@@ -271,7 +266,7 @@ public class FileLocationService {
         }
         catch (Exception e){
             //?
-            throw new FileSystemException(e.getMessage());
+            throw new EntityNotFoundException("File", fileId);
         }
 
     }

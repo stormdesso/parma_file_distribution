@@ -14,7 +14,6 @@ import ru.parma.filesdistr.repos.FileSystemRepository;
 import ru.parma.filesdistr.repos.FolderRepository;
 import ru.parma.filesdistr.repos.ScopeRepository;
 
-import javax.persistence.EntityNotFoundException;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
@@ -37,7 +36,7 @@ public class FolderService {
         return FolderMapper.INSTANCE.toFolderDtos(scopeOptional.get().getFolders());
     }
 
-    public FolderDto getDto (long folderId) throws AccessDeniedException{
+    public FolderDto getDto (long folderId){
         scopeAccessService.tryGetAccessByUserId (TypeInScopePage.FOLDER, folderId,
                 CustomUserDetailsService.getAuthorizedUserId ());
 
@@ -54,7 +53,7 @@ public class FolderService {
     }
 
     @LoggableMethod
-    public void add(FolderDto folderDto, long scope_id) {
+    public void add(FolderDto folderDto, long scopeId) {
         checkDto(folderDto);
         Optional<Scope> scopeOptional = scopeRepository.findById(scopeId);
         if (!scopeOptional.isPresent()) {
@@ -71,7 +70,7 @@ public class FolderService {
         folderRepository.save(folder);
     }
     @LoggableMethod
-    public void update(FolderDto folderDto) throws AccessDeniedException{{
+    public void update(FolderDto folderDto){
         checkDto(folderDto);
         Optional<Folder> existedFolder = folderRepository.findById(folderDto.getId());
         if (!existedFolder.isPresent()) {

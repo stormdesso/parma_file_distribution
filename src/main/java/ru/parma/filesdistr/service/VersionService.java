@@ -3,7 +3,6 @@ package ru.parma.filesdistr.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.parma.filesdistr.aop.annotations.LoggableMethod;
-import ru.parma.filesdistr.aop.exceptions.EntityIllegalArgumentException;
 import ru.parma.filesdistr.aop.exceptions.EntityNotFoundException;
 import ru.parma.filesdistr.dto.VersionDto;
 import ru.parma.filesdistr.enums.TypeInScopePage;
@@ -14,7 +13,6 @@ import ru.parma.filesdistr.repos.FileSystemRepository;
 import ru.parma.filesdistr.repos.FolderRepository;
 import ru.parma.filesdistr.repos.VersionRepository;
 
-import javax.persistence.EntityNotFoundException;
 import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +37,7 @@ public class VersionService {
         return VersionMapper.INSTANCE.toVersionDtos(folderOptional.get().getVersions());
     }
 
-    public VersionDto getDto (long versionId) throws AccessDeniedException{
+    public VersionDto getDto (long versionId){
         scopeAccessService.tryGetAccessByUserId (TypeInScopePage.VERSION,versionId,
                 CustomUserDetailsService.getAuthorizedUserId ());
 
@@ -100,10 +98,10 @@ public class VersionService {
     }
 
     @LoggableMethod
-    public void delete(Long version_id) {
-        Optional<Version> versionOptional = versionRepository.findById(version_id);
+    public void delete(Long versionId) {
+        Optional<Version> versionOptional = versionRepository.findById(versionId);
         if (!versionOptional.isPresent()) {
-            throw new EntityNotFoundException( String.format("Версии с id %d не существует", version_id));
+            throw new EntityNotFoundException( String.format("Версии с id %d не существует", versionId));
         }
         scopeAccessService.tryGetAccessByUserId (TypeInScopePage.VERSION, versionId,
                 CustomUserDetailsService.getAuthorizedUserId ());

@@ -5,20 +5,13 @@ springdoc:
   swagger-ui:
     path: /swagger-ui.html
 
-
-
 spring:
   datasource:
     driver-class-name: org.postgresql.Driver
     url: jdbc:postgresql://localhost:5432/parma_db
-    username: postgres
-    password: root
-  flyway:
-    baseline-on-migrate: true
-    enabled: true
-    baseline-description: "init"
-    user: postgres
-    password: root
+    username: admin
+    password: admin
+
   jpa:
     show-sql: true
     properties:

@@ -8,7 +8,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.parma.filesdistr.aop.annotations.LoggableMethod;
-import ru.parma.filesdistr.aop.exceptions.AccessDeniedException;
 import ru.parma.filesdistr.aop.exceptions.EntityIllegalArgumentException;
 import ru.parma.filesdistr.aop.exceptions.EntityNotFoundException;
 import ru.parma.filesdistr.dto.AdminDto;
@@ -22,7 +21,6 @@ import ru.parma.filesdistr.repos.ScopeRepository;
 import ru.parma.filesdistr.repos.UserRepository;
 import ru.parma.filesdistr.utils.Utils;
 
-import javax.persistence.EntityNotFoundException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -57,7 +55,7 @@ public class UserService{
     }
 
     @LoggableMethod
-    private void checkMaxNumberOfScopes (@NotNull AdminScopeDto adminScopeDto){
+    public void checkMaxNumberOfScopes (@NotNull AdminScopeDto adminScopeDto){
         if(adminScopeDto.getMaxNumberScope () < adminScopeDto.getScopePreviewDtos ().size ()){
             throw new EntityIllegalArgumentException(String.format ("Превышено допустимое число пространств, доступно" +
                             " %d, выбрано: %d", adminScopeDto.getMaxNumberScope (),
